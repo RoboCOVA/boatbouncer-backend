@@ -1,0 +1,66 @@
+{
+  "name": "boatbouncer-backend",
+  "version": "1.0.0",
+  "description": "boatbouncer",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --exec babel-node src/index.js",
+    "lint": "eslint . --ext .js --color -f table"
+  },
+  "husky": {  
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RoboCOVA/boatbouncer-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RoboCOVA/boatbouncer-backend/issues"
+  },
+  "homepage": "https://github.com/RoboCOVA/boatbouncer-backend#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.21.0",
+    "@babel/core": "^7.21.0",
+    "@babel/node": "^7.20.7",
+    "@babel/plugin-transform-runtime": "^7.21.0",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/register": "^7.21.0",
+    "@babel/runtime": "^7.21.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.7.0",
+    "eslint-formatter-table": "^7.32.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^4.3.8",
+    "lint-staged": "^13.2.0",
+    "nodemon": "^2.0.21",
+    "prettier": "2.8.4"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-validator": "^6.15.0",
+    "firebase-admin": "^11.5.0",
+    "google-libphonenumber": "^3.2.32",
+    "googleapis": "^112.0.0",
+    "helmet": "^6.0.1",
+    "http-status": "^1.6.2",
+    "joi": "^17.8.3",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.0.1",
+    "morgan": "^1.10.0",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
+    "winston": "^3.8.2"
+  }
+}
