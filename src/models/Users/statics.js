@@ -1,23 +1,23 @@
 import httpStatus from 'http-status';
-import APIError from '../../errors/APIError';
 import { identityToolkit } from '../../config/googleApis';
+import APIError from '../../errors/APIError';
+import { comparePassword, generateHashedPassword } from '../../utils';
+import {
+  emailAlreadyUsed,
+  passwordDontMatch,
+  phoneNumberAlreadyUsed,
+  updateFailed,
+  userAlreadyVerified,
+  userNotFound,
+} from './errors';
 
-const userNotFound = new APIError(
-  'User not found!',
-  httpStatus.NOT_FOUND,
-  true
-);
-const userAlreadyVerified = new APIError(
-  'User is already verified!',
-  httpStatus.NOT_FOUND,
-  true
-);
-const updateFailed = new APIError(
-  'Update operation failed!',
-  httpStatus.NOT_FOUND,
-  true
-);
+/** @STATIC_FUNCTIONS */
 
+/**
+ * It saves a user's session to the database
+ * @returns The user object with the session saved.
+ * </code>
+ */
 export async function saveUserSession({ phoneNumber, session }) {
   const user = await this.findOne({ phoneNumber });
 
@@ -34,6 +34,12 @@ export async function saveUserSession({ phoneNumber, session }) {
   return sessionSaved;
 }
 
+/**
+ * It verifies a user's phone number by sending a verification code to the user's phone number and then
+ * verifying the code with the Firebase API.
+ * @returns The user object with the verified field set to true.
+ * </code>
+ */
 export async function verifyUser({ verificationCode, phoneNumber }) {
   const user = await this.findOne({ phoneNumber });
 
@@ -55,4 +61,54 @@ export async function verifyUser({ verificationCode, phoneNumber }) {
 
   if (!verifiedUser) throw updateFailed;
   return verifiedUser;
+}
+
+/**
+ * It updates a user's details in the database
+ * @returns The updated user.
+ */
+export async function updateUser({ matchQuery, updateObject }) {
+  const updateQuery = { ...updateObject };
+  const user = await this.findOne(matchQuery);
+  if (!user) throw userNotFound;
+
+  if (
+    updateObject?.phoneNumber &&
+    updateObject?.phoneNumber !== user?.phoneNumber
+  )
+    updateQuery.verified = false;
+
+  /** check if email is already taken */
+  if (updateObject?.email) {
+    const existingEmail = await this.findOne({
+      email: updateQuery?.email,
+      _id: { $nin: [matchQuery?._id] },
+    });
+    if (existingEmail) throw emailAlreadyUsed;
+  }
+
+  /** check if phoneNumber is already taken */
+  if (updateObject?.phoneNumber) {
+    const existingPhoneNum = await this.findOne({
+      phoneNumber: updateQuery?.phoneNumber,
+      _id: { $nin: [matchQuery?._id] },
+    });
+    if (existingPhoneNum) throw phoneNumberAlreadyUsed;
+  }
+
+  /** if password, check with the perviously stored and hash for update */
+  if (updateQuery?.password) {
+    const isMatch = await comparePassword(
+      updateQuery?.password,
+      user?.password
+    );
+    if (!isMatch) throw passwordDontMatch;
+
+    updateQuery.password = await generateHashedPassword(updateQuery?.password);
+  }
+
+  const updatedUser = await this.findOne(matchQuery, updateQuery);
+  if (!updatedUser) throw updateFailed;
+  const clean = updatedUser.clean();
+  return clean;
 }
