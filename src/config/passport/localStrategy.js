@@ -1,4 +1,5 @@
 import passportLocal from 'passport-local';
+import Users from '../../models/Users';
 
 const strategy = new passportLocal.Strategy(
   {
@@ -9,7 +10,8 @@ const strategy = new passportLocal.Strategy(
   async (req, email, password, done) => {
     try {
       // Excute some operation
-      return done(false, {});
+      const authUser = await Users.authenticateUser(email, password);
+      return done(false, authUser);
     } catch (error) {
       return done(error, null);
     }
