@@ -10,7 +10,6 @@ import passportInit from './config/passport';
 
 // Init passport
 passportInit(passport);
-
 const start = async () => {
   if (!module.parent) {
     await connectToDb();
