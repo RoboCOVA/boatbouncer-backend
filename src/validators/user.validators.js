@@ -60,3 +60,8 @@ export const updateUserValidator = () => [
     .optional(),
   defaultValidators.phoneNumber.optional(),
 ];
+
+export const loginValidator = () => [
+  body('email').isEmail().withMessage('Email is required to login'),
+  body('password').isString().withMessage('password is required'),
+];
