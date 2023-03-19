@@ -41,10 +41,12 @@ export const createBoatValidator = () => [
 export const getBoatValidator = () => [
   param('boatId').isMongoId().withMessage('Valid Boat id is required'),
 ];
+
 export const getBoatsValidator = () => [
   defaultValidators.pageNo,
   defaultValidators.size,
 ];
+
 export const updateBoatsValidator = () => [
   param('boatId').isMongoId().withMessage('Valid Boat id is required'),
   body('boatName').isString().optional(),
@@ -73,6 +75,7 @@ export const updateBoatsValidator = () => [
   body('pricing.*.type').isString().isIn(pricingTypeEnum).optional(),
   body('pricing.*.min').isNumeric().optional(),
 ];
+
 export const deleteBoatsValidator = () => [
   param('boatId').isMongoId().optional(),
 ];

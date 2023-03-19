@@ -8,16 +8,6 @@ export const finishBoatPhotoUpload = async (req, res, next) => {
       files,
       userId: user?._id,
     });
-    // const response = await cloudinary.uploader.upload(files?.[0]?.path, {
-    //   public_id: 'boats',
-    // });
-    //   const uploadResults = await TempUploads.uploadAndSaveFiles({
-    //     files,
-    //     user,
-    //     resourceType: resource,
-    //     userType: userTypes.ADMINSTRATOR,
-    //     keepPublicRead: true,
-    //   });
     res.json(tempUploadEntry);
   } catch (error) {
     next(error);
