@@ -33,3 +33,9 @@ export const passwordDontMatch = new APIError(
   httpStatus.CONFLICT,
   true
 );
+
+export const doesntMatchError = new APIError(
+  "Email or Password doesn't match",
+  httpStatus.UNAUTHORIZED,
+  true
+);

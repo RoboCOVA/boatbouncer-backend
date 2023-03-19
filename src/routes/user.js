@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   createUserController,
+  loginController,
   sendSmsController,
   updateUserController,
   verifyUserController,
@@ -8,6 +9,7 @@ import {
 import parseValidationResult from '../validators/errors.parser';
 import {
   createUserValidator,
+  loginValidator,
   sendSmsValidator,
   updateUserValidator,
   verifyUserValidator,
@@ -42,5 +44,7 @@ router.post(
   parseValidationResult,
   updateUserController
 );
+
+router.post('/login', loginValidator(), parseValidationResult, loginController);
 
 export default router;

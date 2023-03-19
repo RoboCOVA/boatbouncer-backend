@@ -89,3 +89,32 @@ export const generateEnumArrayFromObject = (typesObject, valueKey) => {
 
   return enumArray;
 };
+
+export const getPaginationValues = (pageNo = 1, size = 10) => {
+  const page = Number.parseInt(pageNo || '1', 10);
+  const limit = Number.parseInt(size || '10', 10);
+
+  const skip = limit * (page - 1);
+
+  return { limit, skip };
+};
+
+/**
+ * Changes a coordinate obj to mongo Geo Json
+ * @param {{lat:number, lng:number}} param0 coordinate object
+ */
+export const coordinateObjToGeoJson = ({
+  latitude,
+  longitude,
+  landElevation,
+}) => {
+  if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+    return null;
+  }
+
+  return {
+    type: 'Point',
+    coordinates: [longitude, latitude],
+    landElevation,
+  };
+};

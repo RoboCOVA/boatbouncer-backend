@@ -1,3 +1,4 @@
+import passport from 'passport';
 import { identityToolkit } from '../config/googleApis';
 import Users from '../models/Users';
 
@@ -104,4 +105,14 @@ export const updateUserController = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const loginController = (req, res, next) => {
+  passport.authenticate('local', (error, user, message) => {
+    if (error || !user) {
+      return next(error || message);
+    }
+
+    return res.json(user);
+  })(req, res, next);
 };

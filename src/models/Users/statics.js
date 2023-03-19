@@ -1,7 +1,12 @@
 import httpStatus from 'http-status';
+import bcrypt from 'bcrypt';
 import { identityToolkit } from '../../config/googleApis';
 import APIError from '../../errors/APIError';
-import { comparePassword, generateHashedPassword } from '../../utils';
+import {
+  comparePassword,
+  generateHashedPassword,
+  generateJwtToken,
+} from '../../utils';
 import {
   emailAlreadyUsed,
   passwordDontMatch,
@@ -9,6 +14,7 @@ import {
   updateFailed,
   userAlreadyVerified,
   userNotFound,
+  doesntMatchError,
 } from './errors';
 
 /** @STATIC_FUNCTIONS */
@@ -111,4 +117,22 @@ export async function updateUser({ matchQuery, updateObject }) {
   if (!updatedUser) throw updateFailed;
   const clean = updatedUser.clean();
   return clean;
+}
+
+export async function authenticateUser(email, password) {
+  const user = await this.findOne({ email }).exec();
+  if (!user) {
+    throw doesntMatchError;
+  }
+
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (passwordMatch) {
+    const cleanUser = user.clean();
+    const token = generateJwtToken(user._id, cleanUser);
+    cleanUser.token = token;
+    return cleanUser;
+  }
+
+  // If not match
+  throw doesntMatchError;
 }

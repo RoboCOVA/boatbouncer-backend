@@ -12,6 +12,10 @@ const envSchema = Joi.object({
   PORT: Joi.number().default(5000),
   JWT_KEY: Joi.string().required(),
   GOOGLE_CONSOLE_KEY: Joi.string().required(),
+  CLOUDINARY_API_KEY: Joi.string().required(),
+  CLOUDINARY_API_SECRET: Joi.string().required(),
+  CLOUD_NAME: Joi.string().required(),
+  UPLOAD_IMAGE_SIZE_LIMIT_IN_MB: Joi.number().required(),
 })
   .unknown()
   .required();
@@ -28,3 +32,7 @@ export const mongoUrl =
   value.NODE_ENV === 'test' ? value.MONGO_TEST_URL : value.MONGO_URL;
 export const jwtKey = value.JWT_KEY;
 export const googleConsoleKey = value.GOOGLE_CONSOLE_KEY;
+export const cloudinaryApiKey = value.CLOUDINARY_API_KEY;
+export const cloudinaryName = value.CLOUD_NAME;
+export const cloudinaryApiSecret = value.CLOUDINARY_API_SECRET;
+export const uploadImageSizeLimitInMB = value.UPLOAD_IMAGE_SIZE_LIMIT_IN_MB;
