@@ -8,13 +8,24 @@ export async function getConversation({ userId }) {
       const user = current.members.filter(
         (member) => !member?._id?.equals(userId)
       );
-      accumulator.push(...user);
+      const member = user?.[0];
+      member.convoId = current?._id;
+      accumulator.push(member);
     }
     return accumulator;
   }, []);
 
   return members?.map((member) => {
-    const { email, userName, firstName, lastName, phoneNumber } = member;
-    return { email, userName, firstName, lastName, phoneNumber };
+    const { email, userName, firstName, lastName, phoneNumber, convoId, _id } =
+      member;
+    return {
+      email,
+      userName,
+      firstName,
+      lastName,
+      phoneNumber,
+      _id: convoId,
+      userId: _id,
+    };
   });
 }
