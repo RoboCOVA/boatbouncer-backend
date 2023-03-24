@@ -13,6 +13,7 @@ export async function createConversation() {
       if (!user) exsitingUser = false;
     })
   );
+
   if (!exsitingUser) throw userNotFound;
   const conversationEntry = await this.save();
   return conversationEntry;

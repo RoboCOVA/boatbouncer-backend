@@ -4,10 +4,10 @@ export const createConversationController = async (req, res, next) => {
   try {
     const { userOne, userTwo } = req.body;
     const conversation = new Conversations({
-      memebers: [userOne, userTwo],
+      members: [userOne, userTwo],
     });
 
-    const savedConversation = await conversation.createMessage();
+    const savedConversation = await conversation.createConversation();
     res.send(savedConversation);
   } catch (error) {
     next(error);

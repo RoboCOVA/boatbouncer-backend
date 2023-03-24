@@ -19,7 +19,7 @@ router.post(
 );
 
 router.get(
-  '/',
+  '/:conversationId',
   getMessagesValidator(),
   parseValidationResult,
   getMessagesController
