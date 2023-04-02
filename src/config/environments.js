@@ -16,6 +16,8 @@ const envSchema = Joi.object({
   CLOUDINARY_API_SECRET: Joi.string().required(),
   CLOUD_NAME: Joi.string().required(),
   UPLOAD_IMAGE_SIZE_LIMIT_IN_MB: Joi.number().required(),
+  STRIPE_PUBLISHABLE_KEY: Joi.string().required(),
+  STRIPE_SECRET_KEY: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -36,3 +38,5 @@ export const cloudinaryApiKey = value.CLOUDINARY_API_KEY;
 export const cloudinaryName = value.CLOUD_NAME;
 export const cloudinaryApiSecret = value.CLOUDINARY_API_SECRET;
 export const uploadImageSizeLimitInMB = value.UPLOAD_IMAGE_SIZE_LIMIT_IN_MB;
+export const stripePublishKey = value.STRIPE_PUBLISHABLE_KEY;
+export const stripeSecretKey = value.STRIPE_SECRET_KEY;

@@ -50,6 +50,7 @@
     "bcrypt": "^5.1.0",
     "cloudinary": "^1.35.0",
     "cors": "^2.8.5",
+    "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-validator": "^6.15.0",
@@ -67,6 +68,7 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "socket.io": "^4.6.1",
+    "stripe": "^11.17.0",
     "winston": "^3.8.2"
   }
 }

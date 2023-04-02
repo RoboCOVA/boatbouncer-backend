@@ -54,7 +54,6 @@ async function emitNotifications({ notification, userIds = [] }) {
 export async function createNotification({ userIds }) {
   const { modelType } = this;
   const session = await startSession();
-
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     try {
@@ -62,8 +61,8 @@ export async function createNotification({ userIds }) {
         const notification = await this.save({ session });
 
         switch (modelType) {
-          case modelNames.BOATS:
-            await emitNotifications(notification, userIds);
+          case modelNames.BOOKINGS:
+            await emitNotifications({ notification, userIds });
             break;
           default:
             break;

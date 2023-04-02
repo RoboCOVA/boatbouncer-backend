@@ -155,3 +155,20 @@ export const boatFeatures = {
 };
 
 export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
+
+export const bookingStatus = {
+  PENDING: 'Pending',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
+
+export const bookingStatusEnum = generateEnumArrayFromObject(bookingStatus);
+
+export const offerStatus = {
+  PENDING: 'Pending',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+  PROCESSING: 'Processing',
+};
+
+export const offerStatusEnum = generateEnumArrayFromObject(offerStatus);

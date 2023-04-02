@@ -118,3 +118,16 @@ export const coordinateObjToGeoJson = ({
     landElevation,
   };
 };
+
+/**
+ * Express-validator custom date validator
+ * @param {String} date Date String
+ * @returns {Boolean}
+ */
+export const customDateValidator = (date) => {
+  const validDate = Date.parse(date);
+  if (validDate) {
+    return true;
+  }
+  return false;
+};

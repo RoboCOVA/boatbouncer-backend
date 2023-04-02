@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema(
     city: { type: String },
     state: { type: String },
     zipCode: { type: String },
+    stripeCustomerId: { type: String },
   },
   { timestamps: true }
 );

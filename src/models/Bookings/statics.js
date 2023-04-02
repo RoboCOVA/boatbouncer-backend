@@ -1,0 +1,103 @@
+import { startSession } from 'mongoose';
+import { bookingStatus, offerStatus } from '../../utils/constants';
+import { modelNames } from '../constants';
+import {
+  authorizationError,
+  offerCancelFailed,
+  offerNotFound,
+  reservationNotFound,
+  reservationUpdateFailed,
+  statusChangeError,
+} from './errors';
+
+/**
+ * It cancels a booking and if an offer is already created, it cancels the offer as well.
+ * </code>
+ * @returns a promise.
+ */
+export async function cancelBooking({ bookId, userId, isRenter }) {
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise(async (resolve, reject) => {
+    const session = await startSession();
+    const Offers = this.model(modelNames.OFFERS);
+    try {
+      await session.withTransaction(async () => {
+        const matchQuery = {
+          _id: bookId,
+        };
+
+        if (isRenter) matchQuery.renter = userId;
+        const book = await this.findOne(matchQuery).populate('boatId');
+
+        if (!book) throw reservationNotFound;
+
+        if (!isRenter && !book?.owner?.equals(userId)) throw authorizationError;
+
+        if (book?.status !== bookingStatus.PENDING) throw statusChangeError;
+        const cancelledBooking = await this.findOneAndUpdate(
+          matchQuery,
+          {
+            status: bookingStatus.CANCELLED,
+          },
+          { new: true }
+        ).session(session);
+
+        if (!cancelledBooking) throw reservationUpdateFailed;
+
+        /** If Offer is already created, cancel the offer as well */
+        if (book?.offerId) {
+          const offer = await Offers.findOne({ _id: book?.offerId });
+          if (!offer) throw offerNotFound;
+
+          const cancelOffer = await Offers.findOneAndUpdate(
+            {
+              _id: book?.offerId,
+            },
+            { status: offerStatus.CANCELLED }
+          ).session(session);
+
+          if (!cancelOffer) throw offerCancelFailed;
+        }
+
+        await session.commitTransaction();
+        resolve(cancelledBooking);
+      });
+    } catch (error) {
+      await session.endSession();
+      reject(error);
+    } finally {
+      await session.endSession();
+    }
+  });
+}
+
+/**
+ * Get all bookings that are not cancelled and match the userId and isRenter flag.
+ * @returns An array of bookings.
+ */
+export async function getBookings({ userId, isRenter }) {
+  const matchQuery = { status: { $nin: [bookingStatus.CANCELLED] } };
+  if (isRenter) {
+    matchQuery.renter = userId;
+  } else matchQuery.owner = userId;
+
+  const bookings = await this.find(matchQuery);
+  return bookings;
+}
+
+/**
+ * Get a booking by its id, the user id and whether the user is the renter or the owner.
+ * @returns The booking object
+ */
+export async function getBooking({ bookId, userId, isRenter }) {
+  const matchQuery = {
+    _id: bookId,
+    status: { $nin: [bookingStatus.CANCELLED] },
+  };
+  if (isRenter) {
+    matchQuery.renter = userId;
+  } else matchQuery.owner = userId;
+
+  const booking = await this.findOne(matchQuery).populate('offerId');
+  return booking;
+}
