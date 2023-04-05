@@ -77,6 +77,7 @@ export const updateUserController = async (req, res, next) => {
       userName,
       email,
       password,
+      oldPassword,
       firstName,
       lastName,
       phoneNumber,
@@ -99,6 +100,7 @@ export const updateUserController = async (req, res, next) => {
     if (city) updateObject.city = city;
     if (state) updateObject.state = state;
     if (zipCode) updateObject.zipCode = zipCode;
+    if (oldPassword) updateObject.oldPassword = oldPassword;
 
     const user = await Users.updateUser({ matchQuery, updateObject });
     res.send(user);

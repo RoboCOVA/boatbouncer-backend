@@ -103,9 +103,9 @@ export async function updateUser({ matchQuery, updateObject }) {
   }
 
   /** if password, check with the perviously stored and hash for update */
-  if (updateQuery?.password) {
+  if (updateQuery?.password && updateQuery?.oldPassword) {
     const isMatch = await comparePassword(
-      updateQuery?.password,
+      updateQuery?.oldPassword,
       user?.password
     );
     if (!isMatch) throw passwordDontMatch;
@@ -113,7 +113,10 @@ export async function updateUser({ matchQuery, updateObject }) {
     updateQuery.password = await generateHashedPassword(updateQuery?.password);
   }
 
-  const updatedUser = await this.findOne(matchQuery, updateQuery);
+  const updatedUser = await this.findOneAndUpdate(matchQuery, updateQuery, {
+    new: true,
+  });
+
   if (!updatedUser) throw updateFailed;
   const clean = updatedUser.clean();
   return clean;
