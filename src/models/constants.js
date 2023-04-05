@@ -10,6 +10,9 @@ export const modelNames = {
   CONVERSATIONS: 'Conversations',
   NOTIFICATIONS: 'Notifications',
   USERS_NOTIFICATIONS: 'UsersNotifications',
+  PAYMENT_METHODS: 'PaymentMethods',
+  PAYMENT_INTENTS: 'PaymentIntents',
+  TRANSACTIONS: 'Transactions',
 };
 
 export const modelNamesEnum = generateEnumArrayFromObject(modelNames);

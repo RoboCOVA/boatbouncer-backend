@@ -63,6 +63,7 @@ router.post('/create', async (req, res) => {
   const amount = 1000;
   const currency = 'USD';
 
+  console.log(req.body);
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount * 100,
@@ -83,10 +84,12 @@ router.post('/create', async (req, res) => {
 });
 
 router.post('/confirm', async (req, res) => {
-  const { paymentIntent, paymentMethod } = req.body;
+  const { paymentIntent, paymentMethod, customer } = req.body;
+  console.log(req.body);
   try {
     const intent = await stripe.paymentIntents.confirm(paymentIntent, {
       payment_method: paymentMethod,
+      // customer,
     });
 
     /* Update the status of the payment to indicate confirmation */

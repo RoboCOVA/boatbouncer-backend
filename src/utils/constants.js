@@ -172,3 +172,11 @@ export const offerStatus = {
 };
 
 export const offerStatusEnum = generateEnumArrayFromObject(offerStatus);
+
+export const intentStatus = {
+  PENDING: 'Pending',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
+
+export const intentStatusEnum = generateEnumArrayFromObject(intentStatus);

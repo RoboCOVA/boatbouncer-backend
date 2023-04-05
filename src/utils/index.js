@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { isBefore, setMonth, setYear } from 'date-fns';
 import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
 import { jwtKey } from '../config/environments';
 
@@ -131,3 +132,14 @@ export const customDateValidator = (date) => {
   }
   return false;
 };
+
+export async function checkMethodExpiration({ paymentMethod }) {
+  const { expMonth, expYear } = paymentMethod;
+
+  const now = new Date();
+  const expirationDate = setMonth(setYear(new Date(), expYear), expMonth);
+
+  if (isBefore(now, expirationDate)) return false; // Card is not expired.
+
+  return true; // Card is expired.
+}
