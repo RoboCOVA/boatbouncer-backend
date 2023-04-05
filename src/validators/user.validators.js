@@ -1,4 +1,4 @@
-import { body } from 'express-validator';
+import { body, param } from 'express-validator';
 import { strongPasswordRegex } from '../utils/constants';
 import defaultValidators from './default.validator';
 
@@ -39,6 +39,7 @@ export const sendSmsValidator = () => [
 ];
 
 export const updateUserValidator = () => [
+  param('userId').isMongoId().withMessage('User Id is required'),
   body('userName').isString().optional(),
   body('firstName').isString().optional(),
   body('lastName').isString().optional(),
@@ -58,6 +59,12 @@ export const updateUserValidator = () => [
       'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
     )
     .optional(),
+  body('oldPassword')
+    .if((value, { req }) => req.body?.password)
+    .notEmpty()
+    .isString()
+    .withMessage('Password is required'),
+
   defaultValidators.phoneNumber.optional(),
 ];
 

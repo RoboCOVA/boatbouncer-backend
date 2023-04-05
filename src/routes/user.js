@@ -38,8 +38,8 @@ router.post(
   verifyUserController
 );
 
-router.post(
-  '/update',
+router.put(
+  '/:userId',
   updateUserValidator(),
   parseValidationResult,
   updateUserController
