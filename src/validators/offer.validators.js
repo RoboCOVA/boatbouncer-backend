@@ -17,3 +17,7 @@ export const udpateOffervalidator = () => [
   body('paymentServiceFee').isNumeric().optional(),
   body('localTax').isNumeric().optional(),
 ];
+
+export const acceptOfferValidator = () => [
+  param('offerId').isMongoId().withMessage('Valid Offer Id is required'),
+];

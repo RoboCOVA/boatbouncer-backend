@@ -7,6 +7,7 @@ import winstonLogger from './winston';
 import * as environments from './environments';
 import APIError from '../errors/APIError';
 import routes from './routes';
+import { stripeWebHookController } from '../controller/webhook';
 
 const app = express();
 
@@ -22,12 +23,19 @@ if (environments.nodeEnv !== 'test') {
   app.use(morgan('combined', { stream: winstonLogger.stream }));
 }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 // Secure middlewares
 app.use(helmet());
 app.use(cors());
+
+// Stripe Webhook Listener
+app.use(
+  '/webhook/boatBouncer',
+  express.raw({ type: 'application/json' }),
+  stripeWebHookController
+);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/boatbouncer', routes);
 

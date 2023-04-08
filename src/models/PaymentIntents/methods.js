@@ -1,11 +1,12 @@
 import Stripe from 'stripe';
 import retry from 'retry';
+import { startSession } from 'mongoose';
 import { modelNames } from '../constants';
 import { userNotFound } from '../Users/errors';
 import { stripeSecretKey } from '../../config/environments';
-import { checkMethodExpiration } from '../../utils';
-import { intentAlreadyCreated, methodExpired, userCardExpired } from './errors';
-import { intentStatus } from '../../utils/constants';
+import { intentAlreadyCreated, ownerNotFound, userCardExpired } from './errors';
+import { invalidOfferStatus, offerNotFound } from '../Offers/errors';
+import { offerStatus, intentStatus } from '../../utils/constants';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -23,6 +24,8 @@ function cancelPaymentIntent(id) {
     operation.attempt(async () => {
       try {
         const intent = await stripe.paymentIntents.cancel(id);
+        // eslint-disable-next-line no-console
+        console.log('Payment Canceled');
         resolve(intent);
       } catch (error) {
         if (operation.retry(error)) {
@@ -43,14 +46,52 @@ function cancelPaymentIntent(id) {
 }
 
 export async function createPaymentIntent() {
+  const session = await startSession();
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     try {
-      const { customer, paymentMethod, currency, amount, description } = this;
+      await session.withTransaction(async () => {});
+      const { paymentMethod, currency, description, metadata } = this;
+      const offer = await this.model(modelNames.OFFERS)
+        .findOne({
+          _id: metadata?.offerId,
+        })
+        .populate([
+          {
+            path: 'bookId',
+            populate: 'owner',
+          },
+        ]);
+
+      if (
+        !offer?.bookId?.boatId ||
+        !offer?.bookId?.renter ||
+        !offer?.bookId?.owner?.stripeAccountId ||
+        !offer?.boatPrice ||
+        !offer?.captainPrice ||
+        !offer?.paymentServiceFee ||
+        !offer?.localTax
+      )
+        throw offerNotFound;
+
+      if (offer.status !== offerStatus.PROCESSING) throw invalidOfferStatus;
+
+      const { bookId } = offer;
+
       const existingUser = await this.model(modelNames.USERS).findOne({
-        stripeCustomerId: customer,
+        _id: bookId?.renter,
       });
-      if (!existingUser) throw userNotFound;
+
+      if (!existingUser?.stripeCustomerId) throw userNotFound;
+
+      const boatowner = await this.model(modelNames.BOATS).findOne({
+        owner: offer?.bookId?.owner?._id,
+        _id: bookId?.boatId,
+      });
+      if (!boatowner) throw ownerNotFound;
+
+      const customer = existingUser?.stripeCustomerId;
+      this.customer = customer;
 
       const existingIntent = await this.model(
         modelNames.PAYMENT_INTENTS
@@ -61,23 +102,39 @@ export async function createPaymentIntent() {
 
       if (existingIntent) throw intentAlreadyCreated;
 
-      const expired = checkMethodExpiration({ paymentMethod });
-      if (expired) throw methodExpired;
+      const boatPrice = +offer.boatPrice;
+      const captainPrice = +offer.captainPrice;
+      const paymentServiceFee = +offer.paymentServiceFee;
+      const localTax = +offer.localTax;
+      const totalAmont =
+        boatPrice + captainPrice + paymentServiceFee + localTax;
+      delete paymentMethod.type;
+      const token = await stripe.tokens.create(paymentMethod);
 
-      paymentIntent = await stripe.paymentIntents.create(paymentMethod.id, {
+      paymentIntent = await stripe.paymentIntents.create({
         customer,
         currency,
-        amount,
-        payment_method: paymentMethod,
+        amount: totalAmont,
+        payment_method_data: {
+          type: 'card',
+          card: { token: token.id },
+        },
         payment_method_types: ['card'],
         description,
         confirm: false,
+        transfer_data: {
+          destination: offer?.bookId?.owner?.stripeAccountId,
+        },
+        application_fee_amount: 1,
       });
 
+      this.amount = totalAmont;
       this.intentId = paymentIntent.id;
+      this.status = intentStatus.PENDING;
 
-      const saveIntent = await this.save();
-      resolve(saveIntent);
+      const saveIntent = await this.save({ session });
+      const clean = await saveIntent.cleanIntent();
+      resolve(clean);
     } catch (error) {
       if (
         /** Checks if the error is related to expiration of the card */
@@ -95,6 +152,15 @@ export async function createPaymentIntent() {
         }
       }
       reject(error);
+    } finally {
+      await session.endSession();
     }
   });
+}
+
+export async function cleanIntent() {
+  const intentObj = this.toObject({ virtuals: true });
+  delete intentObj.intentId;
+  delete intentObj.customer;
+  return intentObj;
 }

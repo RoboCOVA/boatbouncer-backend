@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  createStripeAccountController,
   createUserController,
   loginController,
   sendSmsController,
@@ -14,6 +15,7 @@ import {
   updateUserValidator,
   verifyUserValidator,
 } from '../validators/user.validators';
+import { authenticateJwt } from '../controller/authenticate';
 
 const router = express.Router();
 
@@ -46,5 +48,7 @@ router.put(
 );
 
 router.post('/login', loginValidator(), parseValidationResult, loginController);
+
+router.post('/stripAccount', authenticateJwt, createStripeAccountController);
 
 export default router;

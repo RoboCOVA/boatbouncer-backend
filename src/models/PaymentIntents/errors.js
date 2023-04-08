@@ -29,3 +29,14 @@ export const confirmationFailed = new APIError(
   'Confirmation Failed',
   httpStatus.BAD_REQUEST
 );
+
+export const ownerNotFound = new APIError(
+  'Owner Not Found!',
+  httpStatus.NOT_FOUND,
+  true
+);
+
+export const intentCanceled = new APIError(
+  'Payment Intent is already canceled',
+  httpStatus.BAD_REQUEST
+);

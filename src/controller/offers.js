@@ -45,3 +45,19 @@ export const updateOfferController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const acceptOfferController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id || '';
+    const { offerId } = req.params;
+
+    const accept = await Offers.acceptOffer({
+      userId,
+      offerId,
+    });
+
+    res.send(accept);
+  } catch (error) {
+    next(error);
+  }
+};

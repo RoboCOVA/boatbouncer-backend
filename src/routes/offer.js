@@ -1,10 +1,12 @@
 import express from 'express';
 import {
+  acceptOfferValidator,
   createOffervalidator,
   udpateOffervalidator,
 } from '../validators/offer.validators';
 import parseValidationResult from '../validators/errors.parser';
 import {
+  acceptOfferController,
   createOfferController,
   updateOfferController,
 } from '../controller/offers';
@@ -23,6 +25,13 @@ router.put(
   udpateOffervalidator(),
   parseValidationResult,
   updateOfferController
+);
+
+router.put(
+  '/accept/:offerId',
+  acceptOfferValidator(),
+  parseValidationResult,
+  acceptOfferController
 );
 
 export default router;

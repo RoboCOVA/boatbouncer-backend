@@ -39,3 +39,8 @@ export const doesntMatchError = new APIError(
   httpStatus.UNAUTHORIZED,
   true
 );
+
+export const existingStripCustomerNotFound = new APIError(
+  'Existing stripe customer not found!',
+  httpStatus.NOT_FOUND
+);

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { isBefore, setMonth, setYear } from 'date-fns';
@@ -133,13 +134,9 @@ export const customDateValidator = (date) => {
   return false;
 };
 
-export async function checkMethodExpiration({ paymentMethod }) {
-  const { expMonth, expYear } = paymentMethod;
-
+export function checkMethodExpiration({ paymentMethod }) {
+  const { exp_month, exp_year } = paymentMethod;
   const now = new Date();
-  const expirationDate = setMonth(setYear(new Date(), expYear), expMonth);
-
-  if (isBefore(now, expirationDate)) return false; // Card is not expired.
-
-  return true; // Card is expired.
+  const expirationDate = setMonth(setYear(new Date(), exp_year), exp_month);
+  return !isBefore(now, expirationDate);
 }

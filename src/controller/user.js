@@ -118,3 +118,13 @@ export const loginController = (req, res, next) => {
     return res.json(user);
   })(req, res, next);
 };
+
+export const createStripeAccountController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id;
+    const createAccount = await Users.createStripeAccount({ userId });
+    res.send(createAccount);
+  } catch (error) {
+    next(error);
+  }
+};

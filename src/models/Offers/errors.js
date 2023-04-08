@@ -13,11 +13,13 @@ export const offerUpdateFailed = new APIError(
 );
 
 export const invalidStatus = new APIError(
-  'Can not create an Offer for Reservation which is not in PENDING status'
+  'Can not create an Offer for Reservation which is not in PENDING status',
+  httpStatus.BAD_REQUEST
 );
 
 export const invalidReservatoinStatus = new APIError(
-  'Can not update an Offer for Reservation which is not in PENDING status'
+  'Can not update an Offer for Reservation which is not in PENDING status',
+  httpStatus.BAD_REQUEST
 );
 
 export const stripeCustomerCreationFailed = new APIError(
@@ -29,4 +31,9 @@ export const userUpdateFailed = new APIError(
   'User Update operation failed!',
   httpStatus.NOT_FOUND,
   true
+);
+
+export const invalidOfferStatus = new APIError(
+  'Invalid Offer Status status',
+  httpStatus.BAD_REQUEST
 );

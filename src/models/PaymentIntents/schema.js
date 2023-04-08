@@ -10,7 +10,7 @@ const paymentIntentSchema = new mongoose.Schema({
   customer: { type: String, required: true },
   paymentMethod: {
     card: {
-      number: { type: String, required: true },
+      number: { type: Number, required: true },
       exp_month: { type: Number, required: true },
       exp_year: { type: Number, required: true },
       cvc: { type: String, required: true },
@@ -38,9 +38,9 @@ const paymentIntentSchema = new mongoose.Schema({
     default: ['card'],
   },
   metadata: {
-    boatId: { type: Types.ObjectId, ref: modelNames.BOATS },
-    userId: { type: Types.ObjectId, ref: modelNames.USERS },
+    offerId: { type: Types.ObjectId, ref: modelNames.OFFERS, required: true },
   },
+  isPaidToOwner: { type: Boolean, default: false },
   intentId: { type: String, required: true },
   status: { type: String, enum: intentStatus, required: true },
 });

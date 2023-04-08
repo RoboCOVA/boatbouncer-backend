@@ -72,3 +72,7 @@ export const loginValidator = () => [
   body('email').isEmail().withMessage('Email is required to login'),
   body('password').isString().withMessage('password is required'),
 ];
+
+export const createStripeAccountValidator = () => [
+  param('userId').isMongoId().withMessage('User Id is required'),
+];

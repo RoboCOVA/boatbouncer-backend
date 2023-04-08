@@ -1,5 +1,7 @@
+import { startSession } from 'mongoose';
 import httpStatus from 'http-status';
 import bcrypt from 'bcrypt';
+import Stripe from 'stripe';
 import { identityToolkit } from '../../config/googleApis';
 import APIError from '../../errors/APIError';
 import {
@@ -16,6 +18,9 @@ import {
   userNotFound,
   doesntMatchError,
 } from './errors';
+import { stripeSecretKey } from '../../config/environments';
+
+const stripe = new Stripe(stripeSecretKey);
 
 /** @STATIC_FUNCTIONS */
 
@@ -138,4 +143,90 @@ export async function authenticateUser(email, password) {
 
   // If not match
   throw doesntMatchError;
+}
+
+export async function createStripeAccount({ userId, country = 'US' }) {
+  const session = await startSession();
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      await session.withTransaction(async () => {
+        const user = await this.findOne({ _id: userId });
+        if (!user?.email) throw userNotFound;
+        const { email } = user;
+        // console.log(email);
+        // const accounts = await stripe.accounts.list({ email });
+
+        // if (accounts?.data?.length) {
+        //   if (user?.stripeAccountId) {
+        //     await session.commitTransaction();
+        //     resolve(user);
+        //   }
+
+        //   const updateAccount = await this.findOneAndUpdate(
+        //     { _id: userId },
+        //     { stripeAccountId: accounts.data[0].id },
+        //     { new: true }
+        //   ).session(session);
+
+        //   if (!updateAccount) throw updateFailed;
+        //   const onBoarded = await stripe.accounts.retrieve(accounts.data[0].id);
+
+        //   if (!onBoarded.charges_enabled) {
+        //     const onboarding = await stripe.accountLinks.create({
+        //       account: updateAccount.stripeAccountId,
+        //       refresh_url: 'http://localhost:5000/api/boatbouncer/test',
+        //       return_url: 'http://localhost:5000/api/boatbouncer/test/failed',
+        //       type: 'account_onboarding',
+        //     });
+        //     await session.commitTransaction();
+        //     resolve(onboarding);
+        //   }
+
+        //   await session.commitTransaction();
+        //   resolve(updateAccount);
+        // } else {
+        //   console.log('NOT FOUND');
+
+        // }
+
+        const account = await stripe.accounts.create({
+          type: 'express',
+          country,
+          email,
+          capabilities: {
+            card_payments: { requested: true },
+            transfers: { requested: true },
+            tax_reporting_us_1099_k: { requested: true },
+          },
+          business_type: 'individual',
+          individual: {
+            email,
+          },
+        });
+
+        const updatedUser = await this.findOneAndUpdate(
+          { _id: userId },
+          { stripeAccountId: account.id },
+          { new: true }
+        ).session(session);
+
+        if (!updatedUser) throw updateFailed;
+
+        const onboarding = await stripe.accountLinks.create({
+          account: updatedUser.stripeAccountId,
+          refresh_url: 'http://localhost:5000/api/boatbouncer/test/failed',
+          return_url: 'http://localhost:5000/api/boatbouncer/test',
+          type: 'account_onboarding',
+        });
+
+        await session.commitTransaction();
+        resolve(onboarding);
+      });
+    } catch (error) {
+      reject(error);
+    } finally {
+      await session.endSession();
+    }
+  });
 }

@@ -15,6 +15,8 @@ const userSchema = new mongoose.Schema(
     state: { type: String },
     zipCode: { type: String },
     stripeCustomerId: { type: String },
+    stripeAccountId: { type: String },
+    chargesEnabled: { type: Boolean },
   },
   { timestamps: true }
 );
