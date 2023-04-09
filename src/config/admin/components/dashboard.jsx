@@ -1,4 +1,4 @@
-import { Box, Text, Button, Icon, H3 } from '@adminjs/design-system';
+import { Box, Text, H3 } from '@adminjs/design-system';
 
 const Dashboard = () => {
   return (
