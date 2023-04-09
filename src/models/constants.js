@@ -13,6 +13,7 @@ export const modelNames = {
   PAYMENT_METHODS: 'PaymentMethods',
   PAYMENT_INTENTS: 'PaymentIntents',
   TRANSACTIONS: 'Transactions',
+  ADMINSTRATORS: 'Adminstrators',
 };
 
 export const modelNamesEnum = generateEnumArrayFromObject(modelNames);

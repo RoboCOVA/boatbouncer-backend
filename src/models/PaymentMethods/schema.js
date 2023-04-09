@@ -1,18 +1,10 @@
 import mongoose from 'mongoose';
+import { modelNames } from '../constants';
 
-const paymentMethodSchema = new mongoose.Schema({
-  customer: { type: String, required: true },
-  paymentMethodId: { type: String, required: true },
-  card: {
-    number: { type: String, required: true },
-    expMonth: { type: Number, required: true },
-    expYear: { type: Number, required: true },
-    cvc: { type: String, required: true },
-  },
-  type: {
-    type: String,
-    default: 'card',
-  },
+const invoiceSchema = new mongoose.Schema({
+  from: { type: mongoose.Types.ObjectId, ref: modelNames.USERS },
+  to: { type: mongoose.Types.ObjectId, ref: modelNames.USERS },
+  intentId: { type: String, required: true },
 });
 
-export default paymentMethodSchema;
+export default invoiceSchema;

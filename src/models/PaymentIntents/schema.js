@@ -40,7 +40,6 @@ const paymentIntentSchema = new mongoose.Schema({
   metadata: {
     offerId: { type: Types.ObjectId, ref: modelNames.OFFERS, required: true },
   },
-  isPaidToOwner: { type: Boolean, default: false },
   intentId: { type: String, required: true },
   status: { type: String, enum: intentStatus, required: true },
 });

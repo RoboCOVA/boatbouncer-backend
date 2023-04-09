@@ -1,11 +1,9 @@
 import Stripe from 'stripe';
 import Users from '../models/Users';
-import { stripeSecretKey } from '../config/environments';
+import { endpointSecret, stripeSecretKey } from '../config/environments';
 
 const stripe = new Stripe(stripeSecretKey);
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
-const endpointSecret =
-  'whsec_8ee99c032f4ea745f35c4209011dfa4e75bcf202544f2ccdb74830b61527ec1f';
 
 export const stripeWebHookController = async (req, res, next) => {
   try {

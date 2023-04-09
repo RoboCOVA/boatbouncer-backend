@@ -18,6 +18,9 @@ const envSchema = Joi.object({
   UPLOAD_IMAGE_SIZE_LIMIT_IN_MB: Joi.number().required(),
   STRIPE_PUBLISHABLE_KEY: Joi.string().required(),
   STRIPE_SECRET_KEY: Joi.string().required(),
+  WEBHOOK_SECRET: Joi.string().required(),
+  COOKIE_NAME: Joi.string().required(),
+  COOKIE_PASSWORD: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -40,3 +43,6 @@ export const cloudinaryApiSecret = value.CLOUDINARY_API_SECRET;
 export const uploadImageSizeLimitInMB = value.UPLOAD_IMAGE_SIZE_LIMIT_IN_MB;
 export const stripePublishKey = value.STRIPE_PUBLISHABLE_KEY;
 export const stripeSecretKey = value.STRIPE_SECRET_KEY;
+export const endpointSecret = value.WEBHOOK_SECRET;
+export const cookieName = value.COOKIE_NAME;
+export const cookiePassword = value.COOKIE_PASSWORD;

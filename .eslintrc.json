@@ -7,7 +7,7 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["prettier"],
+  "plugins": ["react", "prettier"],
   "ignorePatterns": "build/*",
   "extends": ["airbnb-base", "plugin:prettier/recommended"],
   "rules": {

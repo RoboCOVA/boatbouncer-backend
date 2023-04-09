@@ -8,6 +8,8 @@ import * as environments from './environments';
 import APIError from '../errors/APIError';
 import routes from './routes';
 import { stripeWebHookController } from '../controller/webhook';
+import adminRoute from './admin';
+import { adminJs } from './admin/config';
 
 const app = express();
 
@@ -27,13 +29,15 @@ if (environments.nodeEnv !== 'test') {
 app.use(helmet());
 app.use(cors());
 
+// AdminBro/Js
+app.use(adminJs.options.rootPath, adminRoute);
+
 // Stripe Webhook Listener
 app.use(
   '/webhook/boatBouncer',
   express.raw({ type: 'application/json' }),
   stripeWebHookController
 );
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
