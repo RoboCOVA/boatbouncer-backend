@@ -3,12 +3,14 @@ import {
   createBoatController,
   deleteBoatController,
   getBoatController,
+  getBoatListingController,
   getBoatsController,
   updateBoatController,
 } from '../controller/boat';
 import {
   createBoatValidator,
   deleteBoatsValidator,
+  getBoatListingValidator,
   getBoatsValidator,
   getBoatValidator,
   updateBoatsValidator,
@@ -25,6 +27,13 @@ router.post(
 );
 
 router.get('/', getBoatsValidator(), parseValidationResult, getBoatsController);
+
+router.get(
+  '/listing',
+  getBoatListingValidator(),
+  parseValidationResult,
+  getBoatListingController
+);
 
 router.get(
   '/:boatId',
