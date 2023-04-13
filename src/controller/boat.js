@@ -68,6 +68,21 @@ export const getBoatsController = async (req, res, next) => {
   }
 };
 
+export const getBoatListingController = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { pageNo, size } = req.query;
+    const boats = await Boats.getBoats({
+      pageNo,
+      size,
+      userId,
+    });
+    res.send(boats);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getBoatController = async (req, res, next) => {
   try {
     const { boatId } = req.params;

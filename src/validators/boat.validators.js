@@ -79,3 +79,8 @@ export const updateBoatsValidator = () => [
 export const deleteBoatsValidator = () => [
   param('boatId').isMongoId().optional(),
 ];
+
+export const getBoatListingValidator = () => [
+  defaultValidators.pageNo,
+  defaultValidators.size,
+];

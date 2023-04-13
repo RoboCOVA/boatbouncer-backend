@@ -6,9 +6,10 @@ import { boatDeleteFailed, boatNotFound, boatUpdateFailed } from './errors';
  * the page.
  * @returns An object with two properties: data and total.
  */
-export async function getBoats({ pageNo, size }) {
+export async function getBoats({ pageNo, size, userId }) {
   const { skip, limit } = getPaginationValues(pageNo, size);
   const query = {};
+  if (userId) query.owner = userId;
   const boats = await this.find(
     query,
     {},
