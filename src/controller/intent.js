@@ -2,9 +2,8 @@ import PaymentIntents from '../models/PaymentIntents';
 
 export const createIntentController = async (req, res, next) => {
   try {
-    const { paymentMethod, currency, description, metadata } = req.body;
+    const { currency, description, metadata } = req.body;
     const paymentIntent = new PaymentIntents({
-      paymentMethod,
       currency,
       description,
       metadata,

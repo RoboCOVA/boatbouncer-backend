@@ -7,6 +7,7 @@ import { stripeSecretKey } from '../../config/environments';
 import { intentAlreadyCreated, ownerNotFound, userCardExpired } from './errors';
 import { invalidOfferStatus, offerNotFound } from '../Offers/errors';
 import { offerStatus, intentStatus } from '../../utils/constants';
+import { decryptData } from '../../utils';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -51,7 +52,7 @@ export async function createPaymentIntent() {
   return new Promise(async (resolve, reject) => {
     try {
       await session.withTransaction(async () => {});
-      const { paymentMethod, currency, description, metadata } = this;
+      const { currency, description, metadata } = this;
       const offer = await this.model(modelNames.OFFERS)
         .findOne({
           _id: metadata?.offerId,
@@ -108,33 +109,29 @@ export async function createPaymentIntent() {
       const localTax = +offer.localTax;
       const totalAmont =
         boatPrice + captainPrice + paymentServiceFee + localTax;
-      delete paymentMethod.type;
-      const token = await stripe.tokens.create(paymentMethod);
+
+      const accountId = decryptData(offer?.bookId?.owner?.stripeAccountId);
 
       paymentIntent = await stripe.paymentIntents.create({
         customer,
         currency,
         amount: totalAmont,
-        payment_method_data: {
-          type: 'card',
-          card: { token: token.id },
-        },
         payment_method_types: ['card'],
         description,
         confirm: false,
         transfer_data: {
-          destination: offer?.bookId?.owner?.stripeAccountId,
+          destination: accountId,
         },
-        application_fee_amount: 1,
+        // eslint-disable-next-line prettier/prettier
+        application_fee_amount: 100,
       });
 
       this.amount = totalAmont;
       this.intentId = paymentIntent.id;
       this.status = intentStatus.PENDING;
 
-      const saveIntent = await this.save({ session });
-      const clean = await saveIntent.cleanIntent();
-      resolve(clean);
+      await this.save({ session });
+      resolve({ client_secret: paymentIntent.client_secret });
     } catch (error) {
       if (
         /** Checks if the error is related to expiration of the card */

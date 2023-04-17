@@ -1,6 +1,8 @@
 import Stripe from 'stripe';
 import Users from '../models/Users';
+import PaymentIntents from '../models/PaymentIntents';
 import { endpointSecret, stripeSecretKey } from '../config/environments';
+import { intentStatus } from '../utils/constants';
 
 const stripe = new Stripe(stripeSecretKey);
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
@@ -21,6 +23,13 @@ export const stripeWebHookController = async (req, res, next) => {
       case 'payment_intent.succeeded':
         // eslint-disable-next-line no-console
         console.log(`Payment Succeeded ${event.data.object}`);
+        await PaymentIntents.findOneAndUpdate(
+          { intentId: event.data.object?.id },
+          {
+            status: intentStatus.COMPLETED,
+          },
+          { new: true }
+        ).exec();
         // Then define and call a function to handle the event payment_intent.succeeded
         break;
       case 'account.updated':

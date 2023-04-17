@@ -6,6 +6,7 @@ import { identityToolkit } from '../../config/googleApis';
 import APIError from '../../errors/APIError';
 import {
   comparePassword,
+  encryptData,
   generateHashedPassword,
   generateJwtToken,
 } from '../../utils';
@@ -154,41 +155,8 @@ export async function createStripeAccount({ userId, country = 'US' }) {
         const user = await this.findOne({ _id: userId });
         if (!user?.email) throw userNotFound;
         const { email } = user;
-        // console.log(email);
-        // const accounts = await stripe.accounts.list({ email });
-
-        // if (accounts?.data?.length) {
-        //   if (user?.stripeAccountId) {
-        //     await session.commitTransaction();
-        //     resolve(user);
-        //   }
-
-        //   const updateAccount = await this.findOneAndUpdate(
-        //     { _id: userId },
-        //     { stripeAccountId: accounts.data[0].id },
-        //     { new: true }
-        //   ).session(session);
-
-        //   if (!updateAccount) throw updateFailed;
-        //   const onBoarded = await stripe.accounts.retrieve(accounts.data[0].id);
-
-        //   if (!onBoarded.charges_enabled) {
-        //     const onboarding = await stripe.accountLinks.create({
-        //       account: updateAccount.stripeAccountId,
-        //       refresh_url: 'http://localhost:5000/api/boatbouncer/test',
-        //       return_url: 'http://localhost:5000/api/boatbouncer/test/failed',
-        //       type: 'account_onboarding',
-        //     });
-        //     await session.commitTransaction();
-        //     resolve(onboarding);
-        //   }
-
-        //   await session.commitTransaction();
-        //   resolve(updateAccount);
-        // } else {
-        //   console.log('NOT FOUND');
-
-        // }
+        if (user?.stripeAccountId)
+          resolve('User already have account registered');
 
         const account = await stripe.accounts.create({
           type: 'express',
@@ -205,16 +173,17 @@ export async function createStripeAccount({ userId, country = 'US' }) {
           },
         });
 
+        const encryptedId = encryptData(account.id);
         const updatedUser = await this.findOneAndUpdate(
           { _id: userId },
-          { stripeAccountId: account.id },
+          { stripeAccountId: encryptedId },
           { new: true }
         ).session(session);
 
         if (!updatedUser) throw updateFailed;
 
         const onboarding = await stripe.accountLinks.create({
-          account: updatedUser.stripeAccountId,
+          account: account.id,
           refresh_url: 'http://localhost:5000/api/boatbouncer/test/failed',
           return_url: 'http://localhost:5000/api/boatbouncer/test',
           type: 'account_onboarding',

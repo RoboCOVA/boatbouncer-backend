@@ -13,30 +13,6 @@ export const PaymentResource = {
         },
         isEditable: false,
       },
-      'paymentMethod.card.exp_month': {
-        isVisible: {
-          list: false,
-          show: true,
-          edit: false,
-          filter: true,
-        },
-      },
-      'paymentMethod.card.exp_year': {
-        isVisible: {
-          list: false,
-          show: true,
-          edit: false,
-          filter: true,
-        },
-      },
-      'paymentMethod.type': {
-        isVisible: {
-          list: false,
-          show: true,
-          edit: false,
-          filter: true,
-        },
-      },
       description: {
         isVisible: {
           list: false,
@@ -69,14 +45,6 @@ export const PaymentResource = {
           filter: true,
         },
       },
-      'paymentMethod.card.number': {
-        isVisible: {
-          list: true,
-          show: true,
-          edit: false,
-          filter: true,
-        },
-      },
       amount: {
         isVisible: {
           list: true,
@@ -94,14 +62,6 @@ export const PaymentResource = {
         },
       },
       intentId: {
-        isVisible: {
-          list: true,
-          show: true,
-          edit: false,
-          filter: true,
-        },
-      },
-      'paymentMethod.card.cvc': {
         isVisible: {
           list: true,
           show: true,

@@ -78,13 +78,20 @@ export async function cancelPaymentIntent({ userId, id }) {
         if (!intent?.intentId) throw intentNotFound;
         if (intent.status !== intentStatus.PENDING) throw intentAlreadyCreated;
 
+        const updateObject = {};
+        const currentIntent = stripe.paymentIntents.retrieve(intent?.intentId);
+        if (currentIntent?.status === 'succeeded')
+          updateObject.status = intentStatus.COMPLETED;
+        else updateObject.status = intentStatus.CANCELLED;
+
         const cancelledIntent = await this.findOneAndUpdate(
           matchQuery,
-          { status: intentStatus.CANCELLED },
+          updateObject,
           { new: true }
         ).session(session);
 
-        await stripe.paymentIntents.cancel(intent?.intentId);
+        if (cancelledIntent?.status === intentStatus.CANCELLED)
+          await stripe.paymentIntents.cancel(intent?.intentId);
 
         const clean = await cancelledIntent.cleanIntent();
         await session.commitTransaction();
