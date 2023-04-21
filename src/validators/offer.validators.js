@@ -1,4 +1,5 @@
 import { body, param } from 'express-validator';
+import { customDateValidator } from '../utils';
 
 export const createOffervalidator = () => [
   body('bookId').isMongoId().withMessage('Valid Book id is required'),
@@ -8,6 +9,12 @@ export const createOffervalidator = () => [
     .isNumeric()
     .withMessage('Payment Service Fee is required'),
   body('localTax').isNumeric().withMessage('Local Tax is required'),
+  body('returnDate')
+    .custom(customDateValidator)
+    .withMessage('Start time is required'),
+  body('departureDate')
+    .custom(customDateValidator)
+    .withMessage('Start time is required'),
 ];
 
 export const udpateOffervalidator = () => [
@@ -16,6 +23,8 @@ export const udpateOffervalidator = () => [
   body('captainPrice').isNumeric().optional(),
   body('paymentServiceFee').isNumeric().optional(),
   body('localTax').isNumeric().optional(),
+  body('departureDate').custom(customDateValidator).optional(),
+  body('returnDate').custom(customDateValidator).optional(),
 ];
 
 export const acceptOfferValidator = () => [

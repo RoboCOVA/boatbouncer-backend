@@ -4,8 +4,15 @@ import { bookingStatus } from '../utils/constants';
 export const createOfferController = async (req, res, next) => {
   try {
     const userId = req?.user?._id || ' ';
-    const { bookId, boatPrice, captainPrice, paymentServiceFee, localTax } =
-      req.body;
+    const {
+      bookId,
+      boatPrice,
+      captainPrice,
+      paymentServiceFee,
+      localTax,
+      departureDate,
+      returnDate,
+    } = req.body;
 
     const offer = new Offers({
       bookId,
@@ -13,6 +20,8 @@ export const createOfferController = async (req, res, next) => {
       captainPrice,
       paymentServiceFee,
       localTax,
+      departureDate,
+      returnDate,
       status: bookingStatus.PENDING,
       createdBy: userId,
     });

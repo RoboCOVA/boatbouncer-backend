@@ -37,3 +37,13 @@ export const invalidOfferStatus = new APIError(
   'Invalid Offer Status status',
   httpStatus.BAD_REQUEST
 );
+
+export const bookOwnerNotFoundStatus = new APIError(
+  'Boat owner not found',
+  httpStatus.BAD_REQUEST
+);
+
+export const invalidAccess = new APIError(
+  'Only owner can create an offer',
+  httpStatus.BAD_REQUEST
+);

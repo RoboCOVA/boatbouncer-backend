@@ -40,3 +40,8 @@ export const intentCanceled = new APIError(
   'Payment Intent is already canceled',
   httpStatus.BAD_REQUEST
 );
+
+export const settingDocNotFound = new APIError(
+  'Setting not found',
+  httpStatus.NOT_FOUND
+);

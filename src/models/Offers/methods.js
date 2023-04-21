@@ -1,13 +1,17 @@
 import { startSession } from 'mongoose';
 import { modelNames } from '../constants';
-import { invalidStatus } from './errors';
+import {
+  bookOwnerNotFoundStatus,
+  invalidAccess,
+  invalidStatus,
+} from './errors';
 import {
   reservationNotFound,
   reservationUpdateFailed,
 } from '../Bookings/errors';
 import { bookingStatus } from '../../utils/constants';
 
-export async function createOffers() {
+export async function createOffers(userId) {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     const session = await startSession();
@@ -25,6 +29,9 @@ export async function createOffers() {
           book?.status === bookingStatus.COMPLETED
         )
           throw invalidStatus;
+
+        if (!book?.owner) throw bookOwnerNotFoundStatus;
+        if (!book.owner?.equals(userId)) throw invalidAccess;
 
         const offer = await this.save({ session });
 

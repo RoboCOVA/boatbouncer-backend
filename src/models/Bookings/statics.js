@@ -81,8 +81,28 @@ export async function getBookings({ userId, isRenter }) {
     matchQuery.renter = userId;
   } else matchQuery.owner = userId;
 
-  const bookings = await this.find(matchQuery);
-  return bookings;
+  const bookings = await this.find(matchQuery).populate([
+    {
+      path: 'renter',
+      select: [
+        '-password',
+        '-stripeCustomerId',
+        '-stripeAccountId',
+        '-chargesEnabled',
+      ],
+    },
+    {
+      path: 'owner',
+      select: [
+        '-password',
+        '-stripeCustomerId',
+        '-stripeAccountId',
+        '-chargesEnabled',
+      ],
+    },
+  ]);
+  const total = await this.count(matchQuery);
+  return { data: bookings, total };
 }
 
 /**

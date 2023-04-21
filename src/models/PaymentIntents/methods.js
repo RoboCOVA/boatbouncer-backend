@@ -4,7 +4,7 @@ import { startSession } from 'mongoose';
 import { modelNames } from '../constants';
 import { userNotFound } from '../Users/errors';
 import { stripeSecretKey } from '../../config/environments';
-import { intentAlreadyCreated, ownerNotFound, userCardExpired } from './errors';
+import { ownerNotFound, settingDocNotFound, userCardExpired } from './errors';
 import { invalidOfferStatus, offerNotFound } from '../Offers/errors';
 import { offerStatus, intentStatus } from '../../utils/constants';
 import { decryptData } from '../../utils';
@@ -53,6 +53,7 @@ export async function createPaymentIntent() {
     try {
       await session.withTransaction(async () => {});
       const { currency, description, metadata } = this;
+      const Settings = await this.model(modelNames.SETTINGS);
       const offer = await this.model(modelNames.OFFERS)
         .findOne({
           _id: metadata?.offerId,
@@ -63,6 +64,9 @@ export async function createPaymentIntent() {
             populate: 'owner',
           },
         ]);
+
+      const setting = await Settings.findOne();
+      if (!setting?.platformCut) throw settingDocNotFound;
 
       if (
         !offer?.bookId?.boatId ||
@@ -101,7 +105,9 @@ export async function createPaymentIntent() {
         status: intentStatus.PENDING,
       });
 
-      if (existingIntent) throw intentAlreadyCreated;
+      if (existingIntent) {
+        await cancelPaymentIntent(existingIntent?.intentId);
+      }
 
       const boatPrice = +offer.boatPrice;
       const captainPrice = +offer.captainPrice;
@@ -109,21 +115,21 @@ export async function createPaymentIntent() {
       const localTax = +offer.localTax;
       const totalAmont =
         boatPrice + captainPrice + paymentServiceFee + localTax;
+      const platformFee = (totalAmont * +setting.platformCut) / 100;
 
       const accountId = decryptData(offer?.bookId?.owner?.stripeAccountId);
 
       paymentIntent = await stripe.paymentIntents.create({
         customer,
         currency,
-        amount: totalAmont,
+        amount: totalAmont * 100,
         payment_method_types: ['card'],
         description,
         confirm: false,
         transfer_data: {
           destination: accountId,
         },
-        // eslint-disable-next-line prettier/prettier
-        application_fee_amount: 100,
+        application_fee_amount: platformFee * 100,
       });
 
       this.amount = totalAmont;

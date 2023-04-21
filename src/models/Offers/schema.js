@@ -10,6 +10,8 @@ const offerSchema = new mongoose.Schema(
     paymentServiceFee: { type: Number, required: true },
     localTax: { type: Number, required: true },
     status: { type: String, enum: offerStatusEnum },
+    departureDate: { type: Date, required: true },
+    returnDate: { type: Date, required: true },
     createdBy: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
   },
   { timestamps: true }

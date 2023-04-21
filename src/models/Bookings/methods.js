@@ -29,9 +29,6 @@ export async function createBooking() {
         const user = await Users.findOne({ _id: renter });
         if (!user) throw userNotFound;
 
-        this.owner = boat.owner;
-        const reservation = await this.save({ session });
-
         if (!boat?.owner) throw userNotFound;
 
         if (boat?.owner?.equals(renter)) throw invalidOperaton;
@@ -40,7 +37,11 @@ export async function createBooking() {
           members: [boat?.owner, renter],
         });
 
-        await conversation.save({ session });
+        const savedConversation = await conversation.save({ session });
+
+        this.owner = boat.owner;
+        this.conversationId = savedConversation._id;
+        const reservation = await this.save({ session });
 
         await session.commitTransaction();
         resolve(reservation);

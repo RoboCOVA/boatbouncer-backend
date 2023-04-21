@@ -14,6 +14,7 @@ export const modelNames = {
   PAYMENT_INTENTS: 'PaymentIntents',
   TRANSACTIONS: 'Transactions',
   ADMINSTRATORS: 'Adminstrators',
+  SETTINGS: 'Settings',
 };
 
 export const modelNamesEnum = generateEnumArrayFromObject(modelNames);

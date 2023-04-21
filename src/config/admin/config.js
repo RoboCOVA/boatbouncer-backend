@@ -6,6 +6,8 @@ import { OfferResource } from './resources/offers';
 import { UsersResource } from './resources/users';
 import { BoatsResource } from './resources/boats';
 import { BookingResource } from './resources/bookings';
+import { SettingsResource } from './resources/settings';
+import { ConversationsResource } from './resources/conversations';
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
@@ -18,6 +20,8 @@ export const adminJs = new AdminJS({
     UsersResource,
     BoatsResource,
     BookingResource,
+    SettingsResource,
+    ConversationsResource,
   ],
   branding: {
     companyName: 'Boat Bouncer',

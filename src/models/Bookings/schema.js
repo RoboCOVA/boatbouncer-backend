@@ -19,6 +19,11 @@ const bookingSchema = new mongoose.Schema(
     renterPrice: { type: Number },
     offerId: { type: Types.ObjectId, ref: modelNames.OFFERS },
     status: { type: String, enum: bookingStatusEnum },
+    conversationId: {
+      type: Types.ObjectId,
+      ref: modelNames.CONVERSATIONS,
+      required: true,
+    },
   },
   { timestamps: true }
 );
