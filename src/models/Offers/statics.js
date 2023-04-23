@@ -1,3 +1,4 @@
+import { startSession } from 'mongoose';
 import { bookingStatus, offerStatus } from '../../utils/constants';
 import { modelNames } from '../constants';
 import {
@@ -5,7 +6,10 @@ import {
   offerNotFound,
   offerUpdateFailed,
 } from './errors';
-import { reservationNotFound } from '../Bookings/errors';
+import {
+  reservationNotFound,
+  reservationUpdateFailed,
+} from '../Bookings/errors';
 import { userNotFound } from '../Users/errors';
 
 export async function updateOffer({ offerId, userId, updateObject }) {
@@ -33,37 +37,61 @@ export async function updateOffer({ offerId, userId, updateObject }) {
   return updatedOffer;
 }
 
-// Add session
 export async function acceptOffer({ offerId, userId }) {
-  const Users = this.model(modelNames.USERS);
+  const session = await startSession();
+  return new Promise(async (resolve, reject) => {
+    try {
+      await session.withTransaction(async () => {
+        const Users = this.model(modelNames.USERS);
+        const Bookings = this.model(modelNames.BOOKINGS);
 
-  /** @EXISTING_CHECK */
-  const user = await Users.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+        /** @EXISTING_CHECK */
+        const user = await Users.findOne({ _id: userId });
+        if (!user) throw userNotFound;
 
-  const matchQuery = {
-    _id: offerId,
-    renter: userId,
-    status: {
-      $nin: [
-        offerStatus.CANCELLED,
-        offerStatus.COMPLETED,
-        offerStatus.PROCESSING,
-      ],
-    },
-  };
-  const offer = await this.findOne(matchQuery);
-  if (!offer) throw offerNotFound;
+        const matchQuery = {
+          _id: offerId,
+          renter: userId,
+          status: {
+            $nin: [
+              offerStatus.CANCELLED,
+              offerStatus.COMPLETED,
+              offerStatus.PROCESSING,
+            ],
+          },
+        };
+        const offer = await this.findOne(matchQuery);
+        if (!offer) throw offerNotFound;
 
-  const updateOfferStatus = await this.findOneAndUpdate(
-    matchQuery,
-    {
-      status: offerStatus.PROCESSING,
-    },
-    { new: true }
-  );
+        const updateOfferStatus = await this.findOneAndUpdate(
+          matchQuery,
+          {
+            status: offerStatus.PROCESSING,
+          },
+          { new: true }
+        ).session(session);
 
-  if (!updateOfferStatus) throw offerUpdateFailed;
+        if (!updateOfferStatus) throw offerUpdateFailed;
 
-  return updateOfferStatus;
+        const updateBooking = await Bookings.findOneAndUpdate(
+          { _id: updateOfferStatus.bookId },
+          {
+            $set: {
+              'duration.start': updateOfferStatus.departureDate,
+              'duration.end': updateOfferStatus.returnDate,
+            },
+          }
+        ).session(session);
+
+        if (updateBooking) throw reservationUpdateFailed;
+
+        await session.commitTransaction();
+        resolve(updateOfferStatus);
+      });
+    } catch (error) {
+      reject(error);
+    } finally {
+      await session.endSession();
+    }
+  });
 }

@@ -121,3 +121,24 @@ export async function getBooking({ bookId, userId, isRenter }) {
   const booking = await this.findOne(matchQuery).populate('offerId');
   return booking;
 }
+
+export async function checkAvailability({ boatId, start, end }) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    throw new Error(
+      'Invalid date format. Please provide dates in the format: yyyy-mm-dd'
+    );
+  }
+
+  const bookings = await this.find({
+    boatId,
+    status: { $nin: [bookingStatus.CANCELLED] },
+    'duration.startTime': { $gte: startDate },
+    'duration.endTime': { $lte: endDate },
+  });
+
+  if (bookings?.length) return false;
+  return true;
+}

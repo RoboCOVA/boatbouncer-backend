@@ -1,7 +1,12 @@
 import { startSession } from 'mongoose';
 import compareAsc from 'date-fns/compareAsc';
 import { modelNames } from '../constants';
-import { boatNotFound, invalidDateRange, invalidOperaton } from './errors';
+import {
+  boatNotFound,
+  bookingNotAvailable,
+  invalidDateRange,
+  invalidOperaton,
+} from './errors';
 import { userNotFound } from '../Users/errors';
 
 export async function createBooking() {
@@ -25,6 +30,12 @@ export async function createBooking() {
         const boat = await Boats.findOne({ _id: boatId });
         if (!boat) throw boatNotFound;
 
+        const isAvailable = await this.constructor.checkAvailability({
+          boatId,
+          start,
+          end,
+        });
+        if (!isAvailable) throw bookingNotAvailable;
         /** Check if the provided user exists */
         const user = await Users.findOne({ _id: renter });
         if (!user) throw userNotFound;

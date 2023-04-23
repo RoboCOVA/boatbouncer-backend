@@ -46,3 +46,8 @@ export const invalidDateRange = new APIError(
   'Date Range is Invalid!',
   httpStatus.BAD_REQUEST
 );
+
+export const bookingNotAvailable = new APIError(
+  'Booking not available with this range!',
+  httpStatus.BAD_REQUEST
+);
