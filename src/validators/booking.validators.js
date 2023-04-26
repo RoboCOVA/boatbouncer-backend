@@ -1,6 +1,7 @@
-import { body, param } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import { pricingType } from '../utils/constants';
 import { customDateValidator } from '../utils';
+import defaultValidators from './default.validator';
 
 export const createBookingValidator = () => [
   body('boatId').isMongoId().withMessage('Valid Boat id is required'),
@@ -21,10 +22,12 @@ export const cancelBookingValidator = () => [
 ];
 
 export const getBookingsValidator = () => [
-  body('isRenter').isBoolean().optional(),
+  query('isRenter').isBoolean().optional(),
+  defaultValidators.pageNo,
+  defaultValidators.size,
 ];
 
 export const getBookingValidator = () => [
   param('bookId').isMongoId().withMessage('Valid Book id is required'),
-  body('isRenter').isBoolean().optional(),
+  query('isRenter').isBoolean().optional(),
 ];

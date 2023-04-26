@@ -58,7 +58,7 @@ export const cancelBookingController = async (req, res, next) => {
 export const getBookingsController = async (req, res, next) => {
   try {
     const userId = req?.user?._id || ' ';
-    const { isRenter } = req.body;
+    const { isRenter } = req.query;
 
     const bookings = await Bookings.getBookings({
       userId,
@@ -80,7 +80,7 @@ export const getBookingController = async (req, res, next) => {
   try {
     const userId = req?.user?._id || ' ';
     const { bookId } = req.params;
-    const { isRenter } = req.body;
+    const { isRenter } = req.query;
 
     const bookings = await Bookings.getBooking({
       bookId,
