@@ -3,6 +3,7 @@ import {
   attachPaymentMethodController,
   createStripeAccountController,
   createUserController,
+  getPaymentMethodController,
   loginController,
   sendSmsController,
   updateUserController,
@@ -61,6 +62,6 @@ router.post(
   attachPaymentMethodController
 );
 
-router.get('/getMethods', authenticateJwt, attachPaymentMethodController);
+router.get('/getMethods', authenticateJwt, getPaymentMethodController);
 
 export default router;
