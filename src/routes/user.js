@@ -55,6 +55,7 @@ router.post('/stripAccount', authenticateJwt, createStripeAccountController);
 
 router.post(
   '/attachMethod/:methodId',
+  authenticateJwt,
   attachPaymentMethodValidator(),
   parseValidationResult,
   attachPaymentMethodController
