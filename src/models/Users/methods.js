@@ -104,7 +104,7 @@ export async function createNewUser() {
 export function clean() {
   const userObj = this.toObject({ virtuals: true });
   delete userObj.password;
-  delete userObj.stripeCustomerId;
+  // delete userObj.stripeCustomerId;
   // Delete other sensetive fields like this
   return userObj;
 }
