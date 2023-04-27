@@ -206,7 +206,7 @@ export async function attachPaymentMethod({ userId, methodId }) {
   if (!user) throw userNotFound;
   if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
 
-  const attachedMethod = await stripe.attachPaymenMethod(methodId, {
+  const attachedMethod = await stripe.paymentMethods.attach(methodId, {
     customer: user?.stripeCustomerId,
   });
 
