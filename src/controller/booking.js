@@ -36,7 +36,7 @@ export const cancelBookingController = async (req, res, next) => {
   try {
     const userId = req?.user?._id || ' ';
     const { bookId } = req.params;
-    const { isRenter } = req.body;
+    const { isRenter } = req.query;
 
     const cancelledBooking = await Bookings.cancelBooking({
       bookId,

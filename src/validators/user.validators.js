@@ -76,3 +76,7 @@ export const loginValidator = () => [
 export const createStripeAccountValidator = () => [
   param('userId').isMongoId().withMessage('User Id is required'),
 ];
+
+export const attachPaymentMethodValidator = () => [
+  param('methodId').isString().withMessage('Payment Method Id is required'),
+];

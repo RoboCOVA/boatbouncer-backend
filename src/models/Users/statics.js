@@ -18,6 +18,7 @@ import {
   userAlreadyVerified,
   userNotFound,
   doesntMatchError,
+  existingStripCustomerNotFound,
 } from './errors';
 import { stripeSecretKey } from '../../config/environments';
 
@@ -198,4 +199,16 @@ export async function createStripeAccount({ userId, country = 'US' }) {
       await session.endSession();
     }
   });
+}
+
+export async function attachPaymentMethod({ userId, methodId }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+  if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
+
+  const attachedMethod = await stripe.attachPaymenMethod(methodId, {
+    customer: user?.stripeCustomerId,
+  });
+
+  return attachedMethod;
 }

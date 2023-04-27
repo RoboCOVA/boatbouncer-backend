@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  attachPaymentMethodController,
   createStripeAccountController,
   createUserController,
   loginController,
@@ -9,6 +10,7 @@ import {
 } from '../controller/user';
 import parseValidationResult from '../validators/errors.parser';
 import {
+  attachPaymentMethodValidator,
   createUserValidator,
   loginValidator,
   sendSmsValidator,
@@ -50,5 +52,12 @@ router.put(
 router.post('/login', loginValidator(), parseValidationResult, loginController);
 
 router.post('/stripAccount', authenticateJwt, createStripeAccountController);
+
+router.post(
+  '/attachMethod/:methodId',
+  attachPaymentMethodValidator(),
+  parseValidationResult,
+  attachPaymentMethodController
+);
 
 export default router;

@@ -128,3 +128,14 @@ export const createStripeAccountController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const attachPaymentMethodController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id;
+    const { methodId } = req.params;
+    const createAccount = await Users.createStripeAccount({ userId, methodId });
+    res.send(createAccount);
+  } catch (error) {
+    next(error);
+  }
+};

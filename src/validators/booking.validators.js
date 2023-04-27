@@ -18,7 +18,7 @@ export const createBookingValidator = () => [
 
 export const cancelBookingValidator = () => [
   param('bookId').isMongoId().withMessage('Valid Book id is required'),
-  body('isRenter').isBoolean().optional(),
+  query('isRenter').isBoolean().optional(),
 ];
 
 export const getBookingsValidator = () => [
