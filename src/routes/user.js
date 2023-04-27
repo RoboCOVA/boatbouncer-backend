@@ -61,4 +61,6 @@ router.post(
   attachPaymentMethodController
 );
 
+router.get('/getMethods', authenticateJwt, attachPaymentMethodController);
+
 export default router;

@@ -133,7 +133,17 @@ export const attachPaymentMethodController = async (req, res, next) => {
   try {
     const userId = req?.user?._id;
     const { methodId } = req.params;
-    const createAccount = await Users.createStripeAccount({ userId, methodId });
+    const createAccount = await Users.attachPaymentMethod({ userId, methodId });
+    res.send(createAccount);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPaymentMethodController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id;
+    const createAccount = await Users.getPaymentMethod({ userId });
     res.send(createAccount);
   } catch (error) {
     next(error);

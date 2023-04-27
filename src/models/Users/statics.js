@@ -212,3 +212,17 @@ export async function attachPaymentMethod({ userId, methodId }) {
 
   return attachedMethod;
 }
+export async function getPaymentMethod({ userId }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+  if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
+
+  const customerPaymentMethods = await stripe.customers.listPaymentMethods(
+    user?.stripeCustomerId,
+    {
+      type: 'card',
+    }
+  );
+
+  return customerPaymentMethods;
+}
