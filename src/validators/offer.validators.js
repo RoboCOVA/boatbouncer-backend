@@ -30,3 +30,7 @@ export const updateOffervalidator = () => [
 export const acceptOfferValidator = () => [
   param('offerId').isMongoId().withMessage('Valid Offer Id is required'),
 ];
+
+export const getOfferValidator = () => [
+  param('offerId').isMongoId().withMessage('Valid Offer Id is required'),
+];

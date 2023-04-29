@@ -100,6 +100,9 @@ export async function getBookings({ userId, isRenter }) {
         '-chargesEnabled',
       ],
     },
+    {
+      path: 'offerId',
+    },
   ]);
   const total = await this.count(matchQuery);
   return { data: bookings, total };

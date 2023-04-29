@@ -70,3 +70,19 @@ export const acceptOfferController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getOfferController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id || '';
+    const { offerId } = req.params;
+
+    const offer = await Offers.getOffer({
+      userId,
+      offerId,
+    });
+
+    res.send(offer);
+  } catch (error) {
+    next(error);
+  }
+};

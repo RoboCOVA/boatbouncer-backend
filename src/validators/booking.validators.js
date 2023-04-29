@@ -18,16 +18,25 @@ export const createBookingValidator = () => [
 
 export const cancelBookingValidator = () => [
   param('bookId').isMongoId().withMessage('Valid Book id is required'),
-  query('isRenter').isBoolean().optional(),
+  query('isRenter')
+    .isBoolean()
+    .custom((value) => value === 'true')
+    .optional(),
 ];
 
 export const getBookingsValidator = () => [
-  query('isRenter').isBoolean().optional(),
+  query('isRenter')
+    .isBoolean()
+    .custom((value) => value === 'true')
+    .optional(),
   defaultValidators.pageNo,
   defaultValidators.size,
 ];
 
 export const getBookingValidator = () => [
   param('bookId').isMongoId().withMessage('Valid Book id is required'),
-  query('isRenter').isBoolean().optional(),
+  query('isRenter')
+    .isBoolean()
+    .custom((value) => value === 'true')
+    .optional(),
 ];

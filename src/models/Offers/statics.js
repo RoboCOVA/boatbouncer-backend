@@ -94,3 +94,20 @@ export async function acceptOffer({ offerId, userId }) {
     }
   });
 }
+
+export async function getOffer({ offerId, userId }) {
+  const Users = this.model(modelNames.USERS);
+
+  /** @EXISTING_CHECK */
+  const user = await Users.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+
+  const matchQuery = {
+    _id: offerId,
+    // createdBy: userId,
+  };
+  const offer = await this.findOne(matchQuery);
+  if (!offer) throw offerNotFound;
+
+  return offer;
+}
