@@ -2,7 +2,7 @@ import express from 'express';
 import {
   acceptOfferValidator,
   createOffervalidator,
-  udpateOffervalidator,
+  updateOffervalidator,
 } from '../validators/offer.validators';
 import parseValidationResult from '../validators/errors.parser';
 import {
@@ -22,7 +22,7 @@ router.post(
 
 router.put(
   '/:offerId',
-  udpateOffervalidator(),
+  updateOffervalidator(),
   parseValidationResult,
   updateOfferController
 );

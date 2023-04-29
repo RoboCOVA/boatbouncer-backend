@@ -17,7 +17,7 @@ export const createOffervalidator = () => [
     .withMessage('Start time is required'),
 ];
 
-export const udpateOffervalidator = () => [
+export const updateOffervalidator = () => [
   param('offerId').isMongoId().withMessage('Valid Book id is required'),
   body('boatPrice').isNumeric().optional(),
   body('captainPrice').isNumeric().optional(),
