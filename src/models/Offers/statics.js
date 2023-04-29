@@ -51,7 +51,6 @@ export async function acceptOffer({ offerId, userId }) {
 
         const matchQuery = {
           _id: offerId,
-          renter: userId,
           status: {
             $nin: [
               offerStatus.CANCELLED,
@@ -74,7 +73,7 @@ export async function acceptOffer({ offerId, userId }) {
         if (!updateOfferStatus) throw offerUpdateFailed;
 
         const updateBooking = await Bookings.findOneAndUpdate(
-          { _id: updateOfferStatus.bookId },
+          { _id: updateOfferStatus.bookId, renter: userId },
           {
             $set: {
               'duration.start': updateOfferStatus.departureDate,
@@ -83,7 +82,7 @@ export async function acceptOffer({ offerId, userId }) {
           }
         ).session(session);
 
-        if (updateBooking) throw reservationUpdateFailed;
+        if (!updateBooking) throw reservationUpdateFailed;
 
         await session.commitTransaction();
         resolve(updateOfferStatus);

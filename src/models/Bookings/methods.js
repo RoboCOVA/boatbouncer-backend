@@ -30,11 +30,15 @@ export async function createBooking() {
         const boat = await Boats.findOne({ _id: boatId });
         if (!boat) throw boatNotFound;
 
+        // If not captained remove captain price
+        if (!boat?.captained && this.captainPrice) delete this.captainPrice;
+
         const isAvailable = await this.constructor.checkAvailability({
           boatId,
           start,
           end,
         });
+
         if (!isAvailable) throw bookingNotAvailable;
         /** Check if the provided user exists */
         const user = await Users.findOne({ _id: renter });

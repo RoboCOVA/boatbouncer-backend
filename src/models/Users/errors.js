@@ -23,7 +23,7 @@ export const emailAlreadyUsed = new APIError(
   true
 );
 export const phoneNumberAlreadyUsed = new APIError(
-  'Email is already used.!',
+  'Phone number is already used.!',
   httpStatus.CONFLICT,
   true
 );

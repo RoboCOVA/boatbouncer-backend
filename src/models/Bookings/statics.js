@@ -135,8 +135,8 @@ export async function checkAvailability({ boatId, start, end }) {
   const bookings = await this.find({
     boatId,
     status: { $nin: [bookingStatus.CANCELLED] },
-    'duration.startTime': { $gte: startDate },
-    'duration.endTime': { $lte: endDate },
+    'duration.start': { $gte: startDate },
+    'duration.end': { $lte: endDate },
   });
 
   if (bookings?.length) return false;

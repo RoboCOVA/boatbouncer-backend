@@ -9,13 +9,15 @@ import { bookingStatus } from '../utils/constants';
  */
 export const createBookingController = async (req, res, next) => {
   try {
-    const { boatId, type, duration, renter, renterPrice } = req.body;
+    const { boatId, type, duration, renterPrice, captainPrice } = req.body;
+    const id = req?.user?._id;
     const booking = new Bookings({
       boatId,
       type,
       duration,
-      renter,
+      renter: id,
       renterPrice,
+      captainPrice,
       status: bookingStatus.PENDING,
     });
 

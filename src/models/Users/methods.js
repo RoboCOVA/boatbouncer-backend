@@ -5,7 +5,11 @@ import APIError from '../../errors/APIError';
 import { generateHashedPassword } from '../../utils';
 import { modelNames } from '../constants';
 import { stripeSecretKey } from '../../config/environments';
-import { existingStripCustomerNotFound, updateFailed } from './errors';
+import {
+  existingStripCustomerNotFound,
+  phoneNumberAlreadyUsed,
+  updateFailed,
+} from './errors';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -37,11 +41,16 @@ export async function createNewUser() {
   return new Promise(async (resolve, reject) => {
     try {
       await session.withTransaction(async () => {
-        const { password, email } = this;
-        const existingEmail = await await this.model(modelNames.USERS).findOne({
+        const { password, email, phoneNumber } = this;
+        const existingEmail = await this.model(modelNames.USERS).findOne({
           email,
         });
         if (existingEmail) throw userEmailExists;
+
+        const existingPhoneNumber = await this.model(modelNames.USERS).findOne({
+          phoneNumber,
+        });
+        if (existingPhoneNumber) throw phoneNumberAlreadyUsed;
 
         const hashedPassword = await generateHashedPassword(password);
 

@@ -36,6 +36,7 @@ export const createBoatValidator = () => [
     .isIn(pricingTypeEnum)
     .withMessage('Pricing type is required'),
   body('pricing.*.min').isNumeric().withMessage('Pricing Min is required'),
+  body('captained').isBoolean().withMessage('Captained is required'),
 ];
 
 export const getBoatValidator = () => [

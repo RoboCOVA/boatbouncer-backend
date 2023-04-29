@@ -12,8 +12,8 @@ export const createBookingValidator = () => [
   body('duration.end')
     .custom(customDateValidator)
     .withMessage('End time is required'),
-  body('renter').isMongoId().withMessage('Renter is required'),
   body('renterPrice').isNumeric().optional(),
+  body('captainPrice').isNumeric().optional(),
 ];
 
 export const cancelBookingValidator = () => [

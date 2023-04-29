@@ -4,6 +4,7 @@ import {
   bookOwnerNotFoundStatus,
   invalidAccess,
   invalidStatus,
+  offerDuplication,
 } from './errors';
 import {
   reservationNotFound,
@@ -11,14 +12,14 @@ import {
 } from '../Bookings/errors';
 import { bookingStatus } from '../../utils/constants';
 
-export async function createOffers(userId) {
+export async function createOffers() {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     const session = await startSession();
     const Bookings = this.model(modelNames.BOOKINGS);
     try {
       await session.withTransaction(async () => {
-        const { bookId } = this;
+        const { bookId, createdBy } = this;
 
         /** Check if the boat exists */
         const book = await Bookings.findOne({ _id: bookId });
@@ -31,7 +32,8 @@ export async function createOffers(userId) {
           throw invalidStatus;
 
         if (!book?.owner) throw bookOwnerNotFoundStatus;
-        if (!book.owner?.equals(userId)) throw invalidAccess;
+        if (!book.owner?.equals(createdBy)) throw invalidAccess;
+        if (book?.offerId) throw offerDuplication;
 
         const offer = await this.save({ session });
 

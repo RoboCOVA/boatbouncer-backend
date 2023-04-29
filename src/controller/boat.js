@@ -20,6 +20,7 @@ export const createBoatController = async (req, res, next) => {
       currency,
       features,
       pricing,
+      captained,
       securityAllowance,
     } = req.body;
 
@@ -46,6 +47,7 @@ export const createBoatController = async (req, res, next) => {
       pricing,
       securityAllowance,
       owner: userId,
+      captained,
     });
 
     const boat = await newBoat.createBoat();
@@ -72,7 +74,7 @@ export const getBoatListingController = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { pageNo, size } = req.query;
-    const boats = await Boats.getBoats({
+    const boats = await Boats.getBoatListings({
       pageNo,
       size,
       userId,

@@ -19,6 +19,19 @@ export async function getBoats({ pageNo, size, userId }) {
   return { data: boats, total };
 }
 
+export async function getBoatListings({ pageNo, size, userId }) {
+  const { skip, limit } = getPaginationValues(pageNo, size);
+  const query = {};
+  query.owner = userId;
+  const boats = await this.find(
+    query,
+    {},
+    { skip, limit, sort: { createdAt: -1 } }
+  );
+  const total = await this.count(query);
+  return { data: boats, total };
+}
+
 /**
  * It finds a boat by its id and returns it
  * @returns The boat object

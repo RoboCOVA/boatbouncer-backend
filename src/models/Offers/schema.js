@@ -6,7 +6,7 @@ const offerSchema = new mongoose.Schema(
   {
     bookId: { type: Types.ObjectId, ref: modelNames.BOOKINGS, required: true },
     boatPrice: { type: Number, required: true },
-    captainPrice: { type: Number, required: true },
+    captainPrice: { type: Number, min: 1 },
     paymentServiceFee: { type: Number, required: true },
     localTax: { type: Number, required: true },
     status: { type: String, enum: offerStatusEnum },

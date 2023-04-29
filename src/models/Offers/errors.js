@@ -47,3 +47,8 @@ export const invalidAccess = new APIError(
   'Only owner can create an offer',
   httpStatus.BAD_REQUEST
 );
+
+export const offerDuplication = new APIError(
+  'Offer Is Already Created',
+  httpStatus.BAD_REQUEST
+);

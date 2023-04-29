@@ -41,6 +41,7 @@ const boatSchema = new mongoose.Schema(
     features: { type: String, enum: boatFeaturesEnum },
     pricing: [pricingSchema],
     securityAllowance: { type: String, required: true },
+    captained: { type: Boolean, required: true },
   },
   { timestamps: true }
 );

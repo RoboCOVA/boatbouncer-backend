@@ -4,7 +4,7 @@ import { customDateValidator } from '../utils';
 export const createOffervalidator = () => [
   body('bookId').isMongoId().withMessage('Valid Book id is required'),
   body('boatPrice').isNumeric().withMessage('Boat Price is required'),
-  body('captainPrice').isNumeric().withMessage('Captain Price is required'),
+  body('captainPrice').isNumeric().optional(),
   body('paymentServiceFee')
     .isNumeric()
     .withMessage('Payment Service Fee is required'),
