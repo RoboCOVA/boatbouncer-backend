@@ -22,6 +22,8 @@ const envSchema = Joi.object({
   COOKIE_NAME: Joi.string().required(),
   COOKIE_PASSWORD: Joi.string().required(),
   CRYPTO_SECRET: Joi.string().required(),
+  ADMIN_PASSWORD: Joi.string().required(),
+  ADMIN_EMAIL: Joi.string().email().required(),
 })
   .unknown()
   .required();
@@ -48,3 +50,5 @@ export const endpointSecret = value.WEBHOOK_SECRET;
 export const cookieName = value.COOKIE_NAME;
 export const cookiePassword = value.COOKIE_PASSWORD;
 export const cryptoSecret = value.CRYPTO_SECRET;
+export const adminPass = value.ADMIN_PASSWORD;
+export const adminEmail = value.ADMIN_EMAIL;

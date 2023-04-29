@@ -44,7 +44,7 @@ paymentIntentSchema.post('findOneAndUpdate', async function callback(doc) {
       { status: offerStatus.COMPLETED }
     );
     await Bookings.findOneAndUpdate(
-      { offerId: offer.offerId },
+      { offerId: offer._id },
       {
         status: bookingStatus.COMPLETED,
       }
@@ -56,7 +56,7 @@ paymentIntentSchema.post('findOneAndUpdate', async function callback(doc) {
     );
 
     await Bookings.findOneAndUpdate(
-      { offerId: offer.offerId },
+      { offerId: offer._id },
       {
         status: bookingStatus.CANCELLED,
       }

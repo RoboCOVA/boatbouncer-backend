@@ -4,8 +4,17 @@ import { startSession } from 'mongoose';
 import { modelNames } from '../constants';
 import { userNotFound } from '../Users/errors';
 import { stripeSecretKey } from '../../config/environments';
-import { ownerNotFound, settingDocNotFound, userCardExpired } from './errors';
-import { invalidOfferStatus, offerNotFound } from '../Offers/errors';
+import {
+  ownerAccountIdNotFound,
+  ownerNotFound,
+  settingDocNotFound,
+  userCardExpired,
+} from './errors';
+import {
+  invalidOfferStatus,
+  offerCompleted,
+  offerNotFound,
+} from '../Offers/errors';
 import { offerStatus, intentStatus } from '../../utils/constants';
 import { decryptData } from '../../utils';
 
@@ -68,17 +77,19 @@ export async function createPaymentIntent() {
       const setting = await Settings.findOne();
       if (!setting?.platformCut) throw settingDocNotFound;
 
+      if (!offer?.bookId?.owner?.stripeAccountId) throw ownerAccountIdNotFound;
+
       if (
         !offer?.bookId?.boatId ||
         !offer?.bookId?.renter ||
         !offer?.bookId?.owner?.stripeAccountId ||
         !offer?.boatPrice ||
-        !offer?.captainPrice ||
         !offer?.paymentServiceFee ||
         !offer?.localTax
       )
         throw offerNotFound;
 
+      if (offer.status === offerStatus.COMPLETED) throw offerCompleted;
       if (offer.status !== offerStatus.PROCESSING) throw invalidOfferStatus;
 
       const { bookId } = offer;
@@ -109,10 +120,10 @@ export async function createPaymentIntent() {
         await cancelPaymentIntent(existingIntent?.intentId);
       }
 
-      const boatPrice = +offer.boatPrice;
-      const captainPrice = +offer.captainPrice;
-      const paymentServiceFee = +offer.paymentServiceFee;
-      const localTax = +offer.localTax;
+      const boatPrice = +offer.boatPrice || 0;
+      const captainPrice = offer?.captainPrice ? +offer.captainPrice : 0;
+      const paymentServiceFee = +offer.paymentServiceFee || 0;
+      const localTax = +offer.localTax || 0;
       const totalAmont =
         boatPrice + captainPrice + paymentServiceFee + localTax;
       const platformFee = (totalAmont * +setting.platformCut) / 100;

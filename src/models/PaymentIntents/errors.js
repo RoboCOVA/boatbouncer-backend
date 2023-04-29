@@ -45,3 +45,8 @@ export const settingDocNotFound = new APIError(
   'Setting not found',
   httpStatus.NOT_FOUND
 );
+
+export const ownerAccountIdNotFound = new APIError(
+  "Owner's account ID not found",
+  httpStatus.NOT_FOUND
+);

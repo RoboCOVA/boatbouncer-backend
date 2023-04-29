@@ -52,3 +52,8 @@ export const offerDuplication = new APIError(
   'Offer Is Already Created',
   httpStatus.BAD_REQUEST
 );
+
+export const offerCompleted = new APIError(
+  'Offer is already completed',
+  httpStatus.BAD_REQUEST
+);
