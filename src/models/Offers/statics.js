@@ -28,7 +28,7 @@ export async function updateOffer({ offerId, userId, updateObject }) {
   )
     throw invalidReservatoinStatus;
 
-  const updatedOffer = await this.findOne(matchQuery, updateObject, {
+  const updatedOffer = await this.findOneAndUpdate(matchQuery, updateObject, {
     new: true,
   });
 
