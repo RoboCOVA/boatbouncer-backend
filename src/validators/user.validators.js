@@ -80,3 +80,18 @@ export const createStripeAccountValidator = () => [
 export const attachPaymentMethodValidator = () => [
   param('methodId').isString().withMessage('Payment Method Id is required'),
 ];
+
+export const detachMethodValidator = () => [
+  param('methodId').isString().withMessage('Payment Method Id is required'),
+];
+
+export const updateMethodValidator = () => [
+  param('methodId').isString().withMessage('Payment Method Id is required'),
+  body('metadata').isString().optional(),
+  body('billingDetails.address').isString().withMessage(),
+  body('billingDetails.email').isString().withMessage(),
+  body('billingDetails.name').isString().withMessage(),
+  body('billingDetails.phone').isString().withMessage(),
+  body('card.exp_month').isInt().withMessage(),
+  body('card.exp_year').isInt().withMessage(),
+];

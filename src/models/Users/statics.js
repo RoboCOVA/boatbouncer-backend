@@ -212,6 +212,7 @@ export async function attachPaymentMethod({ userId, methodId }) {
 
   return attachedMethod;
 }
+
 export async function getPaymentMethod({ userId }) {
   const user = await this.findOne({ _id: userId });
   if (!user) throw userNotFound;
@@ -225,4 +226,29 @@ export async function getPaymentMethod({ userId }) {
   );
 
   return customerPaymentMethods;
+}
+
+export async function detachPaymentMethod({ userId, methodId }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+  if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
+
+  const detached = await stripe.paymentMethods.detach(methodId);
+  return detached;
+}
+
+export async function updatePaymentMethod({ userId, methodId, updateObject }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+  if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
+
+  const data = {};
+
+  if (updateObject?.metadata) data.metadata = updateObject?.metadata;
+  if (updateObject?.billing_details)
+    data.billing_details = updateObject?.billing_details;
+  if (updateObject?.card) data.card = updateObject?.card;
+
+  const updatedMethod = await stripe.paymentMethods.update(methodId, data);
+  return updatedMethod;
 }

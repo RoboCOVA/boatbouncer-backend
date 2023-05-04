@@ -149,3 +149,37 @@ export const getPaymentMethodController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const detachMethodController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id;
+    const { methodId } = req.params;
+    const detached = await Users.detachPaymentMethod({ userId, methodId });
+    res.send(detached);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateMethodController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id;
+    const { methodId } = req.params;
+    const { metadata, billingDetails, card } = req.body;
+
+    const updateObject = {};
+    if (metadata) updateObject.metadata = metadata;
+    if (billingDetails) updateObject.billingDetails = billingDetails;
+    if (card) updateObject.card = card;
+
+    const updatedMethod = await Users.updatePaymentMethod({
+      userId,
+      methodId,
+      updateObject,
+    });
+
+    res.send(updatedMethod);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -3,9 +3,11 @@ import {
   attachPaymentMethodController,
   createStripeAccountController,
   createUserController,
+  detachMethodController,
   getPaymentMethodController,
   loginController,
   sendSmsController,
+  updateMethodController,
   updateUserController,
   verifyUserController,
 } from '../controller/user';
@@ -13,8 +15,10 @@ import parseValidationResult from '../validators/errors.parser';
 import {
   attachPaymentMethodValidator,
   createUserValidator,
+  detachMethodValidator,
   loginValidator,
   sendSmsValidator,
+  updateMethodValidator,
   updateUserValidator,
   verifyUserValidator,
 } from '../validators/user.validators';
@@ -63,5 +67,21 @@ router.post(
 );
 
 router.get('/getMethods', authenticateJwt, getPaymentMethodController);
+
+router.post(
+  '/detachMethod/:methodId',
+  authenticateJwt,
+  detachMethodValidator(),
+  parseValidationResult,
+  detachMethodController
+);
+
+router.post(
+  '/updateMethod/:methodId',
+  authenticateJwt,
+  updateMethodValidator(),
+  parseValidationResult,
+  updateMethodController
+);
 
 export default router;
