@@ -4,6 +4,7 @@ import {
   createStripeAccountController,
   createUserController,
   detachMethodController,
+  getCurrentUserController,
   getPaymentMethodController,
   loginController,
   sendSmsController,
@@ -83,5 +84,7 @@ router.post(
   parseValidationResult,
   updateMethodController
 );
+
+router.get('/current', authenticateJwt, getCurrentUserController);
 
 export default router;

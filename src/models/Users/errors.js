@@ -44,3 +44,14 @@ export const existingStripCustomerNotFound = new APIError(
   'Existing stripe customer not found!',
   httpStatus.NOT_FOUND
 );
+
+export const StripAccIdNotFound = new APIError(
+  'Stripe account ID not found!',
+  httpStatus.NOT_FOUND
+);
+
+export const chargeEnableUpdateFailed = new APIError(
+  'Charges Enabled Update operation failed!',
+  httpStatus.BAD_REQUEST,
+  true
+);

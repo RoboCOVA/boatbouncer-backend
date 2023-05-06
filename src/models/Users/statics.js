@@ -6,6 +6,7 @@ import { identityToolkit } from '../../config/googleApis';
 import APIError from '../../errors/APIError';
 import {
   comparePassword,
+  decryptData,
   encryptData,
   generateHashedPassword,
   generateJwtToken,
@@ -19,6 +20,7 @@ import {
   userNotFound,
   doesntMatchError,
   existingStripCustomerNotFound,
+  chargeEnableUpdateFailed,
 } from './errors';
 import { stripeSecretKey } from '../../config/environments';
 
@@ -147,6 +149,13 @@ export async function authenticateUser(email, password) {
   throw doesntMatchError;
 }
 
+export async function getCurrentUser({ userId }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+  const clean = await user.clean();
+  return clean;
+}
+
 export async function createStripeAccount({ userId, country = 'US' }) {
   const session = await startSession();
 
@@ -156,8 +165,25 @@ export async function createStripeAccount({ userId, country = 'US' }) {
         const user = await this.findOne({ _id: userId });
         if (!user?.email) throw userNotFound;
         const { email } = user;
-        if (user?.stripeAccountId)
+        if (user?.stripeAccountId && user?.chargesEnabled) {
           resolve('User already have account registered');
+
+          const decryptedId = decryptData(user?.stripeAccountId);
+
+          const savedAccount = await stripe.accounts.retrieve(decryptedId);
+
+          if (savedAccount) {
+            const allowRecivePayment = await this.findOneAndUpdate(
+              { _id: userId },
+              { chargesEnabled: true }
+            );
+
+            if (!allowRecivePayment) throw chargeEnableUpdateFailed;
+
+            if (savedAccount?.charges_enabled)
+              resolve('User already have account registered');
+          }
+        }
 
         const account = await stripe.accounts.create({
           type: 'express',

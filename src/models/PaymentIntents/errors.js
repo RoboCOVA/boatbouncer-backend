@@ -50,3 +50,8 @@ export const ownerAccountIdNotFound = new APIError(
   "Owner's account ID not found",
   httpStatus.NOT_FOUND
 );
+
+export const unableToAcceptPayment = new APIError(
+  'User can not accept payment. Please provide all the neccessary information for Stripe Connect',
+  httpStatus.BAD_REQUEST
+);

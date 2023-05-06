@@ -8,6 +8,7 @@ import {
   ownerAccountIdNotFound,
   ownerNotFound,
   settingDocNotFound,
+  unableToAcceptPayment,
   userCardExpired,
 } from './errors';
 import {
@@ -129,6 +130,10 @@ export async function createPaymentIntent() {
       const platformFee = (totalAmont * +setting.platformCut) / 100;
 
       const accountId = decryptData(offer?.bookId?.owner?.stripeAccountId);
+
+      const savedAccount = await stripe.accounts.retrieve(accountId);
+
+      if (!savedAccount?.charges_enabled) throw unableToAcceptPayment;
 
       paymentIntent = await stripe.paymentIntents.create({
         customer,

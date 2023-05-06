@@ -183,3 +183,13 @@ export const updateMethodController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCurrentUserController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id;
+    const createAccount = await Users.getCurrentUser({ userId });
+    res.send(createAccount);
+  } catch (error) {
+    next(error);
+  }
+};
