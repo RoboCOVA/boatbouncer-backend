@@ -24,6 +24,8 @@ const envSchema = Joi.object({
   CRYPTO_SECRET: Joi.string().required(),
   ADMIN_PASSWORD: Joi.string().required(),
   ADMIN_EMAIL: Joi.string().email().required(),
+  STRIPE_SUCCESS_URL: Joi.string().required(),
+  STRIPE_FAILED_URL: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -52,3 +54,5 @@ export const cookiePassword = value.COOKIE_PASSWORD;
 export const cryptoSecret = value.CRYPTO_SECRET;
 export const adminPass = value.ADMIN_PASSWORD;
 export const adminEmail = value.ADMIN_EMAIL;
+export const stripeSuccessUrl = value.STRIPE_SUCCESS_URL;
+export const stripeFailedUrl = value.STRIPE_FAILED_URL;

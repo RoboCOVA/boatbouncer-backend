@@ -22,7 +22,11 @@ import {
   existingStripCustomerNotFound,
   chargeEnableUpdateFailed,
 } from './errors';
-import { stripeSecretKey } from '../../config/environments';
+import {
+  stripeFailedUrl,
+  stripeSecretKey,
+  stripeSuccessUrl,
+} from '../../config/environments';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -219,8 +223,8 @@ export async function createStripeAccount({ userId, country = 'US' }) {
 
         const onboarding = await stripe.accountLinks.create({
           account: account.id,
-          refresh_url: 'http://localhost:5000/api/boatbouncer/test/failed',
-          return_url: 'http://localhost:5000/api/boatbouncer/test',
+          refresh_url: stripeFailedUrl,
+          return_url: stripeSuccessUrl,
           type: 'account_onboarding',
         });
 
