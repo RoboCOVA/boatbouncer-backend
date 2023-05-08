@@ -118,7 +118,20 @@ export async function createPaymentIntent() {
       });
 
       if (existingIntent) {
-        await cancelPaymentIntent(existingIntent?.intentId);
+        const currentIntent = await stripe.paymentIntents.retrieve(
+          existingIntent?.intentId
+        );
+        if (currentIntent?.status === 'canceled') {
+          await this.findOneAndUpdate(
+            { _id: existingIntent?._id },
+            { status: intentStatus.CANCELLED }
+          ).session(session);
+        } else if (currentIntent?.status === 'succeeded') {
+          await this.findOneAndUpdate(
+            { _id: existingIntent?._id },
+            { status: intentStatus.COMPLETED }
+          ).session(session);
+        } else await cancelPaymentIntent(existingIntent?.intentId);
       }
 
       const boatPrice = +offer.boatPrice || 0;
