@@ -177,9 +177,7 @@ export async function createStripeAccount({ userId, country = 'US' }) {
         const user = await this.findOne({ _id: userId });
         if (!user?.email) throw userNotFound;
         const { email } = user;
-        if (user?.stripeAccountId && user?.chargesEnabled) {
-          resolve('User already have account registered');
-
+        if (user?.stripeAccountId) {
           const decryptedId = decryptData(user?.stripeAccountId);
 
           const savedAccount = await stripe.accounts.retrieve(decryptedId);
@@ -187,7 +185,7 @@ export async function createStripeAccount({ userId, country = 'US' }) {
           if (savedAccount) {
             const allowRecivePayment = await this.findOneAndUpdate(
               { _id: userId },
-              { chargesEnabled: true }
+              { chargesEnabled: savedAccount?.charges_enabled }
             );
 
             if (!allowRecivePayment) throw chargeEnableUpdateFailed;
