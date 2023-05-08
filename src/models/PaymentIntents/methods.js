@@ -122,15 +122,19 @@ export async function createPaymentIntent() {
           existingIntent?.intentId
         );
         if (currentIntent?.status === 'canceled') {
-          await this.findOneAndUpdate(
-            { _id: existingIntent?._id },
-            { status: intentStatus.CANCELLED }
-          ).session(session);
+          await this.model(modelNames.PAYMENT_INTENTS)
+            .findOneAndUpdate(
+              { _id: existingIntent?._id },
+              { status: intentStatus.CANCELLED }
+            )
+            .session(session);
         } else if (currentIntent?.status === 'succeeded') {
-          await this.findOneAndUpdate(
-            { _id: existingIntent?._id },
-            { status: intentStatus.COMPLETED }
-          ).session(session);
+          await this.model(modelNames.PAYMENT_INTENTS)
+            .findOneAndUpdate(
+              { _id: existingIntent?._id },
+              { status: intentStatus.COMPLETED }
+            )
+            .session(session);
         } else await cancelPaymentIntent(existingIntent?.intentId);
       }
 
