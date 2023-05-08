@@ -152,6 +152,14 @@ export async function authenticateUser(email, password) {
 export async function getCurrentUser({ userId }) {
   const user = await this.findOne({ _id: userId });
   if (!user) throw userNotFound;
+
+  if (user?.stripeAccountId) {
+    const decryptedId = decryptData(user?.stripeAccountId);
+    const accountId = await stripe.accounts.retrieve(decryptedId);
+    if (accountId?.charges_enabled) user.chargesEnabled = true;
+    else user.chargesEnabled = false;
+  } else user.chargesEnabled = false;
+
   const clean = await user.clean();
   return clean;
 }
