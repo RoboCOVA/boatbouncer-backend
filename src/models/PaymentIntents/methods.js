@@ -121,21 +121,23 @@ export async function createPaymentIntent() {
         const currentIntent = await stripe.paymentIntents.retrieve(
           existingIntent?.intentId
         );
-        if (currentIntent?.status === 'canceled') {
-          await this.model(modelNames.PAYMENT_INTENTS)
-            .findOneAndUpdate(
-              { _id: existingIntent?._id },
-              { status: intentStatus.CANCELLED }
-            )
-            .session(session);
-        } else if (currentIntent?.status === 'succeeded') {
-          await this.model(modelNames.PAYMENT_INTENTS)
-            .findOneAndUpdate(
-              { _id: existingIntent?._id },
-              { status: intentStatus.COMPLETED }
-            )
-            .session(session);
-        } else await cancelPaymentIntent(existingIntent?.intentId);
+        if (currentIntent) {
+          if (currentIntent?.status === 'canceled') {
+            await this.model(modelNames.PAYMENT_INTENTS)
+              .findOneAndUpdate(
+                { _id: existingIntent?._id },
+                { status: intentStatus.CANCELLED }
+              )
+              .session(session);
+          } else if (currentIntent?.status === 'succeeded') {
+            await this.model(modelNames.PAYMENT_INTENTS)
+              .findOneAndUpdate(
+                { _id: existingIntent?._id },
+                { status: intentStatus.COMPLETED }
+              )
+              .session(session);
+          } else await cancelPaymentIntent(existingIntent?.intentId);
+        }
       }
 
       const boatPrice = +offer.boatPrice || 0;
