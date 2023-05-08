@@ -25,12 +25,11 @@ if (environments.nodeEnv !== 'test') {
   app.use(morgan('combined', { stream: winstonLogger.stream }));
 }
 
+// AdminBro/Js
+app.use(cors());
+app.use(adminJs.options.rootPath, adminRoute);
 // Secure middlewares
 app.use(helmet());
-app.use(cors());
-
-// AdminBro/Js
-app.use(adminJs.options.rootPath, adminRoute);
 
 // Stripe Webhook Listener
 app.use(
