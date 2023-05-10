@@ -7,6 +7,8 @@ import { modelNames } from '../constants';
 paymentIntentSchema.static(staticFunctions);
 paymentIntentSchema.method(methodFunctions);
 
-const Users = mongoose.model(modelNames.PAYMENT_INTENTS, paymentIntentSchema);
+const Users =
+  mongoose?.models?.[modelNames.PAYMENT_INTENTS] ||
+  mongoose.model(modelNames.PAYMENT_INTENTS, paymentIntentSchema);
 
 export default Users;

@@ -7,6 +7,8 @@ import { modelNames } from '../constants';
 boatSchema.static(staticFunctions);
 boatSchema.method(methodFunctions);
 
-const Boats = mongoose.model(modelNames.BOATS, boatSchema);
+const Boats =
+  mongoose?.models?.[modelNames.BOATS] ||
+  mongoose.model(modelNames.BOATS, boatSchema);
 
 export default Boats;

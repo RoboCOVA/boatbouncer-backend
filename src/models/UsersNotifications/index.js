@@ -7,9 +7,8 @@ import { modelNames } from '../constants';
 usersnotificationSchema.method(methods);
 usersnotificationSchema.static(statics);
 
-const Notifications = mongoose.model(
-  modelNames.USERS_NOTIFICATIONS,
-  usersnotificationSchema
-);
+const Notifications =
+  mongoose?.models?.[modelNames.USERS_NOTIFICATIONS] ||
+  mongoose.model(modelNames.USERS_NOTIFICATIONS, usersnotificationSchema);
 
 export default Notifications;

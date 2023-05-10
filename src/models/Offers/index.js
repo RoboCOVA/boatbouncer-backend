@@ -7,6 +7,8 @@ import { modelNames } from '../constants';
 offerSchema.static(staticFunctions);
 offerSchema.method(methodFunctions);
 
-const Offers = mongoose.model(modelNames.OFFERS, offerSchema);
+const Offers =
+  mongoose?.models?.[modelNames.OFFERS] ||
+  mongoose.model(modelNames.OFFERS, offerSchema);
 
 export default Offers;

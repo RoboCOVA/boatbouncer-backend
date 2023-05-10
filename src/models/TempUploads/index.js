@@ -7,6 +7,8 @@ import { modelNames } from '../constants';
 tempUploadsSchema.static(staticFunctions);
 tempUploadsSchema.method(methodFunctions);
 
-const TempUploads = mongoose.model(modelNames.TEMP_UPLOADS, tempUploadsSchema);
+const TempUploads =
+  mongoose?.models?.[modelNames.TEMP_UPLOADS] ||
+  mongoose.model(modelNames.TEMP_UPLOADS, tempUploadsSchema);
 
 export default TempUploads;

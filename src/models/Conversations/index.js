@@ -7,9 +7,8 @@ import { modelNames } from '../constants';
 conversationSchema.static(staticFunctions);
 conversationSchema.method(methodFunctions);
 
-const Conversation = mongoose.model(
-  modelNames.CONVERSATIONS,
-  conversationSchema
-);
+const Conversation =
+  mongoose?.models?.[modelNames.CONVERSATIONS] ||
+  mongoose.model(modelNames.CONVERSATIONS, conversationSchema);
 
 export default Conversation;

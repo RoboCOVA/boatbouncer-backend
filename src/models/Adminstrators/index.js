@@ -7,6 +7,8 @@ import { modelNames } from '../constants';
 adminSchema.static(staticFunctions);
 adminSchema.method(methodFunctions);
 
-const Users = mongoose.model(modelNames.ADMINSTRATORS, adminSchema);
+const Users =
+  mongoose?.models?.[modelNames.ADMINSTRATORS] ||
+  mongoose.model(modelNames.ADMINSTRATORS, adminSchema);
 
 export default Users;

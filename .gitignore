@@ -8,3 +8,6 @@ npm-debug.log*
 
 .adminjs/
 logs/
+
+dist/
+build/

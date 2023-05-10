@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon --exec babel-node src/index.js",
     "lint": "eslint . --ext .js --color -f table",
-    "seed": "babel-node src/config/adminSeeder.js"
+    "seed": "babel-node src/config/adminSeeder.js",
+    "build": "babel ./src -d dist",
+    "start:prod": "babel-node dist/index.js"
   },
   "husky": {
     "hooks": {
@@ -54,6 +56,7 @@
     "@adminjs/express": "^5.1.0",
     "@adminjs/mongoose": "^3.0.3",
     "@tiptap/core": "^2.0.3",
+    "@tiptap/pm": "^2.0.3",
     "adminjs": "^6.8.7",
     "bcrypt": "^5.1.0",
     "cloudinary": "^1.35.0",

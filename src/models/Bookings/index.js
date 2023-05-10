@@ -7,6 +7,8 @@ import { modelNames } from '../constants';
 bookingSchema.static(staticFunctions);
 bookingSchema.method(methodFunctions);
 
-const Bookings = mongoose.model(modelNames.BOOKINGS, bookingSchema);
+const Bookings =
+  mongoose?.models?.[modelNames.BOOKINGS] ||
+  mongoose.model(modelNames.BOOKINGS, bookingSchema);
 
 export default Bookings;
