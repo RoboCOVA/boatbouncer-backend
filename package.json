@@ -53,6 +53,7 @@
     "@adminjs/design-system": "^3.1.8",
     "@adminjs/express": "^5.1.0",
     "@adminjs/mongoose": "^3.0.3",
+    "@tiptap/core": "^2.0.3",
     "adminjs": "^6.8.7",
     "bcrypt": "^5.1.0",
     "cloudinary": "^1.35.0",
