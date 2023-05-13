@@ -16,20 +16,29 @@ import {
   updateBoatsValidator,
 } from '../validators/boat.validators';
 import parseValidationResult from '../validators/errors.parser';
+import { authenticateJwt } from '../controller/authenticate';
 
 const router = express.Router();
 
 router.post(
   '/',
+  authenticateJwt,
   createBoatValidator(),
   parseValidationResult,
   createBoatController
 );
 
-router.get('/', getBoatsValidator(), parseValidationResult, getBoatsController);
+router.get(
+  '/',
+
+  getBoatsValidator(),
+  parseValidationResult,
+  getBoatsController
+);
 
 router.get(
   '/listing',
+  authenticateJwt,
   getBoatListingValidator(),
   parseValidationResult,
   getBoatListingController
@@ -44,6 +53,7 @@ router.get(
 
 router.put(
   '/:boatId',
+  authenticateJwt,
   updateBoatsValidator(),
   parseValidationResult,
   updateBoatController
@@ -51,6 +61,7 @@ router.put(
 
 router.delete(
   '/:boatId',
+  authenticateJwt,
   deleteBoatsValidator(),
   parseValidationResult,
   deleteBoatController

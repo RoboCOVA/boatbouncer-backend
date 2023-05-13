@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.use('/test', testRoute);
 router.use('/user', userRoute);
-router.use('/boat', authenticateJwt, boatRoute);
+router.use('/boat', boatRoute);
 router.use('/offer', authenticateJwt, offerRoute);
 router.use('/upload', authenticateJwt, uploadRoute);
 router.use('/intent', authenticateJwt, intentRoute);
