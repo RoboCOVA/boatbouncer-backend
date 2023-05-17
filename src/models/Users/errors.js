@@ -17,6 +17,13 @@ export const updateFailed = new APIError(
   httpStatus.NOT_FOUND,
   true
 );
+
+export const stripeUpdateFailed = new APIError(
+  'Failed to create stripe customer Id!',
+  httpStatus.INTERNAL_SERVER_ERROR,
+  true
+);
+
 export const emailAlreadyUsed = new APIError(
   'Email is already used.!',
   httpStatus.CONFLICT,

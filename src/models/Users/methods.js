@@ -5,11 +5,7 @@ import APIError from '../../errors/APIError';
 import { generateHashedPassword } from '../../utils';
 import { modelNames } from '../constants';
 import { stripeSecretKey } from '../../config/environments';
-import {
-  existingStripCustomerNotFound,
-  phoneNumberAlreadyUsed,
-  updateFailed,
-} from './errors';
+import { phoneNumberAlreadyUsed, stripeUpdateFailed } from './errors';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -18,20 +14,6 @@ const userEmailExists = new APIError(
   httpStatus.CONFLICT,
   true
 );
-
-/** @HELPERS */
-async function doesCustomerExistByEmail(email) {
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise(async (resolve, reject) => {
-    try {
-      const customers = await stripe.customers.list({ email });
-      resolve(customers); // customer exists if there is at least one customer with the given email
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-/** @END */
 
 export async function createNewUser() {
   const session = await startSession();
@@ -45,12 +27,13 @@ export async function createNewUser() {
         const existingEmail = await this.model(modelNames.USERS).findOne({
           email,
         });
-        if (existingEmail) throw userEmailExists;
+        if (existingEmail?.verified) throw userEmailExists;
 
         const existingPhoneNumber = await this.model(modelNames.USERS).findOne({
           phoneNumber,
         });
-        if (existingPhoneNumber) throw phoneNumberAlreadyUsed;
+
+        if (existingPhoneNumber?.verified) throw phoneNumberAlreadyUsed;
 
         const hashedPassword = await generateHashedPassword(password);
 
@@ -58,43 +41,36 @@ export async function createNewUser() {
 
         const user = await this.save({ session });
 
-        const customers = await doesCustomerExistByEmail(user?.email);
+        if (existingPhoneNumber)
+          await this.model(modelNames.USERS)
+            .findOneAndRemove({
+              _id: existingPhoneNumber?._id,
+            })
+            .session(session);
+        else if (existingEmail)
+          await this.model(modelNames.USERS)
+            .findOneAndRemove({
+              _id: existingEmail?._id,
+            })
+            .session(session);
 
         /** @CREATE_STRIPE_CUSTOMER ----- */
-        if (!customers?.data?.length) {
-          const Customer = await stripe.customers.create({
-            phone: user.phoneNumber,
-            email: user.email,
-            name: user.userName,
-            metadata: {
-              id: user._id,
-            },
-          });
+        const Customer = await stripe.customers.create({
+          phone: user.phoneNumber,
+          email: user.email,
+          name: user.userName,
+          metadata: {
+            id: user._id,
+          },
+        });
 
-          const userStripe = await Users.findOneAndUpdate(
-            { _id: user._id },
-            { stripeCustomerId: Customer.id },
-            { new: true }
-          ).session(session);
+        const userStripe = await Users.findOneAndUpdate(
+          { _id: user._id },
+          { stripeCustomerId: Customer.id },
+          { new: true }
+        ).session(session);
 
-          if (!userStripe?.stripeCustomerId) throw updateFailed;
-        } else {
-          const existingCustomer = customers?.data?.find(
-            (customer) =>
-              customer.email === user.email &&
-              customer.phone === user.phoneNumber &&
-              customer.name === user.userName
-          );
-
-          if (!existingCustomer?.id) throw existingStripCustomerNotFound;
-          const userStripe = await Users.findOneAndUpdate(
-            { _id: user._id },
-            { stripeCustomerId: existingCustomer.id },
-            { new: true }
-          ).session(session);
-
-          if (userStripe?.stripeCustomerId) throw updateFailed;
-        }
+        if (!userStripe?.stripeCustomerId) throw stripeUpdateFailed;
         /** @END ----- */
 
         const cleanUser = user.clean();
