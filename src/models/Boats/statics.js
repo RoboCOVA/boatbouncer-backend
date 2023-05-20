@@ -6,10 +6,22 @@ import { boatDeleteFailed, boatNotFound, boatUpdateFailed } from './errors';
  * the page.
  * @returns An object with two properties: data and total.
  */
-export async function getBoats({ pageNo, size, userId }) {
+export async function getBoats({ pageNo, size, userId, filter }) {
+  const { boatName, address, city, state, captained, category, subCategory } =
+    filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
   const query = {};
   if (userId) query.owner = userId;
+
+  if (boatName) query.boatName = { $regex: boatName, $options: 'i' };
+  if (address) query['location.address'] = { $regex: address, $options: 'i' };
+  if (city) query['location.city'] = { $regex: city, $options: 'i' };
+  if (state) query['location.state'] = { $regex: state, $options: 'i' };
+  if (category) query.category = category;
+  if (subCategory) query.subCategory = subCategory;
+  if (typeof captained === 'boolean') query.captained = captained;
+  else if (captained) query.captained = captained;
+
   const boats = await this.find(
     query,
     {},
@@ -19,10 +31,22 @@ export async function getBoats({ pageNo, size, userId }) {
   return { data: boats, total };
 }
 
-export async function getBoatListings({ pageNo, size, userId }) {
+export async function getBoatListings({ pageNo, size, userId, filter }) {
+  const { boatName, address, city, state, captained, category, subCategory } =
+    filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
   const query = {};
   query.owner = userId;
+
+  if (boatName) query.boatName = { $regex: boatName, $options: 'i' };
+  if (address) query['location.address'] = { $regex: address, $options: 'i' };
+  if (city) query['location.city'] = { $regex: city, $options: 'i' };
+  if (state) query['location.state'] = { $regex: state, $options: 'i' };
+  if (category) query.category = category;
+  if (subCategory) query.subCategory = subCategory;
+  if (typeof captained === 'boolean') query.captained = captained;
+  else if (captained) query.captained = captained;
+
   const boats = await this.find(
     query,
     {},

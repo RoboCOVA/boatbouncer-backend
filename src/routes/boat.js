@@ -28,13 +28,7 @@ router.post(
   createBoatController
 );
 
-router.get(
-  '/',
-
-  getBoatsValidator(),
-  parseValidationResult,
-  getBoatsController
-);
+router.get('/', getBoatsValidator(), parseValidationResult, getBoatsController);
 
 router.get(
   '/listing',

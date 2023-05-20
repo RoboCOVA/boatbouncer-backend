@@ -59,10 +59,31 @@ export const createBoatController = async (req, res, next) => {
 
 export const getBoatsController = async (req, res, next) => {
   try {
-    const { pageNo, size } = req.query;
+    const {
+      pageNo,
+      size,
+      boatName,
+      address,
+      city,
+      state,
+      captained,
+      category,
+      subCategory,
+    } = req.query || {};
+    const filter = {};
+
+    if (boatName) filter.boatName = boatName;
+    if (address) filter.address = address;
+    if (city) filter.city = city;
+    if (state) filter.state = state;
+    if (category) filter.category = category;
+    if (subCategory) filter.subCategory = subCategory;
+    filter.captained = captained;
+
     const boats = await Boats.getBoats({
       pageNo,
       size,
+      filter,
     });
     res.send(boats);
   } catch (error) {
@@ -73,11 +94,32 @@ export const getBoatsController = async (req, res, next) => {
 export const getBoatListingController = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const { pageNo, size } = req.query;
+    const {
+      pageNo,
+      size,
+      boatName,
+      address,
+      city,
+      state,
+      captained,
+      category,
+      subCategory,
+    } = req.query;
+    const filter = {};
+
+    if (boatName) filter.boatName = boatName;
+    if (address) filter.address = address;
+    if (city) filter.city = city;
+    if (state) filter.state = state;
+    if (category) filter.category = category;
+    if (subCategory) filter.subCategory = subCategory;
+    filter.captained = captained;
+
     const boats = await Boats.getBoatListings({
       pageNo,
       size,
       userId,
+      filter,
     });
     res.send(boats);
   } catch (error) {
