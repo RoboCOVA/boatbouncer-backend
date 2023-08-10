@@ -1,6 +1,7 @@
 import { body, param } from 'express-validator';
 import { boatFeaturesEnum, pricingTypeEnum } from '../utils/constants';
 import defaultValidators from './default.validator';
+import { categoriesEnum } from '../models/constants';
 
 export const createBoatValidator = () => [
   body('boatName').isString().withMessage('Boat Name is required'),
@@ -20,9 +21,9 @@ export const createBoatValidator = () => [
   body('location.zipCode').isString().optional(),
   body('latLng.latitude').isNumeric().optional(),
   body('latLng.longitude').isNumeric().optional(),
-  body('category').isString().withMessage('Category is required'),
-  body('subCategory').isArray().withMessage('Sub category is required'),
-  body('subCategory.*').isString().withMessage('Sub category is required'),
+  body('category').isString().isIn(categoriesEnum).optional(),
+  body('subCategory').isArray().optional(),
+  body('subCategory.*').isString().optional(),
   body('features')
     .isString()
     .isIn(boatFeaturesEnum)
@@ -36,6 +37,7 @@ export const createBoatValidator = () => [
     .isIn(pricingTypeEnum)
     .withMessage('Pricing type is required'),
   body('pricing.*.min').isNumeric().withMessage('Pricing Min is required'),
+  body('pricing.*.value').isNumeric().withMessage('Pricing Value is required'),
   body('captained').isBoolean().withMessage('Captained is required'),
 ];
 

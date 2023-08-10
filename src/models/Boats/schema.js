@@ -4,7 +4,7 @@ import {
   currencyCodeEnum,
   pricingTypeEnum,
 } from '../../utils/constants';
-import { modelNames } from '../constants';
+import { categoriesEnum, modelNames } from '../constants';
 
 const locationSchema = {
   address: { type: String },
@@ -16,6 +16,7 @@ const locationSchema = {
 const pricingSchema = {
   type: { type: String, enum: pricingTypeEnum },
   min: { type: Number },
+  value: { type: Number },
 };
 
 const boatSchema = new mongoose.Schema(
@@ -35,8 +36,8 @@ const boatSchema = new mongoose.Schema(
       type: { type: String, enum: ['Point'] },
       coordinates: { type: [Number] },
     },
-    category: { type: String, required: true },
-    subCategory: [{ type: String, required: true }],
+    category: { type: String, enum: categoriesEnum },
+    subCategory: [{ type: String }],
     currency: { type: String, enum: currencyCodeEnum },
     features: { type: String, enum: boatFeaturesEnum },
     pricing: [pricingSchema],

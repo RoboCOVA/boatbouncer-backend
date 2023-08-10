@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import mongoose from 'mongoose';
 import { v2 as cloudinary } from '../../config/cloudinary';
 import { modelNames } from '../constants';
 
@@ -15,9 +16,10 @@ export async function uploadAndSaveUrl({ files, userId }) {
           : undefined;
       try {
         if (file && file?.originalname && file?.path) {
+          const id = new mongoose.Types.ObjectId();
           // eslint-disable-next-line no-await-in-loop
           const response = await cloudinary.uploader.upload(file?.path, {
-            public_id: 'boats',
+            public_id: id.toString(),
           });
           const {
             asset_id,

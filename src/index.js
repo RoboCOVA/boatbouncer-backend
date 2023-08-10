@@ -4,8 +4,8 @@ import path from 'path';
 // Initiate app root
 global.appRoot = path.resolve(path.resolve());
 
-import passport from 'passport';
 import { EventEmitter } from 'events';
+import passport from 'passport';
 import httpStatus from 'http-status';
 import * as environments from './config/environments';
 import connectToDb from './config/mongoose';

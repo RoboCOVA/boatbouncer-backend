@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
+import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { isBefore, setMonth, setYear } from 'date-fns';
 import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
-import crypto from 'crypto';
 import { cryptoSecret, jwtKey } from '../config/environments';
 
 // Encryption function
