@@ -23,6 +23,7 @@ export const createBoatValidator = () => [
   body('latLng.longitude').isNumeric().optional(),
   body('category').isArray().optional(),
   body('category.*').isString().isIn(categoriesEnum).optional(),
+  body('currency').isString().optional(),
   body('subCategory').isArray().optional(),
   body('subCategory.*').isString().optional(),
   body('features')
