@@ -21,7 +21,8 @@ export const createBoatValidator = () => [
   body('location.zipCode').isString().optional(),
   body('latLng.latitude').isNumeric().optional(),
   body('latLng.longitude').isNumeric().optional(),
-  body('category').isString().isIn(categoriesEnum).optional(),
+  body('category').isArray().optional(),
+  body('category.*').isString().isIn(categoriesEnum).optional(),
   body('subCategory').isArray().optional(),
   body('subCategory.*').isString().optional(),
   body('features')

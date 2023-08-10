@@ -36,7 +36,7 @@ const boatSchema = new mongoose.Schema(
       type: { type: String, enum: ['Point'] },
       coordinates: { type: [Number] },
     },
-    category: { type: String, enum: categoriesEnum },
+    category: [{ type: String, enum: categoriesEnum }],
     subCategory: [{ type: String }],
     currency: { type: String, enum: currencyCodeEnum },
     features: { type: String, enum: boatFeaturesEnum },
