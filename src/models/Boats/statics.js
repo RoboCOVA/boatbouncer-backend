@@ -10,18 +10,31 @@ export async function getBoats({ pageNo, size, userId, filter }) {
   const { boatName, address, city, state, captained, category, subCategory } =
     filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
-  const query = {};
-  if (userId) query.owner = userId;
 
-  if (boatName) query.boatName = { $regex: boatName.trim(), $options: 'i' };
+  const matchArr = [];
+  if (boatName)
+    matchArr.push({ boatName: { $regex: boatName.trim(), $options: 'i' } });
   if (address)
-    query['location.address'] = { $regex: address.trim(), $options: 'i' };
-  if (city) query['location.city'] = { $regex: city.trim(), $options: 'i' };
-  if (state) query['location.state'] = { $regex: state.trim(), $options: 'i' };
+    matchArr.push({
+      'location.address': { $regex: address.trim(), $options: 'i' },
+    });
+  if (city)
+    matchArr.push({ 'location.city': { $regex: city.trim(), $options: 'i' } });
+  if (state)
+    matchArr.push({
+      'location.state': { $regex: state.trim(), $options: 'i' },
+    });
+
+  const query = {
+    $or: matchArr,
+  };
+
   if (category) query.category = category.trim();
   if (subCategory) query.subCategory = subCategory.trim();
   if (typeof captained === 'boolean') query.captained = captained;
   else if (captained) query.captained = captained;
+
+  if (userId) query.owner = userId;
 
   const boats = await this.find(
     query,
