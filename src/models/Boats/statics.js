@@ -13,12 +13,13 @@ export async function getBoats({ pageNo, size, userId, filter }) {
   const query = {};
   if (userId) query.owner = userId;
 
-  if (boatName) query.boatName = { $regex: boatName, $options: 'i' };
-  if (address) query['location.address'] = { $regex: address, $options: 'i' };
-  if (city) query['location.city'] = { $regex: city, $options: 'i' };
-  if (state) query['location.state'] = { $regex: state, $options: 'i' };
-  if (category) query.category = category;
-  if (subCategory) query.subCategory = subCategory;
+  if (boatName) query.boatName = { $regex: boatName.trim(), $options: 'i' };
+  if (address)
+    query['location.address'] = { $regex: address.trim(), $options: 'i' };
+  if (city) query['location.city'] = { $regex: city.trim(), $options: 'i' };
+  if (state) query['location.state'] = { $regex: state.trim(), $options: 'i' };
+  if (category) query.category = category.trim();
+  if (subCategory) query.subCategory = subCategory.trim();
   if (typeof captained === 'boolean') query.captained = captained;
   else if (captained) query.captained = captained;
 
