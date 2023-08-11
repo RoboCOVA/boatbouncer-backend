@@ -25,9 +25,8 @@ export async function getBoats({ pageNo, size, userId, filter }) {
       'location.state': { $regex: state.trim(), $options: 'i' },
     });
 
-  const query = {
-    $or: matchArr,
-  };
+  const query = {};
+  if (matchArr?.length) query.$or = matchArr;
 
   if (category) query.category = category.trim();
   if (subCategory) query.subCategory = subCategory.trim();
