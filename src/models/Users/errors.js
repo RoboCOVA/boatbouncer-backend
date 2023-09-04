@@ -62,3 +62,15 @@ export const chargeEnableUpdateFailed = new APIError(
   httpStatus.BAD_REQUEST,
   true
 );
+
+export const userNotVerified = new APIError(
+  'User not verified',
+  httpStatus.BAD_REQUEST,
+  true
+);
+
+export const passwordResetSessionExp = new APIError(
+  'Password reset session expired!',
+  httpStatus.BAD_REQUEST,
+  true
+);

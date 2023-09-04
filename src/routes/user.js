@@ -1,9 +1,12 @@
 import express from 'express';
 import {
   attachPaymentMethodController,
+  changeForgottenPasswordController,
   createStripeAccountController,
   createUserController,
   detachMethodController,
+  forgetPasswordController,
+  formValidatedController,
   getCurrentUserController,
   getPaymentMethodController,
   loginController,
@@ -17,10 +20,13 @@ import {
   attachPaymentMethodValidator,
   createUserValidator,
   detachMethodValidator,
+  forgotPasswordValidator,
   loginValidator,
+  resetPasswordValidator,
   sendSmsValidator,
   updateMethodValidator,
   updateUserValidator,
+  validateResetOTPValidator,
   verifyUserValidator,
 } from '../validators/user.validators';
 import { authenticateJwt } from '../controller/authenticate';
@@ -35,10 +41,38 @@ router.post(
 );
 
 router.post(
+  '/validateUserForm',
+  createUserValidator(),
+  parseValidationResult,
+  formValidatedController
+);
+
+router.post(
   '/sendSms',
   sendSmsValidator(),
   parseValidationResult,
   sendSmsController
+);
+
+router.post(
+  '/forgetPassword',
+  forgotPasswordValidator(),
+  parseValidationResult,
+  forgetPasswordController
+);
+
+router.post(
+  '/validateResetOTP',
+  validateResetOTPValidator(),
+  parseValidationResult,
+  verifyUserController
+);
+
+router.post(
+  '/changePassword',
+  resetPasswordValidator(),
+  parseValidationResult,
+  changeForgottenPasswordController
 );
 
 router.post(

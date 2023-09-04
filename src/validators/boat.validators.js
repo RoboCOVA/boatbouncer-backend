@@ -26,7 +26,8 @@ export const createBoatValidator = () => [
   body('currency').isString().optional(),
   body('subCategory').isArray().optional(),
   body('subCategory.*').isString().optional(),
-  body('features')
+  body('features').isArray().withMessage('Features is required'),
+  body('features.*')
     .isString()
     .isIn(boatFeaturesEnum)
     .withMessage('Features is required'),

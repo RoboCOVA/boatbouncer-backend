@@ -2,6 +2,7 @@ import { startSession } from 'mongoose';
 import httpStatus from 'http-status';
 import bcrypt from 'bcrypt';
 import Stripe from 'stripe';
+import { add, isBefore } from 'date-fns';
 import { identityToolkit } from '../../config/googleApis';
 import APIError from '../../errors/APIError';
 import {
@@ -21,12 +22,15 @@ import {
   doesntMatchError,
   existingStripCustomerNotFound,
   chargeEnableUpdateFailed,
+  userNotVerified,
+  passwordResetSessionExp,
 } from './errors';
 import {
   stripeFailedUrl,
   stripeSecretKey,
   stripeSuccessUrl,
 } from '../../config/environments';
+import { modelNames } from '../constants';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -59,8 +63,18 @@ export async function saveUserSession({ phoneNumber, session }) {
  * @returns The user object with the verified field set to true.
  * </code>
  */
-export async function verifyUser({ verificationCode, phoneNumber }) {
-  const user = await this.findOne({ phoneNumber });
+export async function verifyUser({
+  verificationCode,
+  phoneNumber,
+  encryption,
+}) {
+  const matchQuery = { phoneNumber };
+  if (encryption) {
+    const decryptedId = decryptData(encryption);
+    matchQuery._id = decryptedId;
+  }
+
+  const user = await this.findOne(matchQuery);
 
   if (!user) throw userNotFound;
   if (user?.verified) throw userAlreadyVerified;
@@ -71,6 +85,17 @@ export async function verifyUser({ verificationCode, phoneNumber }) {
     code: verificationCode,
     sessionInfo: user?.session,
   });
+
+  if (encryption && user)
+    return encryptData(
+      JSON.stringify({
+        _id: user?._id,
+        phoneNumber,
+        allowForgetPassword: true,
+        exp: add(new Date(), { days: 1 }),
+      })
+    );
+
   const verifiedUser = await this.findOneAndUpdate(
     { _id: user?._id },
     {
@@ -287,4 +312,48 @@ export async function updatePaymentMethod({ userId, methodId, updateObject }) {
 
   const updatedMethod = await stripe.paymentMethods.update(methodId, data);
   return updatedMethod;
+}
+
+export async function forgetPassword({ phoneNumber, recaptchaToken }) {
+  const user = await this.findOne({ phoneNumber });
+  if (!user) throw userNotFound;
+  if (!user?.verified) throw userNotVerified;
+
+  const encryption = encryptData(user?._id);
+
+  const response = await identityToolkit.relyingparty.sendVerificationCode({
+    phoneNumber,
+    recaptchaToken,
+  });
+
+  await this.model(modelNames.USERS).saveUserSession({
+    phoneNumber,
+    session: response.data.sessionInfo,
+  });
+
+  return encryption;
+}
+
+export async function changeForgottenPassword({ newPassword, encryption }) {
+  const data = decryptData(encryption);
+  const parsedData = JSON.parse(data);
+
+  const { _id, phoneNumber, exp } = parsedData || {};
+  // const validDate = isBefore(new Date(), new Date(exp));
+
+  // if(!validDate) throw passwordResetSessionExp;
+
+  const user = this.findOne({ _id, phoneNumber });
+  if (!user) throw userNotFound;
+
+  const hashedPassword = generateHashedPassword(newPassword);
+
+  const updatePassword = await this.findOneAndUpdate(
+    { _id, phoneNumber },
+    { password: hashedPassword }
+  );
+  if (updatePassword) throw updateFailed;
+
+  updatePassword.clean();
+  return updatePassword;
 }

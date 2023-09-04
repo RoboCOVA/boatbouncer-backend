@@ -15,7 +15,7 @@ export const createUserValidator = () => [
     .isString()
     .isLength({ min: 8, max: 60 })
     .withMessage(
-      'Password should be at least 8 cahracters and not greater than 60'
+      'Password should be at least 8 characters and not greater than 60'
     )
     .withMessage((val) => strongPasswordRegex.test(val))
     .withMessage(
@@ -94,4 +94,33 @@ export const updateMethodValidator = () => [
   body('billingDetails.phone').isString().withMessage(),
   body('card.exp_month').isInt().withMessage(),
   body('card.exp_year').isInt().withMessage(),
+];
+
+export const forgotPasswordValidator = () => [
+  defaultValidators.phoneNumber,
+  body('recaptchaToken')
+    .isString()
+    .withMessage('Valid recaptchaToken is required'),
+];
+
+export const validateResetOTPValidator = () => [
+  body('verificationCode')
+    .isString()
+    .withMessage('Valid verification code is required'),
+  defaultValidators.phoneNumber,
+  body('encryption').isString().withMessage('Encryption Key required'),
+];
+
+export const resetPasswordValidator = () => [
+  body('newPassword')
+    .isString()
+    .isLength({ min: 8, max: 60 })
+    .withMessage(
+      'Password should be at least 8 characters and not greater than 60'
+    )
+    .withMessage((val) => strongPasswordRegex.test(val))
+    .withMessage(
+      'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
+    ),
+  body('encryption').isString().withMessage('Encryption Key required'),
 ];

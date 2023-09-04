@@ -143,15 +143,22 @@ export const publicResources = {
 export const publicResourcesEnum = generateEnumArrayFromObject(publicResources);
 
 export const boatFeatures = {
-  ImplementAutoArray: 'implement Auto array',
-  Metal: 'Metal',
-  Panel: 'panel',
-  Bike: 'Bike',
-  Cheese: 'Cheese',
-  Borders: 'Borders',
-  Internal: 'Internal',
-  GardenJSONRustic: 'Garden JSON Rustic',
-  Buckinghamshire: 'Buckinghamshire',
+  AirConditioning: 'Air conditioning',
+  Anchor: 'Anchor',
+  Bathroom: 'Bathroom',
+  BluetoothAudio: 'Bluetooth audio',
+  Cooler: 'Cooler / ice chest',
+  DeckShower: 'Deck shower',
+  FishFinder: 'Fish finder',
+  Grill: 'Grill',
+  Livewell: 'Livewell / baitwell',
+  Refrigerator: 'Refrigerator',
+  RodHolders: 'Rod holders',
+  Shower: 'Shower',
+  Stereo: 'Stereo',
+  StereoAUXInput: 'Stereo AUX input',
+  SwimLadder: 'Swim ladder',
+  WiFi: 'WiFi',
 };
 
 export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);

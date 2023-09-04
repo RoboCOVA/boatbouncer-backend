@@ -22,7 +22,7 @@ export const categories = {
   Sailing: 'Sailing',
   LuxMotor: 'Luxury motor yachts and bigger groups',
   Fishing: 'Fishing',
-  JetskisWaterFly: 'Jetskis, waterskis and flyboards',
+  JetskisWaterFly: 'Jet Skis, Water Skis and fly boards',
   HouseboatsAndOvernighters: 'Houseboats and Overnighters',
   ToursLessonsAndDiving: 'Tours, lessons and diving',
   BoardsAndPaddles: 'Boards and Paddles',
@@ -32,3 +32,13 @@ export const categories = {
 export const categoriesEnum = generateEnumArrayFromObject(categories);
 
 export const modelNamesEnum = generateEnumArrayFromObject(modelNames);
+
+export const subCategories = {
+  RIB: 'RIB',
+  Airboat: 'Airboat',
+  ElectricBoat: 'Electric Boat',
+  Power: 'Power',
+  PowerboatLessons: 'Powerboat Lessons',
+};
+
+export const subCategoriesEnum = generateEnumArrayFromObject(subCategories);

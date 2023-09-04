@@ -2,6 +2,7 @@ import express from 'express';
 import {
   createBoatController,
   deleteBoatController,
+  getBoatCategories,
   getBoatController,
   getBoatListingController,
   getBoatsController,
@@ -27,6 +28,8 @@ router.post(
   parseValidationResult,
   createBoatController
 );
+
+router.get('/categories', getBoatCategories);
 
 router.get('/', getBoatsValidator(), parseValidationResult, getBoatsController);
 
@@ -60,5 +63,8 @@ router.delete(
   parseValidationResult,
   deleteBoatController
 );
+
+// booking get more infor (like image)
+// check recive payment for the owner (check if they can recive payment if not dont allow their boat to be purchased)
 
 export default router;

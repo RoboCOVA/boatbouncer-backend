@@ -38,6 +38,14 @@ export const createUserController = async (req, res, next) => {
   }
 };
 
+export const formValidatedController = async (req, res, next) => {
+  try {
+    res.send('ok');
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const sendSmsController = async (req, res, next) => {
   try {
     const { phoneNumber, recaptchaToken } = req.body;
@@ -57,12 +65,43 @@ export const sendSmsController = async (req, res, next) => {
   }
 };
 
+export const forgetPasswordController = async (req, res, next) => {
+  try {
+    const { phoneNumber, recaptchaToken } = req.body;
+
+    const encryption = await Users.forgetPassword({
+      phoneNumber,
+      recaptchaToken,
+    });
+
+    res.send(encryption);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changeForgottenPasswordController = async (req, res, next) => {
+  try {
+    const { newPassword, encryption } = req.body;
+
+    const user = await Users.changeForgottenPassword({
+      newPassword,
+      encryption,
+    });
+
+    res.send(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const verifyUserController = async (req, res, next) => {
   try {
-    const { verificationCode, phoneNumber } = req.body;
+    const { verificationCode, phoneNumber, encryption } = req.body;
     const user = await Users.verifyUser({
       verificationCode,
       phoneNumber,
+      encryption,
     });
     res.send(user);
   } catch (error) {

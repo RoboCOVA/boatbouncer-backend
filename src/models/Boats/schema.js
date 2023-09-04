@@ -1,6 +1,6 @@
 import mongoose, { Types } from 'mongoose';
 import { boatFeaturesEnum, pricingTypeEnum } from '../../utils/constants';
-import { categoriesEnum, modelNames } from '../constants';
+import { categoriesEnum, modelNames, subCategoriesEnum } from '../constants';
 
 const locationSchema = {
   address: { type: String },
@@ -33,9 +33,9 @@ const boatSchema = new mongoose.Schema(
       coordinates: { type: [Number] },
     },
     category: [{ type: String, enum: categoriesEnum }],
-    subCategory: [{ type: String }],
+    subCategory: [{ type: String, enum: subCategoriesEnum }],
     currency: { type: String },
-    features: { type: String, enum: boatFeaturesEnum },
+    features: [{ type: String, enum: boatFeaturesEnum }],
     pricing: [pricingSchema],
     securityAllowance: { type: String, required: true },
     captained: { type: Boolean, required: true },

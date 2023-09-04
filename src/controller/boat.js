@@ -1,5 +1,7 @@
 import Boats from '../models/Boats';
+import { categoriesEnum, subCategoriesEnum } from '../models/constants';
 import { coordinateObjToGeoJson } from '../utils';
+import { boatFeaturesEnum } from '../utils/constants';
 
 export const createBoatController = async (req, res, next) => {
   try {
@@ -200,6 +202,14 @@ export const deleteBoatController = async (req, res, next) => {
 
     const boatRemoved = await Boats.deleteBoat({ boatId, userId });
     res.send(boatRemoved);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getBoatCategories = (req, res, next) => {
+  try {
+    res.send({ categoriesEnum, subCategoriesEnum, boatFeaturesEnum });
   } catch (error) {
     next(error);
   }
