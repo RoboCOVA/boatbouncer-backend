@@ -41,11 +41,15 @@ const stripe = new Stripe(stripeSecretKey);
  * @returns The user object with the session saved.
  * </code>
  */
-export async function saveUserSession({ phoneNumber, session }) {
+export async function saveUserSession({
+  phoneNumber,
+  session,
+  isForgetPassword,
+}) {
   const user = await this.findOne({ phoneNumber });
 
   if (!user) throw userNotFound;
-  if (user?.verified) throw userAlreadyVerified;
+  if (user?.verified && !isForgetPassword) throw userAlreadyVerified;
 
   const sessionSaved = await this.findOneAndUpdate(
     { _id: user?._id },
@@ -77,7 +81,7 @@ export async function verifyUser({
   const user = await this.findOne(matchQuery);
 
   if (!user) throw userNotFound;
-  if (user?.verified) throw userAlreadyVerified;
+  if (user?.verified && !encryption) throw userAlreadyVerified;
   if (!user?.session)
     throw new APIError('Session not found', httpStatus.BAD_REQUEST);
 
@@ -91,8 +95,6 @@ export async function verifyUser({
       JSON.stringify({
         _id: user?._id,
         phoneNumber,
-        allowForgetPassword: true,
-        exp: add(new Date(), { days: 1 }),
       })
     );
 
@@ -319,7 +321,7 @@ export async function forgetPassword({ phoneNumber, recaptchaToken }) {
   if (!user) throw userNotFound;
   if (!user?.verified) throw userNotVerified;
 
-  const encryption = encryptData(user?._id);
+  const encryption = encryptData(user?._id?.toString());
 
   const response = await identityToolkit.relyingparty.sendVerificationCode({
     phoneNumber,
@@ -329,6 +331,7 @@ export async function forgetPassword({ phoneNumber, recaptchaToken }) {
   await this.model(modelNames.USERS).saveUserSession({
     phoneNumber,
     session: response.data.sessionInfo,
+    isForgetPassword: true,
   });
 
   return encryption;
@@ -338,22 +341,20 @@ export async function changeForgottenPassword({ newPassword, encryption }) {
   const data = decryptData(encryption);
   const parsedData = JSON.parse(data);
 
-  const { _id, phoneNumber, exp } = parsedData || {};
-  // const validDate = isBefore(new Date(), new Date(exp));
-
-  // if(!validDate) throw passwordResetSessionExp;
+  const { _id, phoneNumber } = parsedData || {};
 
   const user = this.findOne({ _id, phoneNumber });
   if (!user) throw userNotFound;
 
-  const hashedPassword = generateHashedPassword(newPassword);
+  const hashedPassword = await generateHashedPassword(newPassword);
 
   const updatePassword = await this.findOneAndUpdate(
     { _id, phoneNumber },
     { password: hashedPassword }
   );
-  if (updatePassword) throw updateFailed;
 
-  updatePassword.clean();
+  if (!updatePassword) throw updateFailed;
+
+  await updatePassword.clean();
   return updatePassword;
 }
