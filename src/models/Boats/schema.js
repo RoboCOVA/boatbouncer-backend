@@ -23,7 +23,7 @@ const boatSchema = new mongoose.Schema(
     manufacturer: { type: String },
     model: { type: String },
     year: { type: Number },
-    length: { type: Number }, // measurment
+    length: { type: Number }, // measurement
     amenities: [{ type: String }],
     imageUrls: [{ type: String }],
     owner: { type: Types.ObjectId, ref: modelNames.USERS, required: true },

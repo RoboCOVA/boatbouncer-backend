@@ -103,6 +103,9 @@ export async function getBookings({ userId, isRenter }) {
     {
       path: 'offerId',
     },
+    {
+      path: 'boatId',
+    },
   ]);
   const total = await this.count(matchQuery);
   return { data: bookings, total };
@@ -121,7 +124,14 @@ export async function getBooking({ bookId, userId, isRenter }) {
     matchQuery.renter = userId;
   } else matchQuery.owner = userId;
 
-  const booking = await this.findOne(matchQuery).populate('offerId');
+  const booking = await this.findOne(matchQuery).populate([
+    {
+      path: 'offerId',
+    },
+    {
+      path: 'boatId',
+    },
+  ]);
   return booking;
 }
 

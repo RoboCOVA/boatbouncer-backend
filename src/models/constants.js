@@ -15,6 +15,7 @@ export const modelNames = {
   TRANSACTIONS: 'Transactions',
   ADMINSTRATORS: 'Adminstrators',
   SETTINGS: 'Settings',
+  FAVORITES: 'Favorites',
 };
 
 export const categories = {

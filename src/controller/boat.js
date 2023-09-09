@@ -1,4 +1,5 @@
 import Boats from '../models/Boats';
+import Favorites from '../models/Favorites';
 import { categoriesEnum, subCategoriesEnum } from '../models/constants';
 import { coordinateObjToGeoJson } from '../utils';
 import { boatFeaturesEnum } from '../utils/constants';
@@ -210,6 +211,18 @@ export const deleteBoatController = async (req, res, next) => {
 export const getBoatCategories = (req, res, next) => {
   try {
     res.send({ categoriesEnum, subCategoriesEnum, boatFeaturesEnum });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addOrRemoveFavoriteController = async (req, res, next) => {
+  try {
+    const { boatId: boat } = req.params;
+    const user = req?.user?._id || '';
+    const newFavorite = new Favorites({ boat, user });
+    const favorite = await newFavorite.addOrRemoveFavorite();
+    res.send(favorite);
   } catch (error) {
     next(error);
   }

@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  addOrRemoveFavoriteController,
   createBoatController,
   deleteBoatController,
   getBoatCategories,
@@ -9,6 +10,7 @@ import {
   updateBoatController,
 } from '../controller/boat';
 import {
+  addToFavoriteValidator,
   createBoatValidator,
   deleteBoatsValidator,
   getBoatListingValidator,
@@ -64,7 +66,12 @@ router.delete(
   deleteBoatController
 );
 
-// booking get more infor (like image)
-// check recive payment for the owner (check if they can recive payment if not dont allow their boat to be purchased)
+router.post(
+  '/addFavorite/:boatId',
+  authenticateJwt,
+  addToFavoriteValidator(),
+  parseValidationResult,
+  addOrRemoveFavoriteController
+);
 
 export default router;

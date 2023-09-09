@@ -88,6 +88,8 @@ export const deleteBoatsValidator = () => [
   param('boatId').isMongoId().optional(),
 ];
 
+export const addToFavoriteValidator = () => [param('boatId').isMongoId()];
+
 export const getBoatListingValidator = () => [
   defaultValidators.pageNo,
   defaultValidators.size,
