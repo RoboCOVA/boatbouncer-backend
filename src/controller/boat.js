@@ -227,3 +227,13 @@ export const addOrRemoveFavoriteController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getFavoritesController = async (req, res, next) => {
+  try {
+    const user = req?.user?._id || '';
+    const favorites = await Favorites.getFavorites(user);
+    res.send(favorites);
+  } catch (error) {
+    next(error);
+  }
+};

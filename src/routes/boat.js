@@ -7,6 +7,7 @@ import {
   getBoatController,
   getBoatListingController,
   getBoatsController,
+  getFavoritesController,
   updateBoatController,
 } from '../controller/boat';
 import {
@@ -32,6 +33,8 @@ router.post(
 );
 
 router.get('/categories', getBoatCategories);
+
+router.get('/favorites', authenticateJwt, getFavoritesController);
 
 router.get('/', getBoatsValidator(), parseValidationResult, getBoatsController);
 
