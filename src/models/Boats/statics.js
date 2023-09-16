@@ -34,7 +34,7 @@ export async function getBoats({ pageNo, size, filter }) {
     match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
   if (typeof captained === 'boolean') match.captained = captained;
 
-  if (bbox?.length) {
+  if (bbox?.length && Array.isArray(bbox)) {
     const boundingBox = [
       [bbox?.[0] || -180, bbox?.[1] || 0],
       [bbox?.[2] || 180, bbox?.[3] || 90],
@@ -147,7 +147,12 @@ export async function getBoats({ pageNo, size, filter }) {
   ];
 
   // If no bounding box and coordinate is present
-  if (!bbox?.length && coordinates?.longitude && coordinates?.latitude)
+  if (
+    !Array.isArray(bbox) &&
+    !bbox?.length &&
+    coordinates?.longitude &&
+    coordinates?.latitude
+  )
     aggregationQuery.unshift({
       $geoNear: {
         near: {

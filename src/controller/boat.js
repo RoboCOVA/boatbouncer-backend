@@ -86,7 +86,7 @@ export const getBoatsController = async (req, res, next) => {
     if (coordinates)
       filter.coordinates =
         typeof coordinates === 'string' ? JSON.parse(coordinates) : coordinates;
-    if (bbox) filter.bbox = bbox;
+    if (bbox) filter.bbox = typeof bbox === 'string' ? JSON.parse(bbox) : bbox;
 
     filter.captained = captained;
 

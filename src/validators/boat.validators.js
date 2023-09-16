@@ -51,7 +51,6 @@ export const getBoatValidator = () => [
 export const getBoatsValidator = () => [
   defaultValidators.pageNo,
   defaultValidators.size,
-  query('bbox').isArray().optional(),
 ];
 
 export const updateBoatsValidator = () => [
