@@ -9,27 +9,42 @@ import { boatDeleteFailed, boatNotFound, boatUpdateFailed } from './errors';
 export async function getBoats({ pageNo, size, filter }) {
   const {
     boatName,
-    address,
-    city,
-    state,
     captained,
     category,
     subCategory,
     features,
+    coordinates,
+    bbox,
   } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
 
   const match = {};
-  if (city) match['location.city'] = { $regex: city.trim(), $options: 'i' };
-  if (state) match['location.state'] = { $regex: state.trim(), $options: 'i' };
-  if (address)
-    match['location.address'] = { $regex: address.trim(), $options: 'i' };
+
+  /** Temporarily disabled filters */
+  // if (city) match['location.city'] = { $regex: city.trim(), $options: 'i' };
+  // if (state) match['location.state'] = { $regex: state.trim(), $options: 'i' };
+  // if (address)
+  //   match['location.address'] = { $regex: address.trim(), $options: 'i' };
+  /** Temporarily disabled filters */
+
   if (features) match.features = { $regex: features.trim(), $options: 'i' };
   if (category) match.category = { $regex: category.trim(), $options: 'i' };
   if (boatName) match.boatName = { $regex: boatName.trim(), $options: 'i' };
   if (subCategory)
     match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
   if (typeof captained === 'boolean') match.captained = captained;
+
+  if (bbox?.length) {
+    const boundingBox = [
+      [bbox?.[0] || -180, bbox?.[1] || 0],
+      [bbox?.[2] || 180, bbox?.[3] || 90],
+    ];
+    match.latLng = {
+      $geoWithin: {
+        $box: boundingBox,
+      },
+    };
+  }
 
   const aggregationQuery = [
     {
@@ -130,6 +145,21 @@ export async function getBoats({ pageNo, size, filter }) {
       },
     },
   ];
+
+  // If no bounding box and coordinate is present
+  if (!bbox?.length && coordinates?.longitude && coordinates?.latitude)
+    aggregationQuery.unshift({
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [coordinates?.longitude, coordinates?.latitude],
+        },
+        distanceField: 'distance',
+        maxDistance: 50 * 1609.34, // 50 miles
+        key: 'latLng',
+        spherical: true,
+      },
+    });
 
   const boats = await this.aggregate(aggregationQuery);
   return boats;

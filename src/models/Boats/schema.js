@@ -43,4 +43,6 @@ const boatSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+boatSchema.index({ latLng: '2dsphere' });
+
 export default boatSchema;

@@ -1,4 +1,4 @@
-import { body, param } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import { boatFeaturesEnum, pricingTypeEnum } from '../utils/constants';
 import defaultValidators from './default.validator';
 import { categoriesEnum } from '../models/constants';
@@ -51,6 +51,7 @@ export const getBoatValidator = () => [
 export const getBoatsValidator = () => [
   defaultValidators.pageNo,
   defaultValidators.size,
+  query('bbox').isArray().optional(),
 ];
 
 export const updateBoatsValidator = () => [

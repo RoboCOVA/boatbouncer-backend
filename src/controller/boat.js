@@ -72,6 +72,8 @@ export const getBoatsController = async (req, res, next) => {
       captained,
       category,
       subCategory,
+      coordinates,
+      bbox,
     } = req.query || {};
     const filter = {};
 
@@ -81,6 +83,11 @@ export const getBoatsController = async (req, res, next) => {
     if (state) filter.state = state;
     if (category) filter.category = category;
     if (subCategory) filter.subCategory = subCategory;
+    if (coordinates)
+      filter.coordinates =
+        typeof coordinates === 'string' ? JSON.parse(coordinates) : coordinates;
+    if (bbox) filter.bbox = bbox;
+
     filter.captained = captained;
 
     const boats = await Boats.getBoats({
