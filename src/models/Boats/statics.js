@@ -36,8 +36,8 @@ export async function getBoats({ pageNo, size, filter }) {
 
   if (bbox?.length && Array.isArray(bbox)) {
     const boundingBox = [
-      [bbox?.[0] || -180, bbox?.[1] || 0],
       [bbox?.[2] || 180, bbox?.[3] || 90],
+      [bbox?.[0] || -180, bbox?.[1] || 0],
     ];
     match.latLng = {
       $geoWithin: {
