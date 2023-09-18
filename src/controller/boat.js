@@ -186,9 +186,13 @@ export const updateBoatController = async (req, res, next) => {
     if (owner) updateObject.owner = owner;
     if (location) updateObject.location = location;
     if (latLng) {
-      const parsedLocation = coordinateObjToGeoJson(latLng);
-      updateObject.latLng = parsedLocation;
+      if (latLng?.type && latLng?.coordinates) updateObject.latLng = latLng;
+      else if (latLng?.latitude && latLng?.longitude) {
+        const parsedLocation = coordinateObjToGeoJson(latLng);
+        updateObject.latLng = parsedLocation;
+      }
     }
+
     if (category) updateObject.category = category;
     if (subCategory) updateObject.subCategory = subCategory;
     if (currency) updateObject.currency = currency;
