@@ -168,6 +168,7 @@ export const updateBoatController = async (req, res, next) => {
       features,
       pricing,
       securityAllowance,
+      captained,
     } = req.body;
     const userId = req?.user?._id || '';
     const { boatId } = req.params;
@@ -199,6 +200,7 @@ export const updateBoatController = async (req, res, next) => {
     if (features) updateObject.features = features;
     if (pricing) updateObject.pricing = pricing;
     if (securityAllowance) updateObject.securityAllowance = securityAllowance;
+    if (typeof captained === 'boolean') updateObject.captained = captained;
 
     const boatUpdate = await Boats.updateBoat(matchQuery, updateObject);
     res.send(boatUpdate);

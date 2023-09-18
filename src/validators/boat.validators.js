@@ -83,6 +83,7 @@ export const updateBoatsValidator = () => [
   body('pricing').isArray().optional(),
   body('pricing.*.type').isString().isIn(pricingTypeEnum).optional(),
   body('pricing.*.min').isNumeric().optional(),
+  body('captained').isBoolean().optional(),
 ];
 
 export const deleteBoatsValidator = () => [
