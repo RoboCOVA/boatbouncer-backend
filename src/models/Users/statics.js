@@ -2,7 +2,6 @@ import { startSession } from 'mongoose';
 import httpStatus from 'http-status';
 import bcrypt from 'bcrypt';
 import Stripe from 'stripe';
-import { add, isBefore } from 'date-fns';
 import { identityToolkit } from '../../config/googleApis';
 import APIError from '../../errors/APIError';
 import {
@@ -23,7 +22,6 @@ import {
   existingStripCustomerNotFound,
   chargeEnableUpdateFailed,
   userNotVerified,
-  passwordResetSessionExp,
 } from './errors';
 import {
   stripeFailedUrl,
@@ -72,6 +70,7 @@ export async function verifyUser({
   phoneNumber,
   encryption,
 }) {
+  const Otp = this.model(modelNames.OTP);
   const matchQuery = { phoneNumber };
   if (encryption) {
     const decryptedId = decryptData(encryption);
@@ -104,6 +103,8 @@ export async function verifyUser({
       verified: true,
     }
   );
+
+  await Otp.findOneAndRemove({ phoneNumber });
 
   if (!verifiedUser) throw updateFailed;
   return verifiedUser;

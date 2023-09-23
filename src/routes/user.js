@@ -55,6 +55,13 @@ router.post(
 );
 
 router.post(
+  '/resendSms',
+  sendSmsValidator(),
+  parseValidationResult,
+  sendSmsController
+);
+
+router.post(
   '/forgetPassword',
   forgotPasswordValidator(),
   parseValidationResult,

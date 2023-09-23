@@ -16,6 +16,7 @@ export const modelNames = {
   ADMINSTRATORS: 'Adminstrators',
   SETTINGS: 'Settings',
   FAVORITES: 'Favorites',
+  OTP: 'Otp',
 };
 
 export const categories = {

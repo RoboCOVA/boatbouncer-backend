@@ -1,6 +1,7 @@
 import passport from 'passport';
 import { identityToolkit } from '../config/googleApis';
 import Users from '../models/Users';
+import Otp from '../models/Otp';
 
 export const createUserController = async (req, res, next) => {
   try {
@@ -60,6 +61,21 @@ export const sendSmsController = async (req, res, next) => {
     });
 
     res.send(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resendSmsController = async (req, res, next) => {
+  try {
+    const { phoneNumber, recaptchaToken } = req.body;
+
+    const resendOTP = await Otp.handleResendSMSCode({
+      phoneNumber,
+      recaptchaToken,
+    });
+
+    res.send(resendOTP);
   } catch (error) {
     next(error);
   }
