@@ -1,5 +1,3 @@
-import httpStatus from 'http-status';
-import APIError from '../../errors/APIError';
 import { canResendVerificationSMS } from './utils';
 // eslint-disable-next-line import/no-cycle
 import OTP from './index';
@@ -52,11 +50,5 @@ export async function handleResendSMSCode({ phoneNumber, recaptchaToken }) {
     };
   }
 
-  // Throw interval error when if not able to re-send within a given interval
-  const intervalError = new APIError(
-    `Can not resend SMS with this interval. Resend available at ${canResendAt}`,
-    httpStatus.NOT_ACCEPTABLE,
-    true
-  );
-  throw intervalError;
+  return canResendAt;
 }
