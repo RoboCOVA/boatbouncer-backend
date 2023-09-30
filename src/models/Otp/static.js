@@ -12,6 +12,7 @@ export async function handleResendSMSCode({ phoneNumber, recaptchaToken }) {
     const otp = {
       phoneNumber,
       numberOfTrials: 1,
+      lastSMSTime: new Date(),
     };
     const resendEntry = await OTP.create(otp);
 
@@ -45,7 +46,9 @@ export async function handleResendSMSCode({ phoneNumber, recaptchaToken }) {
 
     return {
       data: {
-        ...existingEntry.clean(),
+        lastSMSTime: existingEntry.lastSMSTime,
+        numberOfTrials: existingEntry.lastSMSTime,
+        phoneNumber,
         canResendAt: nextValidTime,
       },
     };
