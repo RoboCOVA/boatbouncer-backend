@@ -11,6 +11,7 @@ export async function handleResendSMSCode({ phoneNumber, recaptchaToken }) {
   if (!existingEntry) {
     const otp = {
       phoneNumber,
+      numberOfTrials: 1,
     };
     const resendEntry = await OTP.create(otp);
 
