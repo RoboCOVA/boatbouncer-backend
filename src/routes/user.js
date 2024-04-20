@@ -10,6 +10,7 @@ import {
   getCurrentUserController,
   getPaymentMethodController,
   loginController,
+  resendSmsController,
   sendSmsController,
   updateMethodController,
   updateUserController,
@@ -58,7 +59,7 @@ router.post(
   '/resendSms',
   sendSmsValidator(),
   parseValidationResult,
-  sendSmsController
+  resendSmsController
 );
 
 router.post(

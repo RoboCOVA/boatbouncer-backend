@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { modelNames } from '../constants';
 
 const otpSchema = new mongoose.Schema({
   phoneNumber: { type: String, required: true },
