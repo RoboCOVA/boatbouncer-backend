@@ -164,6 +164,25 @@ export const updateUserController = async (req, res, next) => {
   }
 };
 
+export const updateUserProfilePictureController = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const {
+      profilePicture,
+    } = req.body;
+
+    const updateObject = {};
+    const matchQuery = { _id: userId };
+
+    if (profilePicture) updateObject.profilePicture = profilePicture;
+
+    const user = await Users.updateUser({ matchQuery, updateObject });
+    res.send(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const loginController = (req, res, next) => {
   passport.authenticate('local', (error, user, message) => {
     if (error || !user) {
