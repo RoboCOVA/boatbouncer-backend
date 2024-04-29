@@ -9,7 +9,7 @@ const envSchema = Joi.object({
     .allow('development', 'test', 'production')
     .default('development'),
   MONGO_URL: Joi.string().required().description('MongoDb connection URL'),
-  PORT: Joi.number().default(5001),
+  PORT: Joi.number().default(5000),
   JWT_KEY: Joi.string().required(),
   GOOGLE_CONSOLE_KEY: Joi.string().required(),
   CLOUDINARY_API_KEY: Joi.string().required(),
