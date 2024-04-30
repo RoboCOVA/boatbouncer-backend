@@ -14,6 +14,7 @@ import {
   sendSmsController,
   updateMethodController,
   updateUserController,
+  updateUserProfilePictureController,
   verifyUserController,
 } from '../controller/user';
 import parseValidationResult from '../validators/errors.parser';
@@ -27,6 +28,7 @@ import {
   sendSmsValidator,
   updateMethodValidator,
   updateUserValidator,
+  updateUserProfilePictureValidator,
   validateResetOTPValidator,
   verifyUserValidator,
 } from '../validators/user.validators';
@@ -95,6 +97,13 @@ router.put(
   updateUserValidator(),
   parseValidationResult,
   updateUserController
+);
+
+router.put(
+  '/updateProfilePicture/:userId',
+  updateUserProfilePictureValidator(),
+  parseValidationResult,
+  updateUserProfilePictureController
 );
 
 router.post('/login', loginValidator(), parseValidationResult, loginController);

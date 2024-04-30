@@ -138,6 +138,7 @@ export const pricingType = {
 export const pricingTypeEnum = generateEnumArrayFromObject(pricingType);
 export const publicResources = {
   BOAT: 'BOAT',
+  USER: 'USER',
 };
 
 export const publicResourcesEnum = generateEnumArrayFromObject(publicResources);

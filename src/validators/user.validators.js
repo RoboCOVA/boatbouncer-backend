@@ -68,6 +68,11 @@ export const updateUserValidator = () => [
   defaultValidators.phoneNumber.optional(),
 ];
 
+export const updateUserProfilePictureValidator = () => [
+  param('userId').isMongoId().withMessage('User Id is required'),
+  body('profilePicture').isString().withMessage('Profile Picture Url is required'),
+];
+
 export const loginValidator = () => [
   body('email').isEmail().withMessage('Email is required to login'),
   body('password').isString().withMessage('password is required'),
