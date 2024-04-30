@@ -23,6 +23,16 @@ const strategy = new Strategy(
         return done(NotFound, false);
       }
 
+      if (!user?.verified) {
+        const NotVerified = new APIError(
+          'User not verified',
+          httpStatus.NOT_FOUND,
+          true
+        );
+
+        return done(NotVerified, false);
+      }
+
       return done(false, user);
     } catch (error) {
       return done(error, null);

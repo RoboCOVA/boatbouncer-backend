@@ -1,10 +1,6 @@
 import mongoose, { Types } from 'mongoose';
-import {
-  boatFeaturesEnum,
-  currencyCodeEnum,
-  pricingTypeEnum,
-} from '../../utils/constants';
-import { modelNames } from '../constants';
+import { boatFeaturesEnum, pricingTypeEnum } from '../../utils/constants';
+import { categoriesEnum, modelNames, subCategoriesEnum } from '../constants';
 
 const locationSchema = {
   address: { type: String },
@@ -16,6 +12,7 @@ const locationSchema = {
 const pricingSchema = {
   type: { type: String, enum: pricingTypeEnum },
   min: { type: Number },
+  value: { type: Number },
 };
 
 const boatSchema = new mongoose.Schema(
@@ -26,7 +23,7 @@ const boatSchema = new mongoose.Schema(
     manufacturer: { type: String },
     model: { type: String },
     year: { type: Number },
-    length: { type: Number }, // measurment
+    length: { type: Number }, // measurement
     amenities: [{ type: String }],
     imageUrls: [{ type: String }],
     owner: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
@@ -35,14 +32,17 @@ const boatSchema = new mongoose.Schema(
       type: { type: String, enum: ['Point'] },
       coordinates: { type: [Number] },
     },
-    category: { type: String, required: true },
-    subCategory: [{ type: String, required: true }],
-    currency: { type: String, enum: currencyCodeEnum },
-    features: { type: String, enum: boatFeaturesEnum },
+    category: [{ type: String, enum: categoriesEnum }],
+    subCategory: [{ type: String, enum: subCategoriesEnum }],
+    currency: { type: String },
+    features: [{ type: String, enum: boatFeaturesEnum }],
     pricing: [pricingSchema],
     securityAllowance: { type: String, required: true },
+    captained: { type: Boolean, required: true },
   },
   { timestamps: true }
 );
+
+boatSchema.index({ latLng: '2dsphere' });
 
 export default boatSchema;

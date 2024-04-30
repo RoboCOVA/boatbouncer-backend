@@ -138,20 +138,53 @@ export const pricingType = {
 export const pricingTypeEnum = generateEnumArrayFromObject(pricingType);
 export const publicResources = {
   BOAT: 'BOAT',
+  USER: 'USER',
 };
 
 export const publicResourcesEnum = generateEnumArrayFromObject(publicResources);
 
 export const boatFeatures = {
-  ImplementAutoArray: 'implement Auto array',
-  Metal: 'Metal',
-  Panel: 'panel',
-  Bike: 'Bike',
-  Cheese: 'Cheese',
-  Borders: 'Borders',
-  Internal: 'Internal',
-  GardenJSONRustic: 'Garden JSON Rustic',
-  Buckinghamshire: 'Buckinghamshire',
+  AirConditioning: 'Air conditioning',
+  Anchor: 'Anchor',
+  Bathroom: 'Bathroom',
+  BluetoothAudio: 'Bluetooth audio',
+  Cooler: 'Cooler / ice chest',
+  DeckShower: 'Deck shower',
+  FishFinder: 'Fish finder',
+  Grill: 'Grill',
+  Livewell: 'Livewell / baitwell',
+  Refrigerator: 'Refrigerator',
+  RodHolders: 'Rod holders',
+  Shower: 'Shower',
+  Stereo: 'Stereo',
+  StereoAUXInput: 'Stereo AUX input',
+  SwimLadder: 'Swim ladder',
+  WiFi: 'WiFi',
 };
 
 export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
+
+export const bookingStatus = {
+  PENDING: 'Pending',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
+
+export const bookingStatusEnum = generateEnumArrayFromObject(bookingStatus);
+
+export const offerStatus = {
+  PENDING: 'Pending',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+  PROCESSING: 'Processing',
+};
+
+export const offerStatusEnum = generateEnumArrayFromObject(offerStatus);
+
+export const intentStatus = {
+  PENDING: 'Pending',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
+
+export const intentStatusEnum = generateEnumArrayFromObject(intentStatus);

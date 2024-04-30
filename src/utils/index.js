@@ -1,7 +1,38 @@
+/* eslint-disable camelcase */
+import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { isBefore, setMonth, setYear } from 'date-fns';
 import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
-import { jwtKey } from '../config/environments';
+import { cryptoSecret, jwtKey } from '../config/environments';
+
+// Encryption function
+export function encryptData(data) {
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(
+    'aes-256-cbc',
+    Buffer.from(cryptoSecret, 'hex'),
+    iv
+  );
+  let encryptedData = cipher.update(data, 'utf-8', 'hex');
+  encryptedData += cipher.final('hex');
+  return iv.toString('hex') + encryptedData;
+}
+
+// Decryption function
+export function decryptData(encryptedData) {
+  const iv = Buffer.from(encryptedData.slice(0, 32), 'hex');
+  // eslint-disable-next-line no-param-reassign
+  encryptedData = encryptedData.slice(32);
+  const decipher = crypto.createDecipheriv(
+    'aes-256-cbc',
+    Buffer.from(cryptoSecret, 'hex'),
+    iv
+  );
+  let decryptedData = decipher.update(encryptedData, 'hex', 'utf-8');
+  decryptedData += decipher.final('utf-8');
+  return decryptedData;
+}
 
 const phoneNumberUtil = PhoneNumberUtil.getInstance();
 /**
@@ -118,3 +149,23 @@ export const coordinateObjToGeoJson = ({
     landElevation,
   };
 };
+
+/**
+ * Express-validator custom date validator
+ * @param {String} date Date String
+ * @returns {Boolean}
+ */
+export const customDateValidator = (date) => {
+  const validDate = Date.parse(date);
+  if (validDate) {
+    return true;
+  }
+  return false;
+};
+
+export function checkMethodExpiration({ paymentMethod }) {
+  const { exp_month, exp_year } = paymentMethod;
+  const now = new Date();
+  const expirationDate = setMonth(setYear(new Date(), exp_year), exp_month);
+  return !isBefore(now, expirationDate);
+}

@@ -7,10 +7,11 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["prettier"],
+  "plugins": ["react", "prettier"],
   "ignorePatterns": "build/*",
   "extends": ["airbnb-base", "plugin:prettier/recommended"],
   "rules": {
+    "no-async-promise-executor": "off",
     "no-console": "warn",
     "no-unused-vars": "warn",
     "import/extensions": "off",

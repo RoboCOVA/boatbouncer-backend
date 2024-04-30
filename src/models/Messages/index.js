@@ -7,6 +7,8 @@ import { modelNames } from '../constants';
 messagesSchema.static(staticFunctions);
 messagesSchema.method(methodFunctions);
 
-const Messages = mongoose.model(modelNames.MESSAGES, messagesSchema);
+const Messages =
+  mongoose?.models?.[modelNames.MESSAGES] ||
+  mongoose.model(modelNames.MESSAGES, messagesSchema);
 
 export default Messages;

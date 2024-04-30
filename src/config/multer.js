@@ -29,7 +29,7 @@ const imagesOnlyFilter = (req, file, cb) => {
 const getMultipleImageUploaderOption = (resource) => {
   const option = {
     dest: `${__dirname}/temp`,
-    fileFilter: imagesOnlyFilter,
+    // fileFilter: imagesOnlyFilter,
     limits: {
       files: getResourceBasedMaxUploadFileLimit(resource),
       fileSize: uploadImageSizeLimitInMB * 1024 * 1024, // 1 * 1024 *1024 = 1MB

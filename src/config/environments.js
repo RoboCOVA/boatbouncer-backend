@@ -16,6 +16,16 @@ const envSchema = Joi.object({
   CLOUDINARY_API_SECRET: Joi.string().required(),
   CLOUD_NAME: Joi.string().required(),
   UPLOAD_IMAGE_SIZE_LIMIT_IN_MB: Joi.number().required(),
+  STRIPE_PUBLISHABLE_KEY: Joi.string().required(),
+  STRIPE_SECRET_KEY: Joi.string().required(),
+  WEBHOOK_SECRET: Joi.string().required(),
+  COOKIE_NAME: Joi.string().required(),
+  COOKIE_PASSWORD: Joi.string().required(),
+  CRYPTO_SECRET: Joi.string().required(),
+  ADMIN_PASSWORD: Joi.string().required(),
+  ADMIN_EMAIL: Joi.string().email().required(),
+  STRIPE_SUCCESS_URL: Joi.string().required(),
+  STRIPE_FAILED_URL: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -36,3 +46,13 @@ export const cloudinaryApiKey = value.CLOUDINARY_API_KEY;
 export const cloudinaryName = value.CLOUD_NAME;
 export const cloudinaryApiSecret = value.CLOUDINARY_API_SECRET;
 export const uploadImageSizeLimitInMB = value.UPLOAD_IMAGE_SIZE_LIMIT_IN_MB;
+export const stripePublishKey = value.STRIPE_PUBLISHABLE_KEY;
+export const stripeSecretKey = value.STRIPE_SECRET_KEY;
+export const endpointSecret = value.WEBHOOK_SECRET;
+export const cookieName = value.COOKIE_NAME;
+export const cookiePassword = value.COOKIE_PASSWORD;
+export const cryptoSecret = value.CRYPTO_SECRET;
+export const adminPass = value.ADMIN_PASSWORD;
+export const adminEmail = value.ADMIN_EMAIL;
+export const stripeSuccessUrl = value.STRIPE_SUCCESS_URL;
+export const stripeFailedUrl = value.STRIPE_FAILED_URL;

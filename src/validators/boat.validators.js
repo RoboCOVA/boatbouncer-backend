@@ -1,6 +1,7 @@
-import { body, param } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import { boatFeaturesEnum, pricingTypeEnum } from '../utils/constants';
 import defaultValidators from './default.validator';
+import { categoriesEnum } from '../models/constants';
 
 export const createBoatValidator = () => [
   body('boatName').isString().withMessage('Boat Name is required'),
@@ -20,10 +21,13 @@ export const createBoatValidator = () => [
   body('location.zipCode').isString().optional(),
   body('latLng.latitude').isNumeric().optional(),
   body('latLng.longitude').isNumeric().optional(),
-  body('category').isString().withMessage('Category is required'),
-  body('subCategory').isArray().withMessage('Sub category is required'),
-  body('subCategory.*').isString().withMessage('Sub category is required'),
-  body('features')
+  body('category').isArray().optional(),
+  body('category.*').isString().isIn(categoriesEnum).optional(),
+  body('currency').isString().optional(),
+  body('subCategory').isArray().optional(),
+  body('subCategory.*').isString().optional(),
+  body('features').isArray().withMessage('Features is required'),
+  body('features.*')
     .isString()
     .isIn(boatFeaturesEnum)
     .withMessage('Features is required'),
@@ -36,6 +40,8 @@ export const createBoatValidator = () => [
     .isIn(pricingTypeEnum)
     .withMessage('Pricing type is required'),
   body('pricing.*.min').isNumeric().withMessage('Pricing Min is required'),
+  body('pricing.*.value').isNumeric().withMessage('Pricing Value is required'),
+  body('captained').isBoolean().withMessage('Captained is required'),
 ];
 
 export const getBoatValidator = () => [
@@ -66,16 +72,27 @@ export const updateBoatsValidator = () => [
   body('location.zipCode').isString().optional(),
   body('latLng.latitude').isNumeric().optional(),
   body('latLng.longitude').isNumeric().optional(),
-  body('category').isString().optional(),
+  body('category').isArray().optional(),
+  body('category.*').isString().isIn(categoriesEnum).optional(),
+  body('currency').isString().optional(),
   body('subCategory').isArray().optional(),
   body('subCategory.*').isString().optional(),
-  body('features').isString().isIn(boatFeaturesEnum).optional(),
+  body('features').isArray().optional(),
+  body('features.*').isString().isIn(boatFeaturesEnum).optional(),
   body('securityAllowance').isString().optional(),
   body('pricing').isArray().optional(),
   body('pricing.*.type').isString().isIn(pricingTypeEnum).optional(),
   body('pricing.*.min').isNumeric().optional(),
+  body('captained').isBoolean().optional(),
 ];
 
 export const deleteBoatsValidator = () => [
   param('boatId').isMongoId().optional(),
+];
+
+export const addToFavoriteValidator = () => [param('boatId').isMongoId()];
+
+export const getBoatListingValidator = () => [
+  defaultValidators.pageNo,
+  defaultValidators.size,
 ];
