@@ -1,6 +1,7 @@
 import passport from 'passport';
 import { identityToolkit } from '../config/googleApis';
 import Users from '../models/Users';
+import Boats from '../models/Boats';
 import Otp from '../models/Otp';
 
 export const createUserController = async (req, res, next) => {
@@ -167,9 +168,7 @@ export const updateUserController = async (req, res, next) => {
 export const updateUserProfilePictureController = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const {
-      profilePicture,
-    } = req.body;
+    const { profilePicture } = req.body;
 
     const updateObject = {};
     const matchQuery = { _id: userId };
@@ -208,6 +207,7 @@ export const attachPaymentMethodController = async (req, res, next) => {
     const userId = req?.user?._id;
     const { methodId } = req.params;
     const createAccount = await Users.attachPaymentMethod({ userId, methodId });
+    Boats.updateBoat({ owner: userId }, { searchable: true });
     res.send(createAccount);
   } catch (error) {
     next(error);

@@ -3,6 +3,7 @@ import Favorites from '../models/Favorites';
 import { categoriesEnum, subCategoriesEnum } from '../models/constants';
 import { coordinateObjToGeoJson } from '../utils';
 import { boatFeaturesEnum } from '../utils/constants';
+import Users from '../models/Users';
 
 export const createBoatController = async (req, res, next) => {
   try {
@@ -31,6 +32,8 @@ export const createBoatController = async (req, res, next) => {
 
     const parsedLocation = latLng ? coordinateObjToGeoJson(latLng) : undefined;
 
+    const hasPaymentMethod = await Users.hasPaymentMethod({ userId });
+
     const newBoat = new Boats({
       boatName,
       boatType,
@@ -51,6 +54,7 @@ export const createBoatController = async (req, res, next) => {
       securityAllowance,
       owner: userId,
       captained,
+      searchable: hasPaymentMethod,
     });
 
     const boat = await newBoat.createBoat();
@@ -89,6 +93,7 @@ export const getBoatsController = async (req, res, next) => {
     if (bbox) filter.bbox = typeof bbox === 'string' ? JSON.parse(bbox) : bbox;
 
     filter.captained = captained;
+    filter.searchable = true;
 
     const boats = await Boats.getBoats({
       pageNo,

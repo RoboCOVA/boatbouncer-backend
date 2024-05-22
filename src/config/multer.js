@@ -1,6 +1,4 @@
-import httpStatus from 'http-status';
 import multer from 'multer';
-import APIError from '../errors/APIError';
 import { publicResources } from '../utils/constants';
 import { uploadImageSizeLimitInMB } from './environments';
 
@@ -10,19 +8,6 @@ const getResourceBasedMaxUploadFileLimit = (resource) => {
       return 6;
     default:
       return 1;
-  }
-};
-
-const imagesOnlyFilter = (req, file, cb) => {
-  if (typeof file.mimetype === 'string' && file.mimetype.startsWith('image')) {
-    cb(null, true);
-  } else {
-    const fileTypeError = new APIError(
-      'Unsuported file upload',
-      httpStatus.BAD_REQUEST
-    );
-
-    cb(fileTypeError, false);
   }
 };
 
