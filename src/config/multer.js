@@ -13,6 +13,7 @@ const getResourceBasedMaxUploadFileLimit = (resource) => {
   }
 };
 
+// eslint-disable-next-line no-unused-vars
 const imagesOnlyFilter = (req, file, cb) => {
   if (typeof file.mimetype === 'string' && file.mimetype.startsWith('image')) {
     cb(null, true);

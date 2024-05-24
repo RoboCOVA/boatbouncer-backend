@@ -94,3 +94,24 @@ export const getBookingController = async (req, res, next) => {
     next(error);
   }
 };
+
+// Get canceled bookings
+/**
+ * It gets the canceled bookings for a user.
+ * @param req - {
+ * @param res - {
+ * @param next - is a function that you call to pass control to the next middleware function.
+ */
+export const getCanceledBookingsController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id || ' ';
+    const { isRenter } = req.query;
+    const canceledBookings = await Bookings.getCanceledBookings({
+      userId,
+      isRenter,
+    });
+    res.send(canceledBookings);
+  } catch (error) {
+    next(error);
+  }
+};
