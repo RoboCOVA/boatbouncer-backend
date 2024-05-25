@@ -105,10 +105,10 @@ export const getBookingController = async (req, res, next) => {
 export const getCanceledBookingsController = async (req, res, next) => {
   try {
     const userId = req?.user?._id || ' ';
-    const { isRenter } = req.query;
+    const { as } = req.query;
     const canceledBookings = await Bookings.getCanceledBookings({
       userId,
-      isRenter,
+      as,
     });
     res.send(canceledBookings);
   } catch (error) {

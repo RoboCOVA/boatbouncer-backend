@@ -160,9 +160,9 @@ export async function checkAvailability({ boatId, start, end }) {
  * Get canceled bookings
  * @returns An array of canceled bookings
  */
-export async function getCanceledBookings({ userId, isRenter }) {
+export async function getCanceledBookings({ userId, as }) {
   const matchQuery = { status: bookingStatus.CANCELLED };
-  if (isRenter === 'true') {
+  if (as === 'renter') {
     matchQuery.renter = userId;
   } else matchQuery.owner = userId;
   const bookings = await this.find(matchQuery).populate([
