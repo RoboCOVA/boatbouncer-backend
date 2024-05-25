@@ -44,6 +44,6 @@ export const getBookingValidator = () => [
 export const getCanceledBookingsValidator = () => [
   query('isRenter')
     .isBoolean()
-    .custom((value) => value === 'true')
+    .custom((value) => value === 'true' || 'false')
     .optional(),
 ];

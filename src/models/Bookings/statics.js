@@ -162,7 +162,7 @@ export async function checkAvailability({ boatId, start, end }) {
  */
 export async function getCanceledBookings({ userId, isRenter }) {
   const matchQuery = { status: bookingStatus.CANCELLED };
-  if (isRenter) {
+  if (isRenter === 'true') {
     matchQuery.renter = userId;
   } else matchQuery.owner = userId;
   const bookings = await this.find(matchQuery).populate([
