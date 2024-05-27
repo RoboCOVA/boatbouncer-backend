@@ -70,7 +70,9 @@ export const updateUserValidator = () => [
 
 export const updateUserProfilePictureValidator = () => [
   param('userId').isMongoId().withMessage('User Id is required'),
-  body('profilePicture').isString().withMessage('Profile Picture Url is required'),
+  body('profilePicture')
+    .isString()
+    .withMessage('Profile Picture Url is required'),
 ];
 
 export const loginValidator = () => [

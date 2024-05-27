@@ -167,9 +167,7 @@ export const updateUserController = async (req, res, next) => {
 export const updateUserProfilePictureController = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const {
-      profilePicture,
-    } = req.body;
+    const { profilePicture } = req.body;
 
     const updateObject = {};
     const matchQuery = { _id: userId };
