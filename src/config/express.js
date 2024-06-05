@@ -31,6 +31,9 @@ app.use(adminJs.options.rootPath, adminRoute);
 // Secure middlewares
 app.use(helmet());
 
+// use static files
+app.use(express.static(`${__dirname}/../../public`));
+
 // Stripe Webhook Listener
 app.use(
   '/webhook/boatBouncer',

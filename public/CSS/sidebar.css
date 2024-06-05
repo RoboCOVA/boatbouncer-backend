@@ -1,0 +1,8 @@
+:root {
+  --sidebar-bg-color: lightblue;
+  --sidebar-text-color: #dfe5ec;
+}
+
+section[data-css='sidebar'] {
+  background-color: var(--sidebar-bg-color) !important;
+}

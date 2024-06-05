@@ -12,6 +12,9 @@ import { ConversationsResource } from './resources/conversations';
 AdminJS.registerAdapter(AdminJSMongoose);
 
 export const adminJs = new AdminJS({
+  assets: {
+    styles: ['/CSS/sidebar.css'], // add assets path
+  },
   databases: [], // We don’t have any resources connected yet.
   resources: [
     AdminResource,
