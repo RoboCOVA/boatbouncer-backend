@@ -5,9 +5,28 @@ export const OfferResource = {
   options: {
     properties: {
       _id: {
+        isVisible: false,
+      },
+      bookId: {
         isVisible: {
           list: false,
           edit: false,
+          show: true,
+          filter: false,
+        },
+      },
+      paymentServiceFee: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: false,
+        },
+      },
+      localTax: {
+        isVisible: {
+          list: false,
+          edit: true,
           show: true,
           filter: false,
         },

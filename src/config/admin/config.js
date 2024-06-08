@@ -13,7 +13,7 @@ AdminJS.registerAdapter(AdminJSMongoose);
 
 export const adminJs = new AdminJS({
   assets: {
-    styles: ['/CSS/sidebar.css'], // add assets path
+    styles: ['/CSS/style.css'], // add assets path
   },
   databases: [], // We don’t have any resources connected yet.
   resources: [
@@ -33,4 +33,7 @@ export const adminJs = new AdminJS({
   },
   dashboard: { component: AdminJS.bundle('./components/dashboard') },
   rootPath: '/admin', // Path to the AdminJS dashboard.
+  session: {
+    cookieMaxAge: 60 * 60 * 1000,
+  },
 });

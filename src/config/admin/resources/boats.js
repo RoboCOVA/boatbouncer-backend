@@ -5,12 +5,7 @@ export const BoatsResource = {
   options: {
     properties: {
       _id: {
-        isVisible: {
-          list: false,
-          edit: false,
-          show: true,
-          filter: false,
-        },
+        isVisible: false,
       },
       createdAt: {
         isVisible: {
@@ -24,6 +19,38 @@ export const BoatsResource = {
         isVisible: {
           list: false,
           edit: false,
+          show: false,
+          filter: false,
+        },
+      },
+      description: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
+      manufacturer: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
+      model: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
+      year: {
+        isVisible: {
+          list: false,
+          edit: true,
           show: true,
           filter: true,
         },
