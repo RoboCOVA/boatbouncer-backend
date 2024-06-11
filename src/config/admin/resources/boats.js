@@ -1,4 +1,5 @@
 import Boats from '../../../models/Boats';
+import { components } from '../components/components';
 
 export const BoatsResource = {
   resource: Boats,
@@ -40,6 +41,10 @@ export const BoatsResource = {
         },
       },
       imageUrls: {
+        components: {
+          show: components.MyImage,
+          edit: components.MyImage,
+        },
         isVisible: {
           list: false,
           edit: true,
