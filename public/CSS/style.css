@@ -20,3 +20,11 @@ section[data-css='Boats-list-table-wrapper'] > thead tr {
   justify-content: space-between;
   /* flex-wrap: wrap; */
 }
+
+.status-button {
+  padding: 4px;
+  border-radius: 7px;
+  color: #fff;
+  width: 70px;
+  border: none;
+}

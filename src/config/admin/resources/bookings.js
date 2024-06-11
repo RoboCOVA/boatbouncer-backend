@@ -1,4 +1,5 @@
 import Bookings from '../../../models/Bookings';
+import { components } from '../components/components';
 
 export const BookingResource = {
   resource: Bookings,
@@ -58,6 +59,30 @@ export const BookingResource = {
           edit: true,
           show: true,
           filter: false,
+        },
+      },
+      status: {
+        components: {
+          list: components.StatusButton,
+          show: components.StatusButton,
+        },
+        isVisible: {
+          list: true,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
+      type: {
+        components: {
+          list: components.TypeButton,
+          show: components.TypeButton,
+        },
+        isVisible: {
+          list: true,
+          edit: true,
+          show: true,
+          filter: true,
         },
       },
       createdAt: {

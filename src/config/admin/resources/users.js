@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import Users from '../../../models/Users';
+import { components } from '../components/components';
 
 export const UsersResource = {
   resource: Users,
@@ -72,6 +73,18 @@ export const UsersResource = {
       zipCode: {
         isVisible: {
           list: false,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
+      verified: {
+        components: {
+          list: components.VerificationButton,
+          show: components.VerificationButton,
+        },
+        isVisible: {
+          list: true,
           edit: true,
           show: true,
           filter: true,
