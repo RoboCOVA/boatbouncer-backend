@@ -8,10 +8,14 @@ import { BoatsResource } from './resources/boats';
 import { BookingResource } from './resources/bookings';
 import { SettingsResource } from './resources/settings';
 import { ConversationsResource } from './resources/conversations';
+import { componentLoader } from './components/components';
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
 export const adminJs = new AdminJS({
+  assets: {
+    styles: ['/CSS/style.css'], // add assets path
+  },
   databases: [], // We don’t have any resources connected yet.
   resources: [
     AdminResource,
@@ -23,6 +27,7 @@ export const adminJs = new AdminJS({
     SettingsResource,
     ConversationsResource,
   ],
+  componentLoader,
   branding: {
     companyName: 'Boat Bouncer',
     withMadeWithLove: false,
@@ -30,4 +35,9 @@ export const adminJs = new AdminJS({
   },
   dashboard: { component: AdminJS.bundle('./components/dashboard') },
   rootPath: '/admin', // Path to the AdminJS dashboard.
+  session: {
+    cookieMaxAge: 60 * 60 * 1000,
+  },
 });
+
+adminJs.watch();
