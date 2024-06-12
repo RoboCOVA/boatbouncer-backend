@@ -1,6 +1,4 @@
-import httpStatus from 'http-status';
 import multer from 'multer';
-import APIError from '../errors/APIError';
 import { publicResources } from '../utils/constants';
 import { uploadImageSizeLimitInMB } from './environments';
 
@@ -13,7 +11,6 @@ const getResourceBasedMaxUploadFileLimit = (resource) => {
   }
 };
 
-// eslint-disable-next-line no-unused-vars
 const imagesOnlyFilter = (req, file, cb) => {
   if (typeof file.mimetype === 'string' && file.mimetype.startsWith('image')) {
     cb(null, true);

@@ -12,6 +12,7 @@ export async function getBoats({ pageNo, size, filter }) {
   const {
     boatName,
     captained,
+    searchable,
     category,
     subCategory,
     features,
@@ -35,6 +36,7 @@ export async function getBoats({ pageNo, size, filter }) {
   if (subCategory)
     match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
   if (typeof captained === 'boolean') match.captained = captained;
+  if (typeof searchable === 'boolean') match.searchable = searchable;
 
   if (bbox?.length && Array.isArray(bbox)) {
     const boundingBox = [
@@ -114,6 +116,7 @@ export async function getBoats({ pageNo, size, filter }) {
         pricing: 1,
         securityAllowance: 1,
         captained: 1,
+        searchable: 1,
       },
     },
     {
@@ -173,8 +176,16 @@ export async function getBoats({ pageNo, size, filter }) {
 }
 
 export async function getBoatListings({ pageNo, size, userId, filter }) {
-  const { boatName, address, city, state, captained, category, subCategory } =
-    filter || {};
+  const {
+    boatName,
+    address,
+    city,
+    state,
+    captained,
+    searchable,
+    category,
+    subCategory,
+  } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
   const query = {};
   query.owner = userId;
@@ -187,6 +198,8 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
   if (subCategory) query.subCategory = subCategory;
   if (typeof captained === 'boolean') query.captained = captained;
   else if (captained) query.captained = captained;
+  if (typeof searchable === 'boolean') query.searchable = searchable;
+  else if (searchable) query.searchable = searchable;
 
   const boats = await this.find(
     query,
