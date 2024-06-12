@@ -144,22 +144,26 @@ export const publicResources = {
 export const publicResourcesEnum = generateEnumArrayFromObject(publicResources);
 
 export const boatFeatures = {
-  AirConditioning: 'Air conditioning',
-  Anchor: 'Anchor',
+  BluetoothCapable: 'Bluetooth capable',
+  PremiumSoundSystem: 'Premium sound system',
   Bathroom: 'Bathroom',
-  BluetoothAudio: 'Bluetooth audio',
-  Cooler: 'Cooler / ice chest',
-  DeckShower: 'Deck shower',
-  FishFinder: 'Fish finder',
   Grill: 'Grill',
-  Livewell: 'Livewell / baitwell',
+  Kitchen: 'Kitchen',
   Refrigerator: 'Refrigerator',
-  RodHolders: 'Rod holders',
-  Shower: 'Shower',
-  Stereo: 'Stereo',
-  StereoAUXInput: 'Stereo AUX input',
   SwimLadder: 'Swim ladder',
-  WiFi: 'WiFi',
+  SunBed: 'Sun bed',
+  BiminiShade: 'Bimini / shade',
+  Heater: 'Heater',
+  AC: 'A/C',
+  FishFinder: 'Fish finder',
+  FishingRodHolders: 'Fishing rod holders',
+  LiveWell: 'Live well',
+  TrollingMotor: 'Trolling motor',
+  Cabin: 'Cabin',
+  WaterSportsCapable: 'Water sports capable',
+  Wifi: 'Wifi',
+  Shower: 'Shower',
+  RgbLights: 'RGB lights',
 };
 
 export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
