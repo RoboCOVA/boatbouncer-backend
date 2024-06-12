@@ -27,10 +27,7 @@ export const createBoatValidator = () => [
   body('subCategory').isArray().optional(),
   body('subCategory.*').isString().optional(),
   body('features').isArray().withMessage('Features is required'),
-  body('features.*')
-    .isString()
-    .isIn(boatFeaturesEnum)
-    .withMessage('Features is required'),
+  body('features.*').isString().withMessage('Features is required'),
   body('securityAllowance')
     .isString()
     .withMessage('SecurityAllowance is required'),
