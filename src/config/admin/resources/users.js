@@ -16,17 +16,28 @@ export const UsersResource = {
         },
       },
       _id: {
+        isVisible: false,
+      },
+      profilePicture: {
         isVisible: {
           list: false,
-          edit: false,
+          edit: true,
           show: true,
-          filter: false,
+          filter: true,
         },
       },
       password: {
         isVisible: false,
       },
       firstName: {
+        isVisible: {
+          list: true,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
+      email: {
         isVisible: {
           list: false,
           edit: true,
@@ -35,6 +46,30 @@ export const UsersResource = {
         },
       },
       lastName: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
+      city: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
+      state: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
+      zipCode: {
         isVisible: {
           list: false,
           edit: true,

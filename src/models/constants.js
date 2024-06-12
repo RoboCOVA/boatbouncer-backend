@@ -40,7 +40,6 @@ export const subCategories = {
   Airboat: 'Airboat',
   ElectricBoat: 'Electric Boat',
   Power: 'Power',
-  PowerboatLessons: 'Powerboat Lessons',
 };
 
 export const subCategoriesEnum = generateEnumArrayFromObject(subCategories);

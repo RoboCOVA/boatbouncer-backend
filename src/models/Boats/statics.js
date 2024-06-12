@@ -1,5 +1,7 @@
 import { getPaginationValues } from '../../utils';
 import { boatDeleteFailed, boatNotFound, boatUpdateFailed } from './errors';
+import Bookings from '../Bookings';
+import { bookingStatus } from '../../utils/constants';
 
 /**
  * It returns a list of boats, with a total count of all boats, based on the page number and size of
@@ -204,8 +206,25 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
     {},
     { skip, limit, sort: { createdAt: -1 } }
   );
+
+  // get copy of boats
+  const copyOfBoats = JSON.parse(JSON.stringify(boats));
+  // add booked count to each boat
+  await Promise.all(
+    copyOfBoats.map(async (boat) => {
+      const matchQuery = {
+        boatId: { $in: boat._id },
+        status: { $nin: [bookingStatus.CANCELLED] },
+      };
+      const numofboatbooked = await Bookings.countDocuments(matchQuery);
+      // eslint-disable-next-line no-param-reassign
+      boat.count = numofboatbooked;
+      return boat;
+    })
+  );
+
   const total = await this.count(query);
-  return { data: boats, total };
+  return { data: copyOfBoats, total };
 }
 
 /**

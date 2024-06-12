@@ -15,20 +15,10 @@ export const SettingsResource = {
         },
       },
       createdAt: {
-        isVisible: {
-          show: true,
-          edit: false,
-          list: true,
-          filter: false,
-        },
+        isVisible: false,
       },
       updatedAt: {
-        isVisible: {
-          show: true,
-          edit: false,
-          list: true,
-          filter: false,
-        },
+        isVisible: false,
       },
     },
     actions: {},

@@ -11,6 +11,19 @@ const getResourceBasedMaxUploadFileLimit = (resource) => {
   }
 };
 
+const imagesOnlyFilter = (req, file, cb) => {
+  if (typeof file.mimetype === 'string' && file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    const fileTypeError = new APIError(
+      'Unsuported file upload',
+      httpStatus.BAD_REQUEST
+    );
+
+    cb(fileTypeError, false);
+  }
+};
+
 const getMultipleImageUploaderOption = (resource) => {
   const option = {
     dest: `${__dirname}/temp`,
