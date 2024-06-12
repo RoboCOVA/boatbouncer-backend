@@ -20,15 +20,13 @@ export const modelNames = {
 };
 
 export const categories = {
-  PowerboatsPontoonsAndRIBs: 'Powerboats, pontoons and RIBs',
-  Sailing: 'Sailing',
-  LuxMotor: 'Luxury motor yachts and bigger groups',
-  Fishing: 'Fishing',
-  JetskisWaterFly: 'Jet Skis, Water Skis and fly boards',
-  HouseboatsAndOvernighters: 'Houseboats and Overnighters',
-  ToursLessonsAndDiving: 'Tours, lessons and diving',
-  BoardsAndPaddles: 'Boards and Paddles',
-  FerriesAndTaxis: 'Ferries and Taxis',
+  Charters: 'Charters',
+  Lessons: 'Lessons',
+  IndividualRentals: 'Individual Rentals',
+  Tours: 'Tours',
+  Certifications: 'Certifications',
+  FerriesAndWaterTaxis: 'Ferries and Water Taxis',
+  PartyCruise: 'Party Cruises',
 };
 
 export const categoriesEnum = generateEnumArrayFromObject(categories);
@@ -36,11 +34,14 @@ export const categoriesEnum = generateEnumArrayFromObject(categories);
 export const modelNamesEnum = generateEnumArrayFromObject(modelNames);
 
 export const subCategories = {
-  RIB: 'RIB',
-  Airboat: 'Airboat',
-  ElectricBoat: 'Electric Boat',
-  Power: 'Power',
-  PowerboatLessons: 'Powerboat Lessons',
+  PowerRIBPontoon: 'Power/RIB/Pontoon',
+  Sailing: 'Sailing',
+  HumanPowered: 'Human Powered',
+  PWCJetski: 'PWC/Jetski',
+  Fishing: 'Fishing',
+  LuxuryYachts: 'Luxury/Yachts',
+  HouseBoats: 'House Boats',
+  EventVessels: 'Event Vessels',
 };
 
 export const subCategoriesEnum = generateEnumArrayFromObject(subCategories);
