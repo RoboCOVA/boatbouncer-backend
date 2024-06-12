@@ -155,3 +155,42 @@ export async function checkAvailability({ boatId, start, end }) {
   if (bookings?.length) return false;
   return true;
 }
+
+/**
+ * Get canceled bookings
+ * @returns An array of canceled bookings
+ */
+export async function getCanceledBookings({ userId, as }) {
+  const matchQuery = { status: bookingStatus.CANCELLED };
+  if (as === 'renter') {
+    matchQuery.renter = userId;
+  } else matchQuery.owner = userId;
+  const bookings = await this.find(matchQuery).populate([
+    {
+      path: 'renter',
+      select: [
+        '-password',
+        '-stripeCustomerId',
+        '-stripeAccountId',
+        '-chargesEnabled',
+      ],
+    },
+    {
+      path: 'owner',
+      select: [
+        '-password',
+        '-stripeCustomerId',
+        '-stripeAccountId',
+        '-chargesEnabled',
+      ],
+    },
+    {
+      path: 'offerId',
+    },
+    {
+      path: 'boatId',
+    },
+  ]);
+  const total = await this.count(matchQuery);
+  return { data: bookings, total };
+}

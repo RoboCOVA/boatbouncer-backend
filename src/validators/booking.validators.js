@@ -40,3 +40,10 @@ export const getBookingValidator = () => [
     .custom((value) => value === 'true')
     .optional(),
 ];
+
+export const getCanceledBookingsValidator = () => [
+  query('as')
+    .isString()
+    .custom((value) => value === 'renter' || 'owner')
+    .optional(),
+];
