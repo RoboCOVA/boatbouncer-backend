@@ -181,6 +181,14 @@ export async function authenticateUser(email, password) {
   throw doesntMatchError;
 }
 
+export async function getUserById({ userId }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+
+  const clean = await user.clean();
+  return clean;
+}
+
 export async function getCurrentUser({ userId }) {
   const user = await this.findOne({ _id: userId });
   if (!user) throw userNotFound;
