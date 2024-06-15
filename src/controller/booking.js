@@ -34,12 +34,12 @@ export const createBookingController = async (req, res, next) => {
 
     const savedReservation = await booking.createBooking();
 
-    const renterPhoneNumber = owner.phoneNumber;
+    const ownerPhoneNumber = owner.phoneNumber;
 
     const requesterFirstName = req?.user?.firstName ?? '';
     const requesterLastName = req?.user?.lastName ?? '';
 
-    sendMessage(renterPhoneNumber, 'bookingRequest', {
+    sendMessage(ownerPhoneNumber, 'bookingRequest', {
       requesterFirstName,
       requesterLastName,
     });

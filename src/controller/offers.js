@@ -1,5 +1,7 @@
 import Offers from '../models/Offers';
 import { bookingStatus } from '../utils/constants';
+import { sendMessage } from '../utils/twilio';
+import { getBooking } from '../models/Bookings/statics';
 
 export const createOfferController = async (req, res, next) => {
   try {
@@ -14,6 +16,12 @@ export const createOfferController = async (req, res, next) => {
       returnDate,
     } = req.body;
 
+    const booking = await getBooking({ bookId, userId, isRenter: true });
+    if (!booking) throw new Error('Booking not found');
+
+    const { renter } = booking;
+    if (!renter) throw new Error('Renter not found');
+
     const offer = new Offers({
       bookId,
       boatPrice,
@@ -27,6 +35,17 @@ export const createOfferController = async (req, res, next) => {
     });
 
     const savedOffer = await offer.createOffers();
+
+    const renterPhoneNumber = renter.phoneNumber;
+
+    const ownerFirstName = req?.user?.firstName ?? '';
+    const ownerLastName = req?.user?.lastName ?? '';
+
+    sendMessage(renterPhoneNumber, 'offerSent', {
+      ownerFirstName,
+      ownerLastName,
+    });
+
     res.send(savedOffer);
   } catch (error) {
     next(error);

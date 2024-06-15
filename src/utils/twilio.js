@@ -10,6 +10,8 @@ const disableSMSTemporary = true;
 const SMSTemplates = {
   bookingRequest:
     'A booking has been requested by <requesterFirstName> <requesterLastName>. Please check out on our website.',
+  offerSent:
+    'An offer has been sent to you by <ownerFirstName> <ownerLastName>. Please check out on our website.',
 };
 
 function fillTemplate(template, values) {
