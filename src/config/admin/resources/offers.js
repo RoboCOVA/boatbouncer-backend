@@ -1,4 +1,5 @@
 import Offers from '../../../models/Offers';
+import { components } from '../components/components';
 
 export const OfferResource = {
   resource: Offers,
@@ -23,7 +24,27 @@ export const OfferResource = {
           filter: false,
         },
       },
+      status: {
+        components: {
+          list: components.StatusButton,
+          show: components.StatusButton,
+        },
+        isVisible: {
+          list: true,
+          edit: true,
+          show: true,
+          filter: true,
+        },
+      },
       localTax: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: false,
+        },
+      },
+      captainPrice: {
         isVisible: {
           list: false,
           edit: true,

@@ -1,7 +1,4 @@
-import React from 'react';
-
 const ImageDisplay = (props) => {
-  console.log('img', props);
   const { record } = props;
 
   const imageUrls = [];
