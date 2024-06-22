@@ -36,7 +36,7 @@ export async function getBoats({ pageNo, size, filter }) {
   if (subCategory)
     match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
   if (typeof captained === 'boolean') match.captained = captained;
-  if (typeof searchable === 'boolean') match.searchable = searchable;
+  // if (typeof searchable === 'boolean') match.searchable = searchable;
 
   if (bbox?.length && Array.isArray(bbox)) {
     const boundingBox = [
