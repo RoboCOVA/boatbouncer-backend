@@ -5,9 +5,10 @@ export const AdminResource = {
   resource: Adminstrators,
   options: {
     properties: {
-      newPassword: {
+      _id: { isVisible: false },
+      password: {
         type: 'custom',
-        label: 'New Password',
+        label: 'Password',
         isVisible: {
           show: false,
           edit: true,
@@ -17,10 +18,6 @@ export const AdminResource = {
       },
       createdAt: { isVisible: false },
       updatedAt: { isVisible: false },
-      password: {
-        type: 'password',
-        isVisible: false,
-      },
     },
     actions: {
       new: {
@@ -36,12 +33,12 @@ export const AdminResource = {
       },
       edit: {
         before: async (request) => {
-          if (request?.payload?.newPassword) {
+          if (request?.payload?.password) {
             request.payload = {
               ...request.payload,
-              password: await bcrypt.hash(request.payload.newPassword, 10),
+              password: await bcrypt.hash(request.payload.password, 10),
             };
-            delete request.payload.newPassword;
+            delete request.payload.password;
           }
           return request;
         },
