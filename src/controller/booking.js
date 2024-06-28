@@ -1,5 +1,8 @@
 import Bookings from '../models/Bookings';
 import { bookingStatus } from '../utils/constants';
+import { sendMessage } from '../utils/twilio';
+import { getBoat } from '../models/Boats/statics';
+import { getUserById } from '../models/Users/statics';
 
 /**
  * It creates a new booking and saves it to the database.
@@ -11,6 +14,14 @@ export const createBookingController = async (req, res, next) => {
   try {
     const { boatId, type, duration, renterPrice, captainPrice } = req.body;
     const id = req?.user?._id;
+
+    const boat = await getBoat({ boatId });
+    if (!boat) throw new Error('Boat not found');
+
+    const ownerId = boat.owner;
+    const owner = await getUserById(ownerId);
+    if (!owner) throw new Error('Owner not found');
+
     const booking = new Bookings({
       boatId,
       type,
@@ -22,6 +33,17 @@ export const createBookingController = async (req, res, next) => {
     });
 
     const savedReservation = await booking.createBooking();
+
+    const ownerPhoneNumber = owner.phoneNumber;
+
+    const requesterFirstName = req?.user?.firstName ?? '';
+    const requesterLastName = req?.user?.lastName ?? '';
+
+    sendMessage(ownerPhoneNumber, 'bookingRequest', {
+      requesterFirstName,
+      requesterLastName,
+    });
+
     res.send(savedReservation);
   } catch (error) {
     next(error);
