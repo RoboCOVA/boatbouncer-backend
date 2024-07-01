@@ -170,6 +170,7 @@ export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
 
 export const boatStatus = {
   ACTIVE: 'active',
+  PAUSED: 'paused',
   DELETED: 'deleted',
 };
 

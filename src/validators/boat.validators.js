@@ -1,5 +1,9 @@
 import { body, param } from 'express-validator';
-import { boatFeaturesEnum, pricingTypeEnum } from '../utils/constants';
+import {
+  boatFeaturesEnum,
+  boatStatusEnum,
+  pricingTypeEnum,
+} from '../utils/constants';
 import defaultValidators from './default.validator';
 import { categoriesEnum } from '../models/constants';
 
@@ -38,6 +42,12 @@ export const createBoatValidator = () => [
     .withMessage('Pricing type is required'),
   body('pricing.*.min').isNumeric().withMessage('Pricing Min is required'),
   body('pricing.*.value').isNumeric().withMessage('Pricing Value is required'),
+  body('cancelationPolicy.refund')
+    .isNumeric()
+    .withMessage('Cancelation Policy Refund Amount is required'),
+  body('cancelationPolicy.priorHours')
+    .isNumeric()
+    .withMessage('Cancelation Policy Prior Hours Value is required'),
   body('captained').isBoolean().withMessage('Captained is required'),
 ];
 
@@ -56,6 +66,7 @@ export const updateBoatsValidator = () => [
   body('boatType').isString().optional(),
   body('description').isString().optional(),
   body('manufacturer').isString().optional(),
+  body('status').isString().isIn(boatStatusEnum).optional(),
   body('model').isString().optional(),
   body('year').isNumeric().optional(),
   body('length').isNumeric().optional(),
@@ -80,6 +91,8 @@ export const updateBoatsValidator = () => [
   body('pricing').isArray().optional(),
   body('pricing.*.type').isString().isIn(pricingTypeEnum).optional(),
   body('pricing.*.min').isNumeric().optional(),
+  body('cancelationPolicy.refund').isNumeric().optional(),
+  body('cancelationPolicy.priorHours').isNumeric().optional(),
   body('captained').isBoolean().optional(),
 ];
 
