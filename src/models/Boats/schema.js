@@ -45,7 +45,7 @@ const boatSchema = new mongoose.Schema(
     category: [{ type: String, enum: categoriesEnum }],
     subCategory: [{ type: String, enum: subCategoriesEnum }],
     currency: { type: String },
-    features: [{ type: String, enum: boatFeaturesEnum }],
+    features: [{ type: String }],
     pricing: [pricingSchema],
     cancelationPolicy: { type: cancelationSchema },
     securityAllowance: { type: String, required: true },
