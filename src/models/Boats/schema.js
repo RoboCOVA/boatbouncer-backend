@@ -1,5 +1,9 @@
 import mongoose, { Types } from 'mongoose';
-import { pricingTypeEnum } from '../../utils/constants';
+import {
+  boatStatusEnum,
+  boatFeaturesEnum,
+  pricingTypeEnum,
+} from '../../utils/constants';
 import { categoriesEnum, modelNames, subCategoriesEnum } from '../constants';
 
 const locationSchema = {
@@ -20,6 +24,7 @@ const boatSchema = new mongoose.Schema(
     boatName: { type: String, required: true },
     boatType: { type: String, required: true }, // should be an enum
     description: { type: String, required: true },
+    status: { type: String, enum: boatStatusEnum },
     manufacturer: { type: String },
     model: { type: String },
     year: { type: Number },

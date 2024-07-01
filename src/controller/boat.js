@@ -2,7 +2,7 @@ import Boats from '../models/Boats';
 import Favorites from '../models/Favorites';
 import { categoriesEnum, subCategoriesEnum } from '../models/constants';
 import { coordinateObjToGeoJson } from '../utils';
-import { boatFeaturesEnum } from '../utils/constants';
+import { boatStatus, boatFeaturesEnum } from '../utils/constants';
 import Users from '../models/Users';
 
 export const createBoatController = async (req, res, next) => {
@@ -39,6 +39,7 @@ export const createBoatController = async (req, res, next) => {
       boatType,
       description,
       manufacturer,
+      status: boatStatus.ACTIVE,
       model,
       year,
       length,
@@ -70,6 +71,7 @@ export const getBoatsController = async (req, res, next) => {
       pageNo,
       size,
       boatName,
+      status,
       address,
       city,
       state,
@@ -82,6 +84,11 @@ export const getBoatsController = async (req, res, next) => {
     const filter = {};
 
     if (boatName) filter.boatName = boatName;
+    if (status) {
+      filter.status = status;
+    } else {
+      filter.status = boatStatus.ACTIVE;
+    }
     if (address) filter.address = address;
     if (city) filter.city = city;
     if (state) filter.state = state;

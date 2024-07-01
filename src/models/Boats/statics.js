@@ -1,7 +1,7 @@
 import { getPaginationValues } from '../../utils';
-import { boatDeleteFailed, boatNotFound, boatUpdateFailed } from './errors';
+import { boatNotFound, boatUpdateFailed } from './errors';
 import Bookings from '../Bookings';
-import { bookingStatus } from '../../utils/constants';
+import { boatStatus, bookingStatus } from '../../utils/constants';
 
 /**
  * It returns a list of boats, with a total count of all boats, based on the page number and size of
@@ -11,6 +11,7 @@ import { bookingStatus } from '../../utils/constants';
 export async function getBoats({ pageNo, size, filter }) {
   const {
     boatName,
+    status,
     captained,
     searchable,
     category,
@@ -30,6 +31,7 @@ export async function getBoats({ pageNo, size, filter }) {
   //   match['location.address'] = { $regex: address.trim(), $options: 'i' };
   /** Temporarily disabled filters */
 
+  if (status) match.status = { $regex: status.trim(), $options: 'i' };
   if (features) match.features = { $regex: features.trim(), $options: 'i' };
   if (category) match.category = { $regex: category.trim(), $options: 'i' };
   if (boatName) match.boatName = { $regex: boatName.trim(), $options: 'i' };
@@ -99,6 +101,7 @@ export async function getBoats({ pageNo, size, filter }) {
         },
         boatName: 1,
         boatType: 1,
+        status: 1,
         description: 1,
         manufacturer: 1,
         model: 1,
@@ -246,10 +249,15 @@ export async function updateBoat(matchQuery, updateObject) {
 }
 
 export async function deleteBoat({ boatId, userId }) {
-  const removedBoat = await this.findOneAndRemove({
-    _id: boatId,
-    owner: userId,
-  });
-  if (!removedBoat) throw boatDeleteFailed;
-  return removedBoat;
+  // const removedBoat = await this.findOneAndRemove({
+  //   _id: boatId,
+  //   owner: userId,
+  // });
+  // if (!removedBoat) throw boatDeleteFailed;
+  // return removedBoat;
+
+  return updateBoat(
+    { _id: boatId, owner: userId },
+    { status: boatStatus.DELETED }
+  );
 }
