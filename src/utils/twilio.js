@@ -1,9 +1,7 @@
 import twilio from 'twilio';
+import { twilioAccountSid, twilioAuthToken } from '../config/environments';
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+const client = twilio(twilioAccountSid, twilioAuthToken);
 
 const disableSMSTemporary = true;
 

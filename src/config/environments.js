@@ -26,6 +26,8 @@ const envSchema = Joi.object({
   ADMIN_EMAIL: Joi.string().email().required(),
   STRIPE_SUCCESS_URL: Joi.string().required(),
   STRIPE_FAILED_URL: Joi.string().required(),
+  TWILIO_ACCOUNT_SID: Joi.string().required(),
+  TWILIO_AUTH_TOKEN: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -56,3 +58,5 @@ export const adminPass = value.ADMIN_PASSWORD;
 export const adminEmail = value.ADMIN_EMAIL;
 export const stripeSuccessUrl = value.STRIPE_SUCCESS_URL;
 export const stripeFailedUrl = value.STRIPE_FAILED_URL;
+export const twilioAccountSid = value.TWILIO_ACCOUNT_SID;
+export const twilioAuthToken = value.TWILIO_AUTH_TOKEN;
