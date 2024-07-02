@@ -168,6 +168,14 @@ export const boatFeatures = {
 
 export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
 
+export const boatStatus = {
+  ACTIVE: 'active',
+  PAUSED: 'paused',
+  DELETED: 'deleted',
+};
+
+export const boatStatusEnum = generateEnumArrayFromObject(boatStatus);
+
 export const bookingStatus = {
   PENDING: 'Pending',
   COMPLETED: 'Completed',

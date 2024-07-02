@@ -1,5 +1,9 @@
 import mongoose, { Types } from 'mongoose';
-import { pricingTypeEnum } from '../../utils/constants';
+import {
+  boatStatusEnum,
+  boatFeaturesEnum,
+  pricingTypeEnum,
+} from '../../utils/constants';
 import { categoriesEnum, modelNames, subCategoriesEnum } from '../constants';
 
 const locationSchema = {
@@ -15,11 +19,17 @@ const pricingSchema = {
   value: { type: Number },
 };
 
+const cancelationSchema = {
+  refund: { type: Number },
+  priorHours: { type: Number },
+};
+
 const boatSchema = new mongoose.Schema(
   {
     boatName: { type: String, required: true },
     boatType: { type: String, required: true }, // should be an enum
     description: { type: String, required: true },
+    status: { type: String, enum: boatStatusEnum },
     manufacturer: { type: String },
     model: { type: String },
     year: { type: Number },
@@ -37,6 +47,7 @@ const boatSchema = new mongoose.Schema(
     currency: { type: String },
     features: [{ type: String }],
     pricing: [pricingSchema],
+    cancelationPolicy: { type: cancelationSchema },
     securityAllowance: { type: String, required: true },
     captained: { type: Boolean, required: true },
     searchable: { type: Boolean, default: false },
