@@ -24,6 +24,7 @@ export const createBoatController = async (req, res, next) => {
       currency,
       features,
       pricing,
+      cancelationPolicy,
       captained,
       securityAllowance,
     } = req.body;
@@ -52,6 +53,7 @@ export const createBoatController = async (req, res, next) => {
       currency,
       features,
       pricing,
+      cancelationPolicy,
       securityAllowance,
       owner: userId,
       captained,
@@ -166,6 +168,7 @@ export const updateBoatController = async (req, res, next) => {
       boatType,
       description,
       manufacturer,
+      status,
       model,
       year,
       length,
@@ -179,6 +182,7 @@ export const updateBoatController = async (req, res, next) => {
       currency,
       features,
       pricing,
+      cancelationPolicy,
       securityAllowance,
       captained,
     } = req.body;
@@ -191,6 +195,7 @@ export const updateBoatController = async (req, res, next) => {
     if (boatType) updateObject.boatType = boatType;
     if (description) updateObject.description = description;
     if (manufacturer) updateObject.manufacturer = manufacturer;
+    if (status) updateObject.status = status;
     if (model) updateObject.model = model;
     if (year) updateObject.year = year;
     if (length) updateObject.length = length;
@@ -211,6 +216,7 @@ export const updateBoatController = async (req, res, next) => {
     if (currency) updateObject.currency = currency;
     if (features) updateObject.features = features;
     if (pricing) updateObject.pricing = pricing;
+    if (cancelationPolicy) updateObject.cancelationPolicy = cancelationPolicy;
     if (securityAllowance) updateObject.securityAllowance = securityAllowance;
     if (typeof captained === 'boolean') updateObject.captained = captained;
 
