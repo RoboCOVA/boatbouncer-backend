@@ -42,10 +42,13 @@ export const createBoatValidator = () => [
     .withMessage('Pricing type is required'),
   body('pricing.*.min').isNumeric().withMessage('Pricing Min is required'),
   body('pricing.*.value').isNumeric().withMessage('Pricing Value is required'),
-  body('cancelationPolicy.refund')
+  body('cancelationPolicy')
+    .isArray()
+    .withMessage('Cancelation Policy is required'),
+  body('cancelationPolicy.*.refund')
     .isNumeric()
     .withMessage('Cancelation Policy Refund Amount is required'),
-  body('cancelationPolicy.priorHours')
+  body('cancelationPolicy.*.priorHours')
     .isNumeric()
     .withMessage('Cancelation Policy Prior Hours Value is required'),
   body('captained').isBoolean().withMessage('Captained is required'),
