@@ -47,7 +47,7 @@ const boatSchema = new mongoose.Schema(
     currency: { type: String },
     features: [{ type: String }],
     pricing: [pricingSchema],
-    cancelationPolicy: { type: cancelationSchema },
+    cancelationPolicy: { type: [cancelationSchema] },
     securityAllowance: { type: String, required: true },
     captained: { type: Boolean, required: true },
     searchable: { type: Boolean, default: false },
