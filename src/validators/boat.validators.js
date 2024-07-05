@@ -89,7 +89,7 @@ export const updateBoatsValidator = () => [
   body('subCategory').isArray().optional(),
   body('subCategory.*').isString().optional(),
   body('features').isArray().optional(),
-  body('features.*').isString().optional(),
+  body('features.*').isString().isIn(boatFeaturesEnum).optional(),
   body('securityAllowance').isString().optional(),
   body('pricing').isArray().optional(),
   body('pricing.*.type').isString().isIn(pricingTypeEnum).optional(),
