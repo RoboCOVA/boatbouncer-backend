@@ -134,7 +134,11 @@ export const getBoatListingController = async (req, res, next) => {
     if (boatName) filter.boatName = boatName;
     if (address) filter.address = address;
     if (city) filter.city = city;
-    if (state) filter.state = state;
+    if (state) {
+      filter.state = state;
+    } else {
+      filter.state = boatStatus.ACTIVE;
+    }
     if (category) filter.category = category;
     if (subCategory) filter.subCategory = subCategory;
     filter.captained = captained;

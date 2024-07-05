@@ -3,8 +3,6 @@ import { twilioAccountSid, twilioAuthToken } from '../config/environments';
 
 const client = twilio(twilioAccountSid, twilioAuthToken);
 
-const disableSMSTemporary = true;
-
 const SMSTemplates = {
   bookingRequest:
     'A booking has been requested by <requesterFirstName> <requesterLastName>. Please check out on our website.',
@@ -27,8 +25,6 @@ function createMessage(templateKey, values) {
 }
 
 function notifyUsingMessage(phone, message) {
-  if (disableSMSTemporary) return;
-
   client.messages.create({
     body: message,
     from: process.env.TWILIO_PHONE_NUMBER,
@@ -37,12 +33,6 @@ function notifyUsingMessage(phone, message) {
 }
 
 export function sendMessage(phone, templateKey, values) {
-  const template = SMSTemplates[templateKey];
-  if (!template) {
-    throw new Error('Template not found');
-  }
-
-  const message = createMessage(template, values);
-
+  const message = createMessage(templateKey, values);
   notifyUsingMessage(phone, message);
 }
