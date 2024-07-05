@@ -205,7 +205,7 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
   else if (searchable) query.searchable = searchable;
 
   const boats = await this.find(
-    query,
+    { ...query, status: { $ne: 'deleted' } },
     {},
     { skip, limit, sort: { createdAt: -1 } }
   );
