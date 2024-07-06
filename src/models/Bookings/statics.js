@@ -131,6 +131,9 @@ export async function getBooking({ bookId, userId, isRenter }) {
     {
       path: 'boatId',
     },
+    {
+      path: 'renter',
+    },
   ]);
   return booking;
 }

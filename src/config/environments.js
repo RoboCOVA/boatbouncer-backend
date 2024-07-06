@@ -28,6 +28,7 @@ const envSchema = Joi.object({
   STRIPE_FAILED_URL: Joi.string().required(),
   TWILIO_ACCOUNT_SID: Joi.string().required(),
   TWILIO_AUTH_TOKEN: Joi.string().required(),
+  FROM_PHONE_NUMBER: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -60,3 +61,4 @@ export const stripeSuccessUrl = value.STRIPE_SUCCESS_URL;
 export const stripeFailedUrl = value.STRIPE_FAILED_URL;
 export const twilioAccountSid = value.TWILIO_ACCOUNT_SID;
 export const twilioAuthToken = value.TWILIO_AUTH_TOKEN;
+export const fromPhoneNumber = value.FROM_PHONE_NUMBER;
