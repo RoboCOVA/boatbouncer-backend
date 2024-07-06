@@ -2,6 +2,7 @@ import Offers from '../models/Offers';
 import { bookingStatus } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
 import { getBooking } from '../models/Bookings/statics';
+import Bookings from '../models/Bookings';
 
 export const createOfferController = async (req, res, next) => {
   try {
@@ -16,7 +17,11 @@ export const createOfferController = async (req, res, next) => {
       returnDate,
     } = req.body;
 
-    const booking = await getBooking({ bookId, userId, isRenter: true });
+    const booking = await Bookings.getBooking({
+      bookId,
+      userId,
+      isRenter: false,
+    });
     if (!booking) throw new Error('Booking not found');
 
     const { renter } = booking;

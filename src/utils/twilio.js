@@ -1,5 +1,9 @@
 import twilio from 'twilio';
-import { twilioAccountSid, twilioAuthToken } from '../config/environments';
+import {
+  fromPhoneNumber,
+  twilioAccountSid,
+  twilioAuthToken,
+} from '../config/environments';
 
 const client = twilio(twilioAccountSid, twilioAuthToken);
 
@@ -24,12 +28,16 @@ function createMessage(templateKey, values) {
   return fillTemplate(template, values);
 }
 
-function notifyUsingMessage(phone, message) {
-  client.messages.create({
-    body: message,
-    from: process.env.TWILIO_PHONE_NUMBER,
-    to: phone,
-  });
+async function notifyUsingMessage(phone, message) {
+  try {
+    await client.messages.create({
+      body: message,
+      from: fromPhoneNumber,
+      to: phone,
+    });
+  } catch (error) {
+    console.log('error', error);
+  }
 }
 
 export function sendMessage(phone, templateKey, values) {
