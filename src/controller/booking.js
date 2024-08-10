@@ -62,11 +62,42 @@ export const cancelBookingController = async (req, res, next) => {
     const { bookId } = req.params;
     const { isRenter } = req.query;
 
+    const booking = await Bookings.getBooking({
+      bookId,
+      userId,
+      isRenter,
+    });
+
+    let phoneNumber;
+    let firstName;
+    let lastName;
+
     const cancelledBooking = await Bookings.cancelBooking({
       bookId,
       userId,
       isRenter,
     });
+
+    if (isRenter) {
+      firstName = booking.renter.firstName;
+      lastName = booking.renter.lastName;
+
+      const ownerId = booking.owner;
+      const owner = await Users.findOne({ _id: ownerId });
+
+      if (!owner) throw new Error('Owner not found');
+      phoneNumber = owner.phoneNumber;
+    } else {
+      firstName = booking.renter.firstName;
+      lastName = booking.renter.lastName;
+      phoneNumber = booking.renter.phoneNumber;
+    }
+
+    sendMessage(phoneNumber, 'bookingCancellation', {
+      firstName,
+      lastName,
+    });
+
     res.send(cancelledBooking);
   } catch (error) {
     next(error);

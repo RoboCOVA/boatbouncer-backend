@@ -1,9 +1,5 @@
 import { body, param } from 'express-validator';
-import {
-  boatFeaturesEnum,
-  boatStatusEnum,
-  pricingTypeEnum,
-} from '../utils/constants';
+import { boatStatusEnum, pricingTypeEnum } from '../utils/constants';
 import defaultValidators from './default.validator';
 import { categoriesEnum } from '../models/constants';
 
@@ -89,7 +85,7 @@ export const updateBoatsValidator = () => [
   body('subCategory').isArray().optional(),
   body('subCategory.*').isString().optional(),
   body('features').isArray().optional(),
-  body('features.*').isString().isIn(boatFeaturesEnum).optional(),
+  body('features.*').isString().optional(),
   body('securityAllowance').isString().optional(),
   body('pricing').isArray().optional(),
   body('pricing.*.type').isString().isIn(pricingTypeEnum).optional(),
