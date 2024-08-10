@@ -13,7 +13,6 @@ export async function getBoats({ pageNo, size, filter }) {
     boatName,
     status,
     captained,
-    searchable,
     category,
     subCategory,
     features,

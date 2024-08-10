@@ -1,9 +1,5 @@
 import mongoose, { Types } from 'mongoose';
-import {
-  boatStatusEnum,
-  boatFeaturesEnum,
-  pricingTypeEnum,
-} from '../../utils/constants';
+import { boatStatusEnum, pricingTypeEnum } from '../../utils/constants';
 import { categoriesEnum, modelNames, subCategoriesEnum } from '../constants';
 
 const locationSchema = {

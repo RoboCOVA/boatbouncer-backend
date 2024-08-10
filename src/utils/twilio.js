@@ -9,9 +9,13 @@ const client = twilio(twilioAccountSid, twilioAuthToken);
 
 const SMSTemplates = {
   bookingRequest:
-    'A booking has been requested by <requesterFirstName> <requesterLastName>. Please check out on our website.',
+    '<requesterFirstName> <requesterLastName> is requesting a booking on BoatBouncer. Please visit boatbouncer.com to view your view bookings. \n https://boatbouncer.com/',
   offerSent:
-    'An offer has been sent to you by <ownerFirstName> <ownerLastName>. Please check out on our website.',
+    'An offer has been sent to you by <ownerFirstName> <ownerLastName>. Please check out on our website. \n https://boatbouncer.com/',
+  offerAccepted:
+    'You offer has been accepted by <firstName> <lastName> \n https://boatbouncer.com/',
+  bookingCancellation:
+    '<firstName> <lastName> has cancelled Booking request. \n https://boatbouncer.com/',
 };
 
 function fillTemplate(template, values) {
@@ -36,7 +40,7 @@ async function notifyUsingMessage(phone, message) {
       to: phone,
     });
   } catch (error) {
-    console.log('error', error);
+    console.log('error occured sending message!');
   }
 }
 

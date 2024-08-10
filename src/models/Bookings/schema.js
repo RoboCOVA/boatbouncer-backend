@@ -17,7 +17,7 @@ const bookingSchema = new mongoose.Schema(
     renter: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
     owner: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
     renterPrice: { type: Number, min: 1 },
-    captainPrice: { type: Number, min: 1 },
+    captainPrice: { type: Number, min: 0 },
     offerId: { type: Types.ObjectId, ref: modelNames.OFFERS },
     status: { type: String, enum: bookingStatusEnum },
     conversationId: {

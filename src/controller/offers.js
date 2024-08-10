@@ -1,8 +1,8 @@
 import Offers from '../models/Offers';
 import { bookingStatus } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
-import { getBooking } from '../models/Bookings/statics';
 import Bookings from '../models/Bookings';
+import Users from '../models/Users';
 
 export const createOfferController = async (req, res, next) => {
   try {
@@ -84,9 +84,30 @@ export const acceptOfferController = async (req, res, next) => {
     const userId = req?.user?._id || '';
     const { offerId } = req.params;
 
+    const offer = await Offers.getOffer({ offerId, userId });
+
+    const booking = await Bookings.getBooking({
+      bookId: offer.bookId,
+      userId,
+      isRenter: true,
+    });
+
     const accept = await Offers.acceptOffer({
       userId,
       offerId,
+    });
+
+    const { firstName, lastName } = booking.renter;
+
+    const ownerId = booking.owner;
+    const owner = await Users.findOne({ _id: ownerId });
+
+    if (!owner) throw new Error('Owner not found');
+    const { phoneNumber } = owner;
+
+    sendMessage(phoneNumber, 'offerAccepted', {
+      firstName,
+      lastName,
     });
 
     res.send(accept);
