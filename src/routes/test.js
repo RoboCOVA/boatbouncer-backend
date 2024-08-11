@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/version', (req, res) => {
-  res.json({ message: 'version 1.1' });
+  res.json({ message: 'version 1.2' });
 });
 
 router.get('/failed', (req, res) => {

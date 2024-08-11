@@ -168,3 +168,17 @@ export const getCanceledBookingsController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCompletedBookingsController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id || ' ';
+    const { as } = req.query;
+    const canceledBookings = await Bookings.getCompletedBookings({
+      userId,
+      as,
+    });
+    res.send(canceledBookings);
+  } catch (error) {
+    next(error);
+  }
+};
