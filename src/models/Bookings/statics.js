@@ -76,7 +76,9 @@ export async function cancelBooking({ bookId, userId, isRenter }) {
  * @returns An array of bookings.
  */
 export async function getBookings({ userId, isRenter }) {
-  const matchQuery = { status: { $nin: [bookingStatus.CANCELLED] } };
+  const matchQuery = {
+    status: { $nin: [bookingStatus.CANCELLED, bookingStatus.COMPLETED] },
+  };
   if (isRenter) {
     matchQuery.renter = userId;
   } else matchQuery.owner = userId;
@@ -165,6 +167,41 @@ export async function checkAvailability({ boatId, start, end }) {
  */
 export async function getCanceledBookings({ userId, as }) {
   const matchQuery = { status: bookingStatus.CANCELLED };
+  if (as === 'renter') {
+    matchQuery.renter = userId;
+  } else matchQuery.owner = userId;
+  const bookings = await this.find(matchQuery).populate([
+    {
+      path: 'renter',
+      select: [
+        '-password',
+        '-stripeCustomerId',
+        '-stripeAccountId',
+        '-chargesEnabled',
+      ],
+    },
+    {
+      path: 'owner',
+      select: [
+        '-password',
+        '-stripeCustomerId',
+        '-stripeAccountId',
+        '-chargesEnabled',
+      ],
+    },
+    {
+      path: 'offerId',
+    },
+    {
+      path: 'boatId',
+    },
+  ]);
+  const total = await this.count(matchQuery);
+  return { data: bookings, total };
+}
+
+export async function getCompletedBookings({ userId, as }) {
+  const matchQuery = { status: bookingStatus.COMPLETED };
   if (as === 'renter') {
     matchQuery.renter = userId;
   } else matchQuery.owner = userId;

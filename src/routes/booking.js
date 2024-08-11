@@ -13,6 +13,7 @@ import {
   getBookingController,
   getBookingsController,
   getCanceledBookingsController,
+  getCompletedBookingsController,
 } from '../controller/booking';
 
 const router = express.Router();
@@ -44,6 +45,13 @@ router.get(
   getCanceledBookingsValidator(),
   parseValidationResult,
   getCanceledBookingsController
+);
+
+router.get(
+  '/completed',
+  getCanceledBookingsValidator(),
+  parseValidationResult,
+  getCompletedBookingsController
 );
 
 router.get(
