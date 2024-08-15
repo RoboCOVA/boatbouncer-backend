@@ -65,7 +65,8 @@ export const updateOfferController = async (req, res, next) => {
     const updateObject = {};
 
     if (boatPrice) updateObject.boatPrice = boatPrice;
-    if (captainPrice) updateObject.captainPrice = captainPrice;
+    if (captainPrice === '0' || captainPrice === 0 || captainPrice)
+      updateObject.captainPrice = captainPrice;
     if (paymentServiceFee) updateObject.paymentServiceFee = paymentServiceFee;
     if (localTax) updateObject.localTax = localTax;
     const updatedOffer = await Offers.updateOffer({
