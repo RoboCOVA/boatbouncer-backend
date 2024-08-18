@@ -16,6 +16,10 @@ const SMSTemplates = {
     'You offer has been accepted by <firstName> <lastName> \n https://boatbouncer.com/',
   bookingCancellation:
     '<firstName> <lastName> has cancelled Booking request. \n https://boatbouncer.com/',
+  notifyRenter:
+    'Reminder: Your departure is in a few minutes. Please make sure all belongings are packed and the property is left in good condition. Safe travels!',
+  notifyOwner:
+    'Notice: The renter will be departing in a few minutes. Please prepare for their departure and ensure the property is ready for the next steps.',
 };
 
 function fillTemplate(template, values) {

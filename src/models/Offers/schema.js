@@ -13,6 +13,7 @@ const offerSchema = new mongoose.Schema(
     departureDate: { type: Date, required: true },
     returnDate: { type: Date, required: true },
     createdBy: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
+    notified: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
