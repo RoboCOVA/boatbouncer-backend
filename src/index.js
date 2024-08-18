@@ -7,6 +7,7 @@ global.appRoot = path.resolve(path.resolve());
 import { EventEmitter } from 'events';
 import passport from 'passport';
 import httpStatus from 'http-status';
+import { Cron } from 'croner';
 import * as environments from './config/environments';
 import connectToDb from './config/mongoose';
 import app from './config/express';
@@ -16,6 +17,7 @@ import { addUser, getUser, removeUser, users } from './socket/userManagment';
 import { socketConstant } from './socket/constants';
 import APIError from './errors/APIError';
 import { initializEmitters } from './socket/emitters';
+import { Scheduler } from './config/scheduler';
 
 const emitter = new EventEmitter();
 global._emitter = emitter;
@@ -31,6 +33,8 @@ const start = async () => {
         `[${environments.nodeEnv}] Server running on localhost:${environments.port}`
       );
     });
+
+    Cron('*/5 * * * *', Scheduler);
 
     const io = createServer(server, {
       cors: {

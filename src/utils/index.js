@@ -169,3 +169,8 @@ export function checkMethodExpiration({ paymentMethod }) {
   const expirationDate = setMonth(setYear(new Date(), exp_year), exp_month);
   return !isBefore(now, expirationDate);
 }
+
+export function getMinutesDifference(date1, date2) {
+  const diffMs = date1 - date2;
+  return Math.floor(diffMs / 60000); // 60000 ms in one minute
+}
