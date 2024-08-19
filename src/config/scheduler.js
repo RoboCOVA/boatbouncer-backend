@@ -39,7 +39,7 @@ export const Scheduler = async () => {
         new Date()
       );
 
-      if (!offer.notified && minutes < 35 && minutes > 22.5) {
+      if (!offer.notified && minutes < 65 && minutes > 55) {
         return true;
       }
 
