@@ -1,7 +1,7 @@
 import { Badge, Box, Text } from '@adminjs/design-system';
 import { commonStyle } from './Badge';
 
-const VerificationButton = (props) => {
+const SuperButton = (props) => {
   const { record } = props;
 
   return (
@@ -14,20 +14,16 @@ const VerificationButton = (props) => {
       <Badge
         style={{
           ...commonStyle,
-          color:
-            record.params.verified === false
-              ? 'rgb(234,84,85)'
-              : 'rgb(40,199,111)',
-          backgroundColor:
-            record.params.verified === false
-              ? 'rgb(234,84,85,0.16)'
-              : 'rgb(40,199,111,0.16)',
+          color: !record.params.super ? 'rgb(234,84,85)' : 'rgb(40,199,111)',
+          backgroundColor: !record.params.super
+            ? 'rgb(234,84,85,0.24)'
+            : 'rgb(40,199,111,0.24)',
         }}
       >
-        {record.params.verified === false ? 'Not Verified' : 'Verified'}
+        {record.params.super ? 'Yes' : 'No'}
       </Badge>
     </Box>
   );
 };
 
-export default VerificationButton;
+export default SuperButton;

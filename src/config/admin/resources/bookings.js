@@ -13,6 +13,26 @@ export const BookingResource = {
           filter: false,
         },
       },
+      boatId: {
+        isVisible: {
+          list: false,
+          edit: false,
+          show: false,
+          filter: false,
+        },
+      },
+      boatName: {
+        components: {
+          list: components.BoatId,
+          show: components.BoatId,
+        },
+        isVisible: {
+          list: true,
+          edit: false,
+          show: true,
+          filter: true,
+        },
+      },
       owner: {
         isVisible: {
           list: false,

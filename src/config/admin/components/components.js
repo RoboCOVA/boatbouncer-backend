@@ -10,6 +10,12 @@ const components = {
     'VerificationButton',
     './VerificationButton'
   ),
+  OwnerInfo: componentLoader.add('OwnerInfo', './OwnerInfo'),
+  RenterInfo: componentLoader.add('RenterInfo', './RenterInfo'),
+  Analytics: componentLoader.add('Analytics', './Analytics'),
+  BoatId: componentLoader.add('BoatId', './BoatId'),
+  SuperButton: componentLoader.add('SuperButton', './SuperButton'),
+  BooleanButton: componentLoader.add('BooleanButton', './BooleanButton'),
 };
 
 export { components, componentLoader };

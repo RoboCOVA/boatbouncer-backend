@@ -11,7 +11,7 @@ const modelsPath = path.join(process.cwd(), 'src/models');
 fs.readdirSync(modelsPath, { withFileTypes: true })
   .filter((dir) => dir.isDirectory())
   // eslint-disable-next-line
-  .forEach(dir => require(path.join(modelsPath, dir.name)));
+  .forEach((dir) => require(path.join(modelsPath, dir.name)));
 
 /**
  * It connects to the MongoDB database using the Mongoose library
@@ -20,7 +20,6 @@ fs.readdirSync(modelsPath, { withFileTypes: true })
 const connectToDb = async () => {
   try {
     const connectOptions = {
-      keepAlive: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
       //   useCreateIndex: true,
