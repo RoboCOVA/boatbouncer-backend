@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import Adminstrators from '../../../models/Adminstrators';
+import { components } from '../components/components';
 
 export const AdminResource = {
   resource: Adminstrators,
@@ -14,6 +15,13 @@ export const AdminResource = {
           edit: true,
           list: false,
           filter: false,
+        },
+      },
+      super: {
+        type: 'string',
+        components: {
+          list: components.SuperButton,
+          show: components.SuperButton,
         },
       },
       createdAt: { isVisible: false },

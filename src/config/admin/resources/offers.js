@@ -68,6 +68,13 @@ export const OfferResource = {
           filter: true,
         },
       },
+      notified: {
+        type: 'string',
+        components: {
+          list: components.BooleanButton,
+          show: components.BooleanButton,
+        },
+      },
     },
   },
 };

@@ -8,7 +8,10 @@ import { BoatsResource } from './resources/boats';
 import { BookingResource } from './resources/bookings';
 import { SettingsResource } from './resources/settings';
 import { ConversationsResource } from './resources/conversations';
-import { componentLoader } from './components/components';
+import { componentLoader, components } from './components/components';
+import { OwnersResource } from './resources/owners';
+import { RentersResource } from './resources/renters';
+import { getAllBookings } from './utils/fetches';
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
@@ -24,17 +27,27 @@ export const adminJs = new AdminJS({
     UsersResource,
     BoatsResource,
     BookingResource,
+    OwnersResource,
+    RentersResource,
     SettingsResource,
     ConversationsResource,
   ],
   componentLoader,
   branding: {
-    companyName: 'Boat Bouncer',
+    companyName: 'Boatbouncer',
     withMadeWithLove: false,
-    logo: '',
+    logo: '/images/boatbouncer-new.png',
+    favicon: '/images/boatbouncer-favicon.png',
   },
   dashboard: { component: AdminJS.bundle('./components/dashboard') },
   rootPath: '/admin', // Path to the AdminJS dashboard.
+  pages: {
+    Analytics: {
+      icon: 'Analytics',
+      component: components.Analytics,
+      handler: getAllBookings,
+    },
+  },
   session: {
     cookieMaxAge: 60 * 60 * 1000,
   },

@@ -1,4 +1,5 @@
 import PaymentIntents from '../../../models/PaymentIntents';
+import { components } from '../components/components';
 
 export const PaymentResource = {
   resource: PaymentIntents,
@@ -67,6 +68,13 @@ export const PaymentResource = {
           show: true,
           edit: false,
           filter: true,
+        },
+      },
+      status: {
+        type: 'string',
+        components: {
+          list: components.StatusButton,
+          show: components.StatusButton,
         },
       },
     },

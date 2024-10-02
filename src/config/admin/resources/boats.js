@@ -76,6 +76,13 @@ export const BoatsResource = {
           filter: false,
         },
       },
+      status: {
+        type: 'string',
+        components: {
+          list: components.StatusButton,
+          show: components.StatusButton,
+        },
+      },
       category: {
         isVisible: {
           list: false,
@@ -114,6 +121,13 @@ export const BoatsResource = {
           edit: true,
           show: true,
           filter: false,
+        },
+      },
+      cancelationPolicy: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
         },
       },
       captained: {
@@ -170,6 +184,13 @@ export const BoatsResource = {
           edit: true,
           show: true,
           filter: true,
+        },
+      },
+      searchable: {
+        type: 'string',
+        components: {
+          list: components.BooleanButton,
+          show: components.BooleanButton,
         },
       },
     },

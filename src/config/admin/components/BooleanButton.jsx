@@ -1,8 +1,10 @@
 import { Badge, Box, Text } from '@adminjs/design-system';
 import { commonStyle } from './Badge';
 
-const VerificationButton = (props) => {
+const NoticeButton = (props) => {
   const { record } = props;
+
+  console.log(props);
 
   return (
     <Box marginBottom={props.where === 'show' ? 24 : 0}>
@@ -14,20 +16,18 @@ const VerificationButton = (props) => {
       <Badge
         style={{
           ...commonStyle,
-          color:
-            record.params.verified === false
-              ? 'rgb(234,84,85)'
-              : 'rgb(40,199,111)',
-          backgroundColor:
-            record.params.verified === false
-              ? 'rgb(234,84,85,0.16)'
-              : 'rgb(40,199,111,0.16)',
+          color: !record.params[props.property.label.toLowerCase()]
+            ? 'rgb(234,84,85)'
+            : 'rgb(40,199,111)',
+          backgroundColor: !record.params[props.property.label.toLowerCase()]
+            ? 'rgb(234,84,85,0.24)'
+            : 'rgb(40,199,111,0.24)',
         }}
       >
-        {record.params.verified === false ? 'Not Verified' : 'Verified'}
+        {record.params[props.property.label.toLowerCase()] ? 'Yes' : 'No'}
       </Badge>
     </Box>
   );
 };
 
-export default VerificationButton;
+export default NoticeButton;
