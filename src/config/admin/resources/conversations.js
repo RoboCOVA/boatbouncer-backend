@@ -8,7 +8,7 @@ export const ConversationsResource = {
         isVisible: {
           show: true,
           edit: false,
-          list: true,
+          list: false,
           filter: false,
         },
       },

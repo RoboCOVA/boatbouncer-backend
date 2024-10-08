@@ -16,8 +16,8 @@ const SuperButton = (props) => {
           ...commonStyle,
           color: !record.params.super ? 'rgb(234,84,85)' : 'rgb(40,199,111)',
           backgroundColor: !record.params.super
-            ? 'rgb(234,84,85,0.24)'
-            : 'rgb(40,199,111,0.24)',
+            ? 'rgba(234,84,85,0.24)'
+            : 'rgba(40,199,111,0.24)',
         }}
       >
         {record.params.super ? 'Yes' : 'No'}

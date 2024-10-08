@@ -16,6 +16,7 @@ const components = {
   BoatId: componentLoader.add('BoatId', './BoatId'),
   SuperButton: componentLoader.add('SuperButton', './SuperButton'),
   BooleanButton: componentLoader.add('BooleanButton', './BooleanButton'),
+  CurrencyButton: componentLoader.add('CurrencyButton', './CurrencyButton'),
 };
 
 export { components, componentLoader };

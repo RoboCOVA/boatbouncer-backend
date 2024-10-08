@@ -1,7 +1,7 @@
 import { Badge, Box, Text } from '@adminjs/design-system';
 import { commonStyle } from './Badge';
 
-const BooleanButton = (props) => {
+const CurrencyButton = (props) => {
   const { record } = props;
 
   return (
@@ -14,18 +14,14 @@ const BooleanButton = (props) => {
       <Badge
         style={{
           ...commonStyle,
-          color: !record.params[props.property.label.toLowerCase()]
-            ? 'rgb(234,84,85)'
-            : 'rgb(40,199,111)',
-          backgroundColor: !record.params[props.property.label.toLowerCase()]
-            ? 'rgba(234,84,85,0.24)'
-            : 'rgba(40,199,111,0.24)',
+          color: 'rgb(17,140,79)',
+          backgroundColor: 'rgba(17,140,79,0.16)',
         }}
       >
-        {record.params[props.property.label.toLowerCase()] ? 'Yes' : 'No'}
+        {record.params[props.property.label.toLowerCase()]}
       </Badge>
     </Box>
   );
 };
 
-export default BooleanButton;
+export default CurrencyButton;

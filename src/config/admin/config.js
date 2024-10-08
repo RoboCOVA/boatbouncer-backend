@@ -11,7 +11,7 @@ import { ConversationsResource } from './resources/conversations';
 import { componentLoader, components } from './components/components';
 import { OwnersResource } from './resources/owners';
 import { RentersResource } from './resources/renters';
-import { getAllBookings } from './utils/fetches';
+import { getPaginatedBookingsPerStatusForAllBoats } from './utils/fetches';
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
@@ -45,7 +45,7 @@ export const adminJs = new AdminJS({
     Analytics: {
       icon: 'Analytics',
       component: components.Analytics,
-      handler: getAllBookings,
+      handler: getPaginatedBookingsPerStatusForAllBoats,
     },
   },
   session: {
