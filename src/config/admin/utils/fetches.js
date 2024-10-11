@@ -1,4 +1,6 @@
+import Boats from '../../../models/Boats';
 import Bookings from '../../../models/Bookings';
+import { mapboxApiToken } from '../../environments';
 
 export const getPaginatedBookingsPerStatusForAllBoats = async (currPage) => {
   const page = Number(currPage.query.page);
@@ -55,4 +57,13 @@ export const getPaginatedBookingsPerStatusForAllBoats = async (currPage) => {
   ]);
 
   return result;
+};
+
+export const getAllBoats = async () => {
+  try {
+    const boats = await Boats.find({});
+    return { boats, mapboxApiToken };
+  } catch (error) {
+    return [];
+  }
 };

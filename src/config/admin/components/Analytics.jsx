@@ -23,7 +23,7 @@ const getStatusCount = (statusArray, statusName) => {
   return status ? status.count : 0;
 };
 
-const Analytics = () => {
+const Statistics = () => {
   const api = new ApiClient();
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,6 @@ const Analytics = () => {
       .getPage({ pageName: 'Analytics', params: { page } })
       .then((result) => {
         setResponse(result.data[0]);
-        console.log('result.data[0]', result.data[0]);
         setLoading(false);
       })
       .catch((error) => {
@@ -196,4 +195,4 @@ const Analytics = () => {
   );
 };
 
-export default Analytics;
+export default Statistics;
