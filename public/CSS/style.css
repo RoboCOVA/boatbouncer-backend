@@ -116,3 +116,11 @@ table {
   border: 1px solid #f6f7fb !important;
   box-shadow: 0px 0px 10px 0px rgba(57, 73, 86, 0.05) !important;
 }
+
+.mapboxgl-ctrl-bottom-right {
+  display: none !important;
+}
+
+.mapboxgl-control-container {
+  display: none !important;
+}

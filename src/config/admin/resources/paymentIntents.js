@@ -54,14 +54,6 @@ export const PaymentResource = {
           filter: true,
         },
       },
-      currency: {
-        isVisible: {
-          list: true,
-          show: true,
-          edit: false,
-          filter: true,
-        },
-      },
       intentId: {
         isVisible: {
           list: true,
@@ -75,6 +67,13 @@ export const PaymentResource = {
         components: {
           list: components.StatusButton,
           show: components.StatusButton,
+        },
+      },
+      currency: {
+        type: 'string',
+        components: {
+          list: components.CurrencyButton,
+          show: components.CurrencyButton,
         },
       },
     },

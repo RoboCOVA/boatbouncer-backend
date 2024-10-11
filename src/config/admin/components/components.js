@@ -12,10 +12,12 @@ const components = {
   ),
   OwnerInfo: componentLoader.add('OwnerInfo', './OwnerInfo'),
   RenterInfo: componentLoader.add('RenterInfo', './RenterInfo'),
-  Analytics: componentLoader.add('Analytics', './Analytics'),
   BoatId: componentLoader.add('BoatId', './BoatId'),
   SuperButton: componentLoader.add('SuperButton', './SuperButton'),
   BooleanButton: componentLoader.add('BooleanButton', './BooleanButton'),
+  CurrencyButton: componentLoader.add('CurrencyButton', './CurrencyButton'),
+  Analytics: componentLoader.add('Analytics', './Analytics'),
+  Statistics: componentLoader.add('Statistics', './Statistics'),
 };
 
 export { components, componentLoader };

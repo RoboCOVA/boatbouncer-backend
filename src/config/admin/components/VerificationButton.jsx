@@ -20,8 +20,8 @@ const VerificationButton = (props) => {
               : 'rgb(40,199,111)',
           backgroundColor:
             record.params.verified === false
-              ? 'rgb(234,84,85,0.16)'
-              : 'rgb(40,199,111,0.16)',
+              ? 'rgba(234,84,85,0.16)'
+              : 'rgba(40,199,111,0.16)',
         }}
       >
         {record.params.verified === false ? 'Not Verified' : 'Verified'}

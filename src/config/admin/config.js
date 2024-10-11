@@ -11,13 +11,16 @@ import { ConversationsResource } from './resources/conversations';
 import { componentLoader, components } from './components/components';
 import { OwnersResource } from './resources/owners';
 import { RentersResource } from './resources/renters';
-import { getAllBookings } from './utils/fetches';
+import {
+  getAllBoats,
+  getPaginatedBookingsPerStatusForAllBoats,
+} from './utils/fetches';
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
 export const adminJs = new AdminJS({
   assets: {
-    styles: ['/CSS/style.css'], // add assets path
+    styles: ['/CSS/style.css', '/CSS/mapbox-gl.css'], // add assets path
   },
   databases: [], // We don’t have any resources connected yet.
   resources: [
@@ -45,7 +48,12 @@ export const adminJs = new AdminJS({
     Analytics: {
       icon: 'Analytics',
       component: components.Analytics,
-      handler: getAllBookings,
+      handler: getPaginatedBookingsPerStatusForAllBoats,
+    },
+    Statistics: {
+      icon: 'Statistics',
+      component: components.Statistics,
+      handler: getAllBoats,
     },
   },
   session: {

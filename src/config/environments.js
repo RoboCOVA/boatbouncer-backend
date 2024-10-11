@@ -29,6 +29,7 @@ const envSchema = Joi.object({
   TWILIO_ACCOUNT_SID: Joi.string().required(),
   TWILIO_AUTH_TOKEN: Joi.string().required(),
   FROM_PHONE_NUMBER: Joi.string().required(),
+  MAPBOX_API_TOKEN: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -62,3 +63,4 @@ export const stripeFailedUrl = value.STRIPE_FAILED_URL;
 export const twilioAccountSid = value.TWILIO_ACCOUNT_SID;
 export const twilioAuthToken = value.TWILIO_AUTH_TOKEN;
 export const fromPhoneNumber = value.FROM_PHONE_NUMBER;
+export const mapboxApiToken = value.MAPBOX_API_TOKEN;
