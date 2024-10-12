@@ -50,11 +50,11 @@ export const adminJs = new AdminJS({
       component: components.Analytics,
       handler: getPaginatedBookingsPerStatusForAllBoats,
     },
-    Statistics: {
-      icon: 'Statistics',
-      component: components.Statistics,
-      handler: getAllBoats,
-    },
+    // Statistics: {
+    //   icon: 'Statistics',
+    //   component: components.Statistics,
+    //   handler: getAllBoats,
+    // },
   },
   session: {
     cookieMaxAge: 60 * 60 * 1000,
