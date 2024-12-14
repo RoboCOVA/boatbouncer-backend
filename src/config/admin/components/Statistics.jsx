@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from 'react';
 import { Box, H2, H5, Overlay, Loader } from '@adminjs/design-system';
 import { ApiClient } from 'adminjs';
 import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Helper function to get the status count
 const getStatusCount = (statusArray, statusName) => {
