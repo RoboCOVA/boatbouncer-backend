@@ -17,7 +17,7 @@ const components = {
   BooleanButton: componentLoader.add('BooleanButton', './BooleanButton'),
   CurrencyButton: componentLoader.add('CurrencyButton', './CurrencyButton'),
   Analytics: componentLoader.add('Analytics', './Analytics'),
-  // Statistics: componentLoader.add('Statistics', './Statistics'),
+  Statistics: componentLoader.add('Statistics', './Statistics'),
 };
 
 export { components, componentLoader };

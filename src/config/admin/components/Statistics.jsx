@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Box, H2, H5, Overlay, Loader } from '@adminjs/design-system';
 import { ApiClient } from 'adminjs';
 import mapboxgl from 'mapbox-gl';
-// import 'mapbox-gl/dist/mapbox-gl.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Helper function to get the status count
 const getStatusCount = (statusArray, statusName) => {
@@ -69,11 +69,11 @@ const Statistics = () => {
               'circle-radius': [
                 'step',
                 ['get', 'point_count'],
-                20,
-                100,
                 30,
-                750,
+                110,
                 40,
+                760,
+                50,
               ],
             },
           });
@@ -86,7 +86,7 @@ const Statistics = () => {
             layout: {
               'text-field': ['get', 'point_count_abbreviated'],
               'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-              'text-size': 12,
+              'text-size': 17,
             },
           });
 
