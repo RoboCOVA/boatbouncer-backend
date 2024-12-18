@@ -5,8 +5,8 @@ const Members = (props) => {
     <Box>
       {
         props.record.populated[
-          `members.${props.property.path === 'member1' ? 1 : 0}`
-        ].title
+          `members.${props?.property?.path === 'member1' ? 1 : 0}`
+        ]?.title
       }
     </Box>
   );

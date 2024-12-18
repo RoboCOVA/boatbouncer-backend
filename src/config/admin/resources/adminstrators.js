@@ -99,7 +99,12 @@ export const AdminResource = {
         },
       },
       delete: {
-        isAccessible: ({ currentAdmin }) => currentAdmin.super,
+        isAccessible: ({ currentAdmin, record }) => {
+          const currentAdminId = currentAdmin._id.toString();
+          const deleteAdminId = record.params._id;
+
+          return currentAdmin.super && currentAdminId !== deleteAdminId;
+        },
       },
       show: {
         isAccessible: ({ currentAdmin, record }) => {
