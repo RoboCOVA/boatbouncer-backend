@@ -57,7 +57,8 @@ export const ConversationsResource = {
         isVisible: false,
       },
       show: {
-        handler: async (context) => {
+        handler: async (request, response, context) => {
+          console.log('context.record', context.record);
           const { record, currentAdmin } = context;
           const conversationId = record.params._id;
 
