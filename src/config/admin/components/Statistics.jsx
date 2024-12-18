@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Box, H2, H5, Overlay, Loader } from '@adminjs/design-system';
+import { Box, H2, H5, Overlay, Loader, Select } from '@adminjs/design-system';
 import { ApiClient } from 'adminjs';
 import mapboxgl from 'mapbox-gl';
 
@@ -9,10 +9,30 @@ const getStatusCount = (statusArray, statusName) => {
   return status ? status.count : 0;
 };
 
+const options = [
+  {
+    value: '',
+    label: 'All',
+  },
+  {
+    value: 'active',
+    label: 'Active',
+  },
+  {
+    value: 'paused',
+    label: 'Paused',
+  },
+  {
+    value: 'deleted',
+    label: 'Deleted',
+  },
+];
+
 const Statistics = () => {
   const api = new ApiClient();
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [option, setOption] = useState(options[1]);
   const [page, setPage] = useState(1);
 
   const mapContainerRef = useRef();
@@ -21,7 +41,7 @@ const Statistics = () => {
   useEffect(() => {
     setLoading(true);
     api
-      .getPage({ pageName: 'Statistics' })
+      .getPage({ pageName: 'Statistics', params: { status: option.value } })
       .then((res) => {
         const { boats, mapboxApiToken } = res.data;
 
@@ -153,12 +173,12 @@ const Statistics = () => {
                         ${
                           prices[0]
                             ? `<li>${prices[0].type}: ${prices[0].value} ${currency}</li>`
-                            : null
+                            : ''
                         }
                         ${
                           prices[1]
                             ? `<li>${prices[1].type}: ${prices[1].value} ${currency}</li>`
-                            : null
+                            : ''
                         }
                       </ul>
                     </p>
@@ -187,18 +207,17 @@ const Statistics = () => {
 
         setLoading(false);
       })
-      .catch((error) => {
+      .catch(() => {
         setLoading(false);
       });
 
     return () => mapRef.current.remove();
-  }, [page]);
+  }, [page, option]);
 
   return (
     <Box>
       <Box position="relative">
         <img
-          // src="/images/boat-bouncer.png"
           alt=""
           height="200px"
           width="100%"
@@ -237,13 +256,24 @@ const Statistics = () => {
         </Box>
       </Box>
 
+      <Select
+        value={option}
+        options={options}
+        onChange={(opt) => setOption(opt)}
+        placeholder="Select an option"
+      />
+
       {loading && <Overlay />}
       {loading && <Loader />}
 
       <div
         id="map"
         ref={mapContainerRef}
-        style={{ height: 'calc(67.5vh)' }}
+        style={{
+          height: '63.75vh',
+          marginTop: '0.25rem',
+          marginLeft: '0.75rem',
+        }}
       ></div>
     </Box>
   );

@@ -59,9 +59,15 @@ export const getPaginatedBookingsPerStatusForAllBoats = async (currPage) => {
   return result;
 };
 
-export const getAllBoats = async () => {
+export const getAllBoats = async (stat) => {
   try {
-    const boats = await Boats.find({});
+    const filter = {};
+    if (stat.query.status) {
+      filter.status = stat.query.status;
+    }
+
+    const boats = await Boats.find(filter);
+
     return { boats, mapboxApiToken };
   } catch (error) {
     return [];

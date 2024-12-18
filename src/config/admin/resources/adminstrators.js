@@ -1,14 +1,22 @@
 import bcrypt from 'bcrypt';
-import Adminstrators from '../../../models/Adminstrators';
+import Admin from '../../../models/Adminstrators';
 import { components } from '../components/components';
 
 export const AdminResource = {
-  resource: Adminstrators,
+  resource: Admin,
   options: {
     properties: {
       _id: { isVisible: false },
       password: {
-        type: 'custom',
+        isVisible: {
+          show: false,
+          edit: false,
+          list: false,
+          filter: false,
+        },
+      },
+      newPassword: {
+        type: 'password',
         label: 'Password',
         isVisible: {
           show: false,
@@ -16,41 +24,90 @@ export const AdminResource = {
           list: false,
           filter: false,
         },
+        props: {
+          placeholder: 'Enter new password to change',
+        },
       },
       super: {
         type: 'string',
         components: {
           list: components.SuperButton,
           show: components.SuperButton,
+          edit: components.EditButton,
         },
+        isVisible: {
+          list: true,
+          show: true,
+          edit: true,
+          filter: false,
+        },
+        availableValues: [
+          { value: true, label: 'Yes' },
+          { value: null, label: 'No' },
+        ],
       },
       createdAt: { isVisible: false },
       updatedAt: { isVisible: false },
     },
     actions: {
-      new: {
-        before: async (request) => {
-          if (request?.payload?.password) {
-            request.payload = {
-              ...request.payload,
-              password: await bcrypt.hash(request.payload.password, 10),
+      list: {
+        before: async (request, context) => {
+          const { currentAdmin } = context;
+
+          if (!currentAdmin.super) {
+            request.query = {
+              ...request.query,
+              'filters.email': currentAdmin.email,
             };
           }
           return request;
         },
       },
       edit: {
-        before: async (request) => {
-          if (request?.payload?.password) {
+        isAccessible: ({ currentAdmin, record }) => {
+          if (currentAdmin.super) return true;
+          return currentAdmin._id.toString() === record.params._id.toString();
+        },
+        before: async (request, context) => {
+          const { currentAdmin } = context;
+
+          if (!currentAdmin.super) {
+            delete request.payload.super;
+          }
+
+          if (request?.payload?.newPassword) {
             request.payload = {
               ...request.payload,
-              password: await bcrypt.hash(request.payload.password, 10),
+              password: await bcrypt.hash(request.payload.newPassword, 10),
             };
-            delete request.payload.password;
           }
+
           return request;
         },
       },
+      new: {
+        isAccessible: ({ currentAdmin }) => currentAdmin.super,
+        before: async (request) => {
+          if (request?.payload?.newPassword) {
+            request.payload = {
+              ...request.payload,
+              password: await bcrypt.hash(request.payload.newPassword, 10),
+            };
+          }
+
+          return request;
+        },
+      },
+      delete: {
+        isAccessible: ({ currentAdmin }) => currentAdmin.super,
+      },
+      show: {
+        isAccessible: ({ currentAdmin, record }) => {
+          if (currentAdmin.super) return true;
+          return currentAdmin._id.toString() === record.params._id.toString();
+        },
+      },
     },
+    isAccessible: true,
   },
 };

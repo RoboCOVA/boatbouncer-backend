@@ -1,5 +1,4 @@
 import { ComponentLoader } from 'adminjs';
-
 const componentLoader = new ComponentLoader();
 
 const components = {
@@ -14,10 +13,13 @@ const components = {
   RenterInfo: componentLoader.add('RenterInfo', './RenterInfo'),
   BoatId: componentLoader.add('BoatId', './BoatId'),
   SuperButton: componentLoader.add('SuperButton', './SuperButton'),
+  EditButton: componentLoader.add('EditButton', './EditButton'),
   BooleanButton: componentLoader.add('BooleanButton', './BooleanButton'),
   CurrencyButton: componentLoader.add('CurrencyButton', './CurrencyButton'),
   Analytics: componentLoader.add('Analytics', './Analytics'),
   Statistics: componentLoader.add('Statistics', './Statistics'),
+  Conversations: componentLoader.add('Conversations', './Conversations'),
+  Members: componentLoader.add('Members', './Members'),
 };
 
 export { components, componentLoader };
