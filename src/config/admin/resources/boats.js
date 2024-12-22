@@ -1,5 +1,7 @@
-import Boats from '../../../models/Boats';
+import { categoriesEnum, subCategoriesEnum } from '../../../models/constants';
+import { boatFeaturesEnum } from '../../../utils/constants';
 import { components } from '../components/components';
+import Boats from '../../../models/Boats';
 
 export const BoatsResource = {
   resource: Boats,
@@ -9,6 +11,7 @@ export const BoatsResource = {
         isVisible: false,
       },
       amenities: {
+        type: 'array',
         isVisible: {
           list: false,
           edit: true,
@@ -90,6 +93,10 @@ export const BoatsResource = {
           show: true,
           filter: false,
         },
+        availableValues: Object.entries(categoriesEnum).map(([, value]) => ({
+          value,
+          label: value,
+        })),
       },
       subCategory: {
         isVisible: {
@@ -98,6 +105,10 @@ export const BoatsResource = {
           show: true,
           filter: false,
         },
+        availableValues: Object.entries(subCategoriesEnum).map(([, value]) => ({
+          value,
+          label: value,
+        })),
       },
       currency: {
         isVisible: {
@@ -108,12 +119,19 @@ export const BoatsResource = {
         },
       },
       features: {
+        type: 'array',
         isVisible: {
           list: false,
           edit: true,
           show: true,
           filter: false,
         },
+        availableValues: Object.entries(boatFeaturesEnum).map(
+          ([key, value]) => ({
+            value: key,
+            label: value,
+          })
+        ),
       },
       securityAllowance: {
         isVisible: {
