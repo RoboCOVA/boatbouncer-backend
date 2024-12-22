@@ -223,7 +223,7 @@ const Statistics = () => {
           width="100%"
           style={{
             objectFit: 'cover',
-            borderRadius: '4px',
+            borderRadius: '6px',
             background: 'linear-gradient(to right, #3b82f6, #06b6d4)',
           }}
         />
