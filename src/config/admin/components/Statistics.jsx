@@ -259,7 +259,9 @@ const Statistics = () => {
       <Select
         value={option}
         options={options}
-        onChange={(opt) => setOption(opt)}
+        onChange={(opt) => {
+          setOption(opt ? opt : option);
+        }}
         placeholder="Select an option"
       />
 
