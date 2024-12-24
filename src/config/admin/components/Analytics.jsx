@@ -37,7 +37,7 @@ const Statistics = () => {
         setResponse(result.data[0]);
         setLoading(false);
       })
-      .catch((error) => {
+      .catch(() => {
         setLoading(false);
       });
   }, [page]);
@@ -46,10 +46,10 @@ const Statistics = () => {
     <Box>
       <Box position={'relative'}>
         <img
-          src="/images/boat-bouncer.png"
-          height={'400vh'}
           width={'100%'}
-          style={{ objectFit: 'cover' }}
+          height={'400vh'}
+          src="/images/boat-bouncer.png"
+          style={{ objectFit: 'cover', borderRadius: '8px' }}
         />
         <Box
           style={{
@@ -101,7 +101,12 @@ const Statistics = () => {
                 <TableRow key={item._id}>
                   <TableCell>
                     <Text marginBottom={4} fontWeight={400} fontSize={14}>
-                      {item.boatDetails?.boatName || 'N/A'}
+                      <a
+                        className="anchor-link"
+                        href={`/admin/resources/Boats/records/${item._id}/show`}
+                      >
+                        {item.boatDetails?.boatName || 'N/A'}
+                      </a>
                     </Text>
                   </TableCell>
                   <TableCell>

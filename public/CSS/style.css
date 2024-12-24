@@ -124,3 +124,24 @@ table {
 .mapboxgl-control-container {
   display: none !important;
 }
+
+.anchor-link {
+  outline: 0;
+  font-size: 16px;
+  color: #4268f6;
+  appearance: none;
+  line-height: 24px;
+  padding-left: 2px;
+  padding: 4px 32px;
+  padding-right: 2px;
+  display: inline-block;
+  -moz-appearance: none;
+  text-decoration: none;
+  vertical-align: middle;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  border-color: transparent;
+  -webkit-text-decoration: none;
+  background-color: transparent;
+  font-family: 'Roboto', sans-serif;
+}
