@@ -47,6 +47,7 @@ const boatSchema = new mongoose.Schema(
     securityAllowance: { type: String, required: true },
     captained: { type: Boolean, required: true },
     searchable: { type: Boolean, default: false },
+    avgResponseTime: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

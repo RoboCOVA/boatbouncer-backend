@@ -32,6 +32,7 @@ export const getPaginatedBookingsPerStatusForAllBoats = async (currPage) => {
             $project: {
               boatName: 1, // Include only boatName
               searchable: 1, // Include only searchable
+              avgResponseTime: 1, // Include avgResponseTime
             },
           },
         ],

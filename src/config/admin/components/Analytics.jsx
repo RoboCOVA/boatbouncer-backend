@@ -16,6 +16,7 @@ import {
 } from '@adminjs/design-system';
 import { ApiClient } from 'adminjs';
 import { commonStyle } from './Badge';
+import prettyMilliseconds from 'pretty-ms';
 
 // Helper function to get the status count
 const getStatusCount = (statusArray, statusName) => {
@@ -37,7 +38,7 @@ const Statistics = () => {
         setResponse(result.data[0]);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
         setLoading(false);
       });
   }, [page]);
@@ -46,10 +47,10 @@ const Statistics = () => {
     <Box>
       <Box position={'relative'}>
         <img
-          width={'100%'}
-          height={'400vh'}
           src="/images/boat-bouncer.png"
-          style={{ objectFit: 'cover', borderRadius: '8px' }}
+          height={'400vh'}
+          width={'100%'}
+          style={{ objectFit: 'cover' }}
         />
         <Box
           style={{
@@ -94,6 +95,7 @@ const Statistics = () => {
                 <TableCell>Pending</TableCell>
                 <TableCell>Completed</TableCell>
                 <TableCell>Cancelled</TableCell>
+                <TableCell>Avg.Resp.Time</TableCell>
               </TableRow>
             </thead>
             <TableBody>
@@ -179,6 +181,22 @@ const Statistics = () => {
                       fontSize={18}
                     >
                       {getStatusCount(item.status, 'Cancelled')}
+                    </Text>
+                  </TableCell>
+                  <TableCell>
+                    <Text
+                      marginBottom={4}
+                      marginLeft={10}
+                      style={{
+                        display: 'flex',
+                        borderRadius: '100%',
+                      }}
+                      fontWeight={500}
+                      fontSize={18}
+                    >
+                      {item.boatDetails?.avgResponseTime
+                        ? prettyMilliseconds(item.boatDetails?.avgResponseTime)
+                        : '—'}
                     </Text>
                   </TableCell>
                 </TableRow>
