@@ -83,6 +83,7 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pretty-ms": "^9.2.0",
     "react-zoom-pan-pinch": "^3.6.1",
     "recharts": "^2.12.7",
     "retry": "^0.13.1",

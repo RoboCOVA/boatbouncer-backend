@@ -20,6 +20,7 @@ const components = {
   Statistics: componentLoader.add('Statistics', './Statistics'),
   Conversations: componentLoader.add('Conversations', './Conversations'),
   Members: componentLoader.add('Members', './Members'),
+  ResponseTime: componentLoader.add('ResponseTime', './ResponseTime'),
 };
 
 export { components, componentLoader };
