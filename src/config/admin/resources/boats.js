@@ -211,8 +211,8 @@ export const BoatsResource = {
           show: components.BooleanButton,
         },
         availableValues: [
-          { value: 'yes', label: 'Yes' },
-          { value: 'no', label: 'No' },
+          { value: true, label: 'Yes' },
+          { value: null, label: 'No' },
         ],
       },
       avgResponseTime: {
