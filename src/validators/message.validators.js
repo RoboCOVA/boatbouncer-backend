@@ -13,3 +13,9 @@ export const getMessagesValidator = () => [
     .isMongoId()
     .withMessage('Valid conversation ID is required'),
 ];
+
+export const readMessagesValidator = () => [
+  param('messageId').isMongoId().withMessage('Valid message ID is required'),
+
+  body('member').isMongoId().withMessage('Conversation member is required'),
+];

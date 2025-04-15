@@ -25,3 +25,14 @@ export const getMessagesController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const readMessageController = async (req, res, next) => {
+  try {
+    const { messageId } = req.params;
+    const { member } = req.body;
+    const message = await Messages.readMessage({ messageId, userId: member });
+    res.send(message);
+  } catch (error) {
+    next(error);
+  }
+};
