@@ -2,7 +2,38 @@ import { modelNames } from '../constants';
 import { userNotFound } from '../Users/errors';
 import { messageNotFound, userNotMember } from './errors';
 
-export async function getMessages({ conversationId }) {
+export async function getMessages({ conversationId, userId }) {
+  const Conversations = this.model(modelNames.CONVERSATIONS);
+  const conversation = await Conversations.findOne({
+    _id: conversationId,
+  }).populate('members');
+
+  const isMember = conversation.members.some((member) =>
+    member._id.equals(userId)
+  );
+  if (isMember) {
+    const unreadMessages = await this.find({
+      conversation: conversationId,
+      isRead: false,
+      sender: { $ne: userId },
+    });
+
+    if (unreadMessages.length > 0) {
+      const messageIdsToUpdate = unreadMessages.map((m) => m._id);
+
+      await this.updateMany(
+        {
+          _id: { $in: messageIdsToUpdate },
+          isRead: false,
+        },
+        {
+          $set: { isRead: true },
+          $addToSet: { readBy: userId },
+        }
+      );
+    }
+  }
+
   const message = await this.find({ conversation: conversationId }).populate([
     {
       path: 'conversation',
@@ -12,6 +43,7 @@ export async function getMessages({ conversationId }) {
       },
     },
   ]);
+
   return message;
 }
 
