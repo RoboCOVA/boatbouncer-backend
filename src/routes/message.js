@@ -1,24 +1,27 @@
 import { Router } from 'express';
 import {
-  crearteMessageValidator,
+  createMessageController,
+  getMessagesController,
+  getUnMessgesCountController,
+  readMessageController,
+} from '../controller/messages';
+import parseValidationResult from '../validators/errors.parser';
+import {
+  createMessageValidator,
   getMessagesValidator,
   readMessagesValidator,
 } from '../validators/message.validators';
-import parseValidationResult from '../validators/errors.parser';
-import {
-  createMessageController,
-  getMessagesController,
-  readMessageController,
-} from '../controller/messages';
 
 const router = Router();
 
 router.post(
   '/',
-  crearteMessageValidator(),
+  createMessageValidator(),
   parseValidationResult,
   createMessageController
 );
+
+router.get('/new/count', getUnMessgesCountController);
 
 router.get(
   '/:conversationId',

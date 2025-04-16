@@ -16,20 +16,19 @@ export async function getMessages({ conversationId }) {
 }
 
 export async function readMessage({ messageId, userId }) {
-  const Messages = this.model(modelNames.MESSAGES);
   const Users = this.model(modelNames.USERS);
 
   const user = await Users.findById(userId);
   if (!user) throw userNotFound;
 
-  let message = await Messages.findOne({ _id: messageId });
+  let message = await this.findOne({ _id: messageId });
   if (!message) throw messageNotFound;
 
   if (message.sender.equals(userId)) {
     return message;
   }
 
-  message = await Messages.findOne({ _id: messageId }).populate(
+  message = await this.findOne({ _id: messageId }).populate(
     'conversation',
     'members'
   );
@@ -39,7 +38,7 @@ export async function readMessage({ messageId, userId }) {
   );
   if (!isMember) throw userNotMember;
 
-  const olderMessages = await Messages.find({
+  const olderMessages = await this.find({
     conversation: message.conversation._id,
     createdAt: { $lte: message.createdAt },
     isRead: false,
@@ -48,7 +47,7 @@ export async function readMessage({ messageId, userId }) {
 
   const messageIdsToUpdate = [messageId, ...olderMessages.map((m) => m._id)];
 
-  await Messages.updateMany(
+  await this.updateMany(
     {
       _id: { $in: messageIdsToUpdate },
       isRead: false,
@@ -59,6 +58,28 @@ export async function readMessage({ messageId, userId }) {
     }
   );
 
-  const updatedMessage = await Messages.findById(messageId);
+  const updatedMessage = await this.findById(messageId);
   return updatedMessage;
+}
+
+export async function getUnreadMessagesCount({ userId }) {
+  const Conversations = this.model(modelNames.CONVERSATIONS);
+
+  const conversations = await Conversations.find({
+    members: userId,
+  });
+
+  if (!conversations.length) {
+    return 0;
+  }
+
+  const conversationIds = conversations.map((conv) => conv._id);
+
+  const unreadCount = await this.countDocuments({
+    conversation: { $in: conversationIds },
+    isRead: false,
+    sender: { $ne: userId },
+  });
+
+  return unreadCount;
 }

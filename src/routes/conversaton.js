@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import {
+  createConversationController,
+  getConversationController,
+} from '../controller/conversations';
+import {
   crearteConversationValidator,
   getConversationValidator,
 } from '../validators/conversation.validator';
 import parseValidationResult from '../validators/errors.parser';
-import {
-  createConversationController,
-  getConversationController,
-} from '../controller/conversations';
 
 const router = Router();
 
