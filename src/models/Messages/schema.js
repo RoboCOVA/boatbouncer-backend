@@ -10,6 +10,11 @@ const messageSchema = new Schema(
     },
     sender: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
     text: { type: String, required: true },
+    isRead: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
   { timestamps: true }
 );
