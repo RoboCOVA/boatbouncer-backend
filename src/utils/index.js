@@ -174,3 +174,7 @@ export function getMinutesDifference(date1, date2) {
   const diffMs = date1 - date2;
   return Math.floor(diffMs / 60000); // 60000 ms in one minute
 }
+
+export function emailToUsername(email) {
+  return email.split('@')[0];
+}
