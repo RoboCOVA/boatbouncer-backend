@@ -25,7 +25,7 @@ export async function createNewUser() {
       await session.withTransaction(async () => {
         const { password, email, phoneNumber } = this;
         const existingEmail = await this.model(modelNames.USERS).findOne({
-          email,
+          email: email.toLowerCase(),
         });
         if (existingEmail?.verified) throw userEmailExists;
 

@@ -3,7 +3,6 @@ import { strongPasswordRegex } from '../utils/constants';
 import defaultValidators from './default.validator';
 
 export const createUserValidator = () => [
-  body('userName').isString().withMessage('User name is required'),
   body('firstName').isString().withMessage('First name is required'),
   body('lastName').isString().withMessage('Last name is required'),
   body('address').isString().optional(),
@@ -40,7 +39,6 @@ export const sendSmsValidator = () => [
 
 export const updateUserValidator = () => [
   param('userId').isMongoId().withMessage('User Id is required'),
-  body('userName').isString().optional(),
   body('firstName').isString().optional(),
   body('lastName').isString().optional(),
   body('address').isString().optional(),

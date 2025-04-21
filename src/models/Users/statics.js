@@ -164,7 +164,9 @@ export async function updateUser({ matchQuery, updateObject }) {
 }
 
 export async function authenticateUser(email, password) {
-  const user = await this.findOne({ email }).exec();
+  const user = await this.findOne({
+    email: { $regex: new RegExp(`^${email}$`, 'i') },
+  }).exec();
   if (!user) {
     throw doesntMatchError;
   }

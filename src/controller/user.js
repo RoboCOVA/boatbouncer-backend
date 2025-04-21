@@ -3,11 +3,11 @@ import { identityToolkit } from '../config/googleApis';
 import Users from '../models/Users';
 import Boats from '../models/Boats';
 import Otp from '../models/Otp';
+import { emailToUsername } from '../utils';
 
 export const createUserController = async (req, res, next) => {
   try {
     const {
-      userName,
       email,
       password,
       firstName,
@@ -20,8 +20,8 @@ export const createUserController = async (req, res, next) => {
     } = req.body;
 
     const newUser = new Users({
-      userName,
-      email,
+      userName: emailToUsername(email),
+      email: email.toLowerCase(),
       password,
       firstName,
       lastName,
@@ -130,7 +130,6 @@ export const updateUserController = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const {
-      userName,
       email,
       password,
       oldPassword,
@@ -146,8 +145,10 @@ export const updateUserController = async (req, res, next) => {
     const updateObject = {};
     const matchQuery = { _id: userId };
 
-    if (userName) updateObject.userName = userName;
-    if (email) updateObject.email = email;
+    if (email) {
+      updateObject.email = email.toLowerCase();
+      updateObject.userName = emailToUsername(email);
+    }
     if (password) updateObject.password = password;
     if (firstName) updateObject.firstName = firstName;
     if (lastName) updateObject.lastName = lastName;
