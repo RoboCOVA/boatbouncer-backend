@@ -16,3 +16,13 @@ export const userNotMember = new APIError(
   'user is not member of conversation',
   httpStatus.BAD_REQUEST
 );
+
+export const notMessageOwner = new APIError(
+  'Action not allowed - you are not the owner',
+  httpStatus.FORBIDDEN
+);
+
+export const messageDeletionFailed = new APIError(
+  'Message deletion failed',
+  httpStatus.INTERNAL_SERVER_ERROR
+);

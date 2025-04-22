@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createMessageController,
+  deleteMessageController,
   getMessagesController,
   getUnMessgesCountController,
   readMessageController,
@@ -35,6 +36,13 @@ router.patch(
   readMessagesValidator(),
   parseValidationResult,
   readMessageController
+);
+
+router.delete(
+  '/:messageId',
+  readMessagesValidator(),
+  parseValidationResult,
+  deleteMessageController
 );
 
 export default router;

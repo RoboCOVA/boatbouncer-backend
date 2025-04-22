@@ -1,6 +1,11 @@
 import { modelNames } from '../constants';
 import { userNotFound } from '../Users/errors';
-import { messageNotFound, userNotMember } from './errors';
+import {
+  messageDeletionFailed,
+  messageNotFound,
+  notMessageOwner,
+  userNotMember,
+} from './errors';
 
 export async function getMessages({ conversationId, userId }) {
   const Conversations = this.model(modelNames.CONVERSATIONS);
@@ -92,6 +97,27 @@ export async function readMessage({ messageId, userId }) {
 
   const updatedMessage = await this.findById(messageId);
   return updatedMessage;
+}
+
+export async function deleteMessage({ messageId, userId }) {
+  const Users = this.model(modelNames.USERS);
+
+  const user = await Users.findById(userId);
+  if (!user) throw userNotFound;
+
+  const message = await this.findOne({ _id: messageId });
+  if (!message) throw messageNotFound;
+
+  if (!message.sender.equals(userId)) {
+    throw notMessageOwner;
+  }
+
+  const deletedMessage = await this.findByIdAndDelete(messageId);
+
+  if (!deletedMessage) {
+    throw messageDeletionFailed;
+  }
+  return messageId;
 }
 
 export async function getUnreadMessagesCount({ userId }) {
