@@ -196,14 +196,23 @@ export async function getCurrentUser({ userId }) {
   if (!user) throw userNotFound;
 
   if (user?.stripeAccountId) {
-    const decryptedId = decryptData(user?.stripeAccountId);
+    const decryptedId = decryptData(user.stripeAccountId);
     const accountId = await stripe.accounts.retrieve(decryptedId);
-    if (accountId?.charges_enabled) user.chargesEnabled = true;
-    else user.chargesEnabled = false;
-  } else user.chargesEnabled = false;
+    user.chargesEnabled = accountId?.charges_enabled || false;
+  } else {
+    user.chargesEnabled = false;
+  }
+
+  const activeListingsCount = await this.model(modelNames.BOATS).countDocuments(
+    {
+      owner: userId,
+      status: 'active',
+    }
+  );
+  user.activeListingsCount = activeListingsCount;
 
   const clean = await user.clean();
-  return clean;
+  return { ...clean, activeListingsCount };
 }
 
 export async function createStripeAccount({ userId, country = 'US' }) {
