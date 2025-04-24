@@ -41,6 +41,20 @@ export const readMessageController = async (req, res, next) => {
   }
 };
 
+export const deleteMessageController = async (req, res, next) => {
+  try {
+    const { user } = req;
+    const { messageId } = req.params;
+    const message = await Messages.deleteMessage({
+      messageId,
+      userId: user?.id,
+    });
+    res.send(message);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getUnMessgesCountController = async (req, res, next) => {
   try {
     const { user } = req;
