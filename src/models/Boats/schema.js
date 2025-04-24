@@ -1,53 +1,101 @@
-import mongoose, { Types } from 'mongoose';
-import { boatStatusEnum, pricingTypeEnum } from '../../utils/constants';
-import { categoriesEnum, modelNames, subCategoriesEnum } from '../constants';
+import mongoose, { Schema, Types } from 'mongoose';
+import {
+  boatActivityTypeEnum,
+  boatListingTypeEnum,
+  boatStatusEnum,
+  boatTypeEnum,
+} from '../../utils/constants';
 
-const locationSchema = {
+const latLngSchema = new Schema(
+  {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
+const locationSchema = new Schema(
+  {
+    address: { type: String },
+    city: { type: String },
+    state: { type: String },
+    zipCode: { type: String },
+  },
+  { _id: false }
+);
+
+const baseBoatFieldsSchema = {
+  boatName: { type: String, required: true },
+  description: { type: String, required: true },
   address: { type: String },
-  city: { type: String },
-  state: { type: String },
-  zipCode: { type: String },
+  location: locationSchema,
+  maxPassengers: { type: Number },
+  imageUrls: [{ type: String }],
+  owner: { type: Types.ObjectId, ref: 'User', required: true },
+  latLng: latLngSchema,
+  searchable: { type: Boolean, default: false },
+  status: { type: String, enum: boatStatusEnum },
+  listingType: { type: String, enum: boatListingTypeEnum, default: 'rental' },
 };
 
-const pricingSchema = {
-  type: { type: String, enum: pricingTypeEnum },
-  min: { type: Number },
-  value: { type: Number },
+const activityPricingSchema = new Schema(
+  {
+    perPerson: { type: Number, required: true },
+    discountPercentage: { type: Number, default: 0 },
+    minPeopleForDiscount: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
+
+const activityBoatFields = {
+  activityType: {
+    type: String,
+    enum: boatActivityTypeEnum,
+    required: false,
+  },
+  pricing: { type: activityPricingSchema, required: false },
 };
 
-const cancelationSchema = {
-  refund: { type: Number },
-  priorHours: { type: Number },
-};
+const rentalPricingSchema = new Schema(
+  {
+    perDay: { type: Number },
+    dayDiscount: { type: Number, default: 0 },
+    minDaysForDiscount: { type: Number, default: 0 },
+    perHour: { type: Number },
+    hourDiscount: { type: Number, default: 0 },
+    minHours: { type: Number, default: 1 },
+  },
+  { _id: false }
+);
 
+const rentalBoatFields = {
+  agreementInfo: { type: String },
+  boatType: {
+    type: String,
+    enum: boatTypeEnum,
+    required: false,
+  },
+  year: { type: Number },
+  manufacturer: { type: String },
+  model: { type: String },
+  pricing: { type: rentalPricingSchema, required: false },
+  features: {
+    type: [String],
+    default: [],
+  },
+};
 const boatSchema = new mongoose.Schema(
   {
-    boatName: { type: String, required: true },
-    boatType: { type: String, required: true }, // should be an enum
-    description: { type: String, required: true },
-    status: { type: String, enum: boatStatusEnum },
-    manufacturer: { type: String },
-    model: { type: String },
-    year: { type: Number },
-    length: { type: Number }, // measurement
-    amenities: [{ type: String }],
-    imageUrls: [{ type: String }],
-    owner: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
-    location: locationSchema,
-    latLng: {
-      type: { type: String, enum: ['Point'] },
-      coordinates: { type: [Number] },
-    },
-    category: [{ type: String, enum: categoriesEnum }],
-    subCategory: [{ type: String, enum: subCategoriesEnum }],
-    currency: { type: String },
-    features: [{ type: String }],
-    pricing: [pricingSchema],
-    cancelationPolicy: { type: [cancelationSchema] },
-    securityAllowance: { type: String, required: true },
-    captained: { type: Boolean, required: true },
-    searchable: { type: Boolean, default: false },
-    avgResponseTime: { type: Number, default: 0 },
+    ...baseBoatFieldsSchema,
+    ...activityBoatFields,
+    ...rentalBoatFields,
   },
   { timestamps: true }
 );

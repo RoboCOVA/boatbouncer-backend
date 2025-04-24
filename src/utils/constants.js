@@ -182,6 +182,29 @@ export const bookingStatus = {
   CANCELLED: 'Cancelled',
 };
 
+const boatListTypes = {
+  RENTAL: 'rental',
+  ACTIVITY: 'activity',
+};
+
+export const boatListingTypeEnum = generateEnumArrayFromObject(boatListTypes);
+
+const boatTypes = {
+  YACHT: 'Yacht',
+  MOTORIZED_BOAT: 'Motorized Boat',
+  NON_MOTORIZED_BOAT: 'Non-Motorized Boat',
+  SAIL_BOAT: 'Sail Boat',
+  PWC: 'PWC',
+};
+export const boatTypeEnum = generateEnumArrayFromObject(boatTypes);
+
+const boatActivities = {
+  LESSON: 'Lesson',
+  TOUR_GUIDE: 'Tour/Guide',
+  OTHER: 'Other',
+};
+export const boatActivityTypeEnum = generateEnumArrayFromObject(boatActivities);
+
 export const bookingStatusEnum = generateEnumArrayFromObject(bookingStatus);
 
 export const offerStatus = {

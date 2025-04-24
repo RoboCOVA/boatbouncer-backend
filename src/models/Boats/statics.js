@@ -1,8 +1,14 @@
 import { getPaginationValues } from '../../utils';
-import { boatNotFound, boatUpdateFailed } from './errors';
+import {
+  boatDeleteFailed,
+  boatNameUsed,
+  boatNotFound,
+  boatUpdateFailed,
+  updatelistingTypeNotAllowed,
+} from './errors';
 import Bookings from '../Bookings';
 import { boatStatus, bookingStatus } from '../../utils/constants';
-
+//   const Conversations = this.model(modelNames.CONVERSATIONS);
 /**
  * It returns a list of boats, with a total count of all boats, based on the page number and size of
  * the page.
@@ -18,6 +24,7 @@ export async function getBoats({ pageNo, size, filter }) {
     features,
     coordinates,
     bbox,
+    listingType,
   } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
 
@@ -31,11 +38,13 @@ export async function getBoats({ pageNo, size, filter }) {
   /** Temporarily disabled filters */
 
   if (status) match.status = { $regex: status.trim(), $options: 'i' };
+  if (listingType)
+    match.listingType = { $regex: listingType.trim(), $options: 'i' };
   if (features) match.features = { $regex: features.trim(), $options: 'i' };
-  if (category) match.category = { $regex: category.trim(), $options: 'i' };
+  // if (category) match.category = { $regex: category.trim(), $options: 'i' };
   if (boatName) match.boatName = { $regex: boatName.trim(), $options: 'i' };
-  if (subCategory)
-    match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
+  // if (subCategory)
+  //   match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
   if (typeof captained === 'boolean') match.captained = captained;
   // if (typeof searchable === 'boolean') match.searchable = searchable;
 
@@ -111,14 +120,16 @@ export async function getBoats({ pageNo, size, filter }) {
         owner: 1,
         location: 1,
         latLng: 1,
-        category: 1,
-        subCategory: 1,
         currency: 1,
         features: 1,
         pricing: 1,
         securityAllowance: 1,
-        captained: 1,
         searchable: 1,
+        listingType: 1,
+        maxPassengers: 1,
+        agreementInfo: 1,
+        address: 1,
+        activityType: 1,
       },
     },
     {
@@ -187,6 +198,7 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
     searchable,
     category,
     subCategory,
+    listingType,
   } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
   const query = {};
@@ -198,6 +210,7 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
   if (state) query['location.state'] = { $regex: state, $options: 'i' };
   if (category) query.category = category;
   if (subCategory) query.subCategory = subCategory;
+  if (listingType) query.listingType = listingType;
   if (typeof captained === 'boolean') query.captained = captained;
   else if (captained) query.captained = captained;
   if (typeof searchable === 'boolean') query.searchable = searchable;
@@ -234,15 +247,38 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
  * @returns The boat object
  */
 export async function getBoat({ boatId }) {
-  const boat = await this.findOne({ _id: boatId });
+  const boat = await this.findOne({ _id: boatId, status: { $ne: 'deleted' } });
   if (!boat) throw boatNotFound;
   return boat;
 }
 
-export async function updateBoat(matchQuery, updateObject) {
-  const boatUpdate = await this.findOneAndUpdate(matchQuery, updateObject, {
-    new: true,
+export async function updateBoat(id, userId, updateObject) {
+  const boat = await this.findOne({
+    _id: id,
+    owner: userId,
+    status: { $ne: 'deleted' },
   });
+
+  if (!boat) throw boatNotFound;
+  if (boat.listingType !== updateObject.listingType)
+    throw updatelistingTypeNotAllowed;
+
+  const existingBoat = await this.findOne({
+    boatName: { $regex: new RegExp(`^${this.boatName}$`, 'i') },
+  });
+
+  if (existingBoat && existingBoat._id !== id) {
+    throw boatNameUsed;
+  }
+
+  const boatUpdate = await this.findOneAndUpdate(
+    { _id: id, owner: userId },
+    updateObject,
+    {
+      new: true,
+    }
+  );
+
   if (!boatUpdate) throw boatUpdateFailed;
   return boatUpdate;
 }
@@ -255,8 +291,22 @@ export async function deleteBoat({ boatId, userId }) {
   // if (!removedBoat) throw boatDeleteFailed;
   // return removedBoat;
 
-  return updateBoat(
+  const boat = await this.findOne({
+    _id: boatId,
+    owner: userId,
+    status: { $ne: 'deleted' },
+  });
+  if (!boat) throw boatNotFound;
+
+  const boatDeleted = await this.findOneAndUpdate(
     { _id: boatId, owner: userId },
-    { status: boatStatus.DELETED }
+    { status: boatStatus.DELETED, boatName: `${boat.boatName}_${boatId}` },
+    {
+      new: true,
+    }
   );
+
+  if (!boatDeleted) throw boatDeleteFailed;
+
+  return boatId;
 }

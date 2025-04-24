@@ -1,4 +1,5 @@
 import express from 'express';
+import { authenticateJwt } from '../controller/authenticate';
 import {
   addOrRemoveFavoriteController,
   createBoatController,
@@ -17,10 +18,9 @@ import {
   getBoatListingValidator,
   getBoatsValidator,
   getBoatValidator,
-  updateBoatsValidator,
+  updateBoatValidator,
 } from '../validators/boat.validators';
 import parseValidationResult from '../validators/errors.parser';
-import { authenticateJwt } from '../controller/authenticate';
 
 const router = express.Router();
 
@@ -56,7 +56,8 @@ router.get(
 router.put(
   '/:boatId',
   authenticateJwt,
-  updateBoatsValidator(),
+  updateBoatValidator(),
+  // updateBoatsValidator(),
   parseValidationResult,
   updateBoatController
 );
