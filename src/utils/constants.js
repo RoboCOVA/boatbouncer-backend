@@ -143,30 +143,30 @@ export const publicResources = {
 
 export const publicResourcesEnum = generateEnumArrayFromObject(publicResources);
 
-export const boatFeatures = {
-  BluetoothCapable: 'Bluetooth capable',
-  PremiumSoundSystem: 'Premium sound system',
-  Bathroom: 'Bathroom',
-  Grill: 'Grill',
-  Kitchen: 'Kitchen',
-  Refrigerator: 'Refrigerator',
-  SwimLadder: 'Swim ladder',
-  SunBed: 'Sun bed',
-  BiminiShade: 'Bimini / shade',
-  Heater: 'Heater',
-  AC: 'A/C',
-  FishFinder: 'Fish finder',
-  FishingRodHolders: 'Fishing rod holders',
-  LiveWell: 'Live well',
-  TrollingMotor: 'Trolling motor',
-  Cabin: 'Cabin',
-  WaterSportsCapable: 'Water sports capable',
-  Wifi: 'Wifi',
-  Shower: 'Shower',
-  RgbLights: 'RGB lights',
-};
+// export const boatFeatures = {
+//   BluetoothCapable: 'Bluetooth capable',
+//   PremiumSoundSystem: 'Premium sound system',
+//   Bathroom: 'Bathroom',
+//   Grill: 'Grill',
+//   Kitchen: 'Kitchen',
+//   Refrigerator: 'Refrigerator',
+//   SwimLadder: 'Swim ladder',
+//   SunBed: 'Sun bed',
+//   BiminiShade: 'Bimini / shade',
+//   Heater: 'Heater',
+//   AC: 'A/C',
+//   FishFinder: 'Fish finder',
+//   FishingRodHolders: 'Fishing rod holders',
+//   LiveWell: 'Live well',
+//   TrollingMotor: 'Trolling motor',
+//   Cabin: 'Cabin',
+//   WaterSportsCapable: 'Water sports capable',
+//   Wifi: 'Wifi',
+//   Shower: 'Shower',
+//   RgbLights: 'RGB lights',
+// };
 
-export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
+// export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
 
 export const boatStatus = {
   ACTIVE: 'active',
@@ -198,12 +198,24 @@ const boatTypes = {
 };
 export const boatTypeEnum = generateEnumArrayFromObject(boatTypes);
 
-const boatActivities = {
+export const boatActivities = {
   LESSON: 'Lesson',
   TOUR_GUIDE: 'Tour/Guide',
   OTHER: 'Other',
 };
 export const boatActivityTypeEnum = generateEnumArrayFromObject(boatActivities);
+
+export const boatFeatures = {
+  CAPTAINED: 'Captained',
+  WATER_TOYS: 'Water Toys',
+  TOWABLE: 'Can be Towed on Trailer',
+  DELIVERABLE: 'Deliverable',
+  BATHROOM: 'Bathroom',
+  ANCHOR: 'Anchor',
+  ADDITIONAL_AMENITIES: 'Additional Amenities',
+};
+
+export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
 
 export const bookingStatusEnum = generateEnumArrayFromObject(bookingStatus);
 

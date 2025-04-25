@@ -177,51 +177,14 @@ const createRentalBoatValidator = () => [
     .isInt({ min: 1 })
     .withMessage('Minimum hours must be at least 1'),
 
-  body('amenities')
-    .optional()
-    .isObject()
-    .withMessage('Amenities must be an object'),
-
-  body('amenities.captained')
-    .optional()
-    .isBoolean()
-    .withMessage('Captained must be a boolean'),
-
-  body('amenities.waterToys')
-    .optional()
-    .isBoolean()
-    .withMessage('Water toys must be a boolean'),
-
-  body('amenities.towable')
-    .optional()
-    .isBoolean()
-    .withMessage('Towable must be a boolean'),
-
-  body('amenities.deliverable')
-    .optional()
-    .isBoolean()
-    .withMessage('Deliverable must be a boolean'),
-
-  body('amenities.bathroom')
-    .optional()
-    .isBoolean()
-    .withMessage('Bathroom must be a boolean'),
-
-  body('amenities.anchor')
-    .optional()
-    .isBoolean()
-    .withMessage('Anchor must be a boolean'),
-
-  body('amenities.additionalAmenities')
-    .optional()
+  body('features')
     .isArray()
-    .withMessage('Additional amenities must be an array'),
-
-  body('amenities.additionalAmenities.*')
-    .isString()
-    .isLength({ max: 100 })
+    .withMessage('Features must be an array')
+    .isIn(Object.values(boatFeatures))
     .withMessage(
-      'Each additional amenity must be a string less than 100 characters'
+      `Invalid feature. Valid features are: ${Object.values(boatFeatures).join(
+        ', '
+      )}`
     ),
 ];
 
@@ -232,11 +195,20 @@ export const createBoatValidator = () => [
     .isString()
     .withMessage('listingType must be a string')
     .isIn(['rental', 'activity'])
-    .withMessage('Ulisting Type  must be either "rental" or "activity"'),
+    .withMessage('listing Type  must be either "rental" or "activity"'),
 
-  body('listingType').custom((value) => {
-    if (value === 'activity') return createActivityBoatValidator();
-    return createRentalBoatValidator();
+  body().custom((value, { req }) => {
+    if (req.body.listingType === 'activity') {
+      return Promise.all(
+        createActivityBoatValidator().map((validator) => validator.run(req))
+      );
+    }
+    if (req.body.listingType === 'rental') {
+      return Promise.all(
+        createRentalBoatValidator().map((validator) => validator.run(req))
+      );
+    }
+    return true;
   }),
 ];
 
@@ -349,19 +321,6 @@ const updateActivityBoatValidator = () => [
     .optional()
     .isInt({ min: 2 })
     .withMessage('Minimum people for discount must be at least 2'),
-
-  body('features')
-    .optional()
-    .isArray()
-    .withMessage('Features must be an array'),
-
-  body('features.*')
-    .isIn(Object.values(boatFeatures))
-    .withMessage(
-      `Invalid feature. Valid features are: ${Object.values(boatFeatures).join(
-        ', '
-      )}`
-    ),
 ];
 
 const updateRentalBoatValidator = () => [
@@ -422,52 +381,15 @@ const updateRentalBoatValidator = () => [
     .isInt({ min: 1 })
     .withMessage('Minimum hours must be at least 1'),
 
-  body('amenities')
-    .optional()
-    .isObject()
-    .withMessage('Amenities must be an object'),
-
-  body('amenities.captained')
-    .optional()
-    .isBoolean()
-    .withMessage('Captained must be a boolean'),
-
-  body('amenities.waterToys')
-    .optional()
-    .isBoolean()
-    .withMessage('Water toys must be a boolean'),
-
-  body('amenities.towable')
-    .optional()
-    .isBoolean()
-    .withMessage('Towable must be a boolean'),
-
-  body('amenities.deliverable')
-    .optional()
-    .isBoolean()
-    .withMessage('Deliverable must be a boolean'),
-
-  body('amenities.bathroom')
-    .optional()
-    .isBoolean()
-    .withMessage('Bathroom must be a boolean'),
-
-  body('amenities.anchor')
-    .optional()
-    .isBoolean()
-    .withMessage('Anchor must be a boolean'),
-
-  body('amenities.additionalAmenities')
+  body('features')
     .optional()
     .isArray()
-    .withMessage('Additional amenities must be an array'),
-
-  body('amenities.additionalAmenities.*')
-    .optional()
-    .isString()
-    .isLength({ max: 100 })
+    .withMessage('Features must be an array')
+    .isIn(Object.values(boatFeatures))
     .withMessage(
-      'Each additional amenity must be a string less than 100 characters'
+      `Invalid feature. Valid features are: ${Object.values(boatFeatures).join(
+        ', '
+      )}`
     ),
 ];
 
@@ -482,9 +404,18 @@ export const updateBoatValidator = () => [
 
   body('status').isString().isIn(boatStatusEnum).optional(),
 
-  body('listingType').custom((value) => {
-    if (value === 'activity') return updateActivityBoatValidator();
-    return updateRentalBoatValidator();
+  body().custom((value, { req }) => {
+    if (req.body.listingType === 'activity') {
+      return Promise.all(
+        updateActivityBoatValidator().map((validator) => validator.run(req))
+      );
+    }
+    if (req.body.listingType === 'rental') {
+      return Promise.all(
+        updateRentalBoatValidator().map((validator) => validator.run(req))
+      );
+    }
+    return true;
   }),
 ];
 export const getBoatValidator = () => [

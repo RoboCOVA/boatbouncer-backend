@@ -1,6 +1,7 @@
 import mongoose, { Schema, Types } from 'mongoose';
 import {
   boatActivityTypeEnum,
+  boatFeaturesEnum,
   boatListingTypeEnum,
   boatStatusEnum,
   boatTypeEnum,
@@ -88,6 +89,7 @@ const rentalBoatFields = {
   pricing: { type: rentalPricingSchema, required: false },
   features: {
     type: [String],
+    enum: boatFeaturesEnum,
     default: [],
   },
 };

@@ -2,12 +2,18 @@ import Boats from '../models/Boats';
 import Favorites from '../models/Favorites';
 import { categoriesEnum, subCategoriesEnum } from '../models/constants';
 import { coordinateObjToGeoJson } from '../utils';
-import { boatStatus, boatFeaturesEnum } from '../utils/constants';
+import {
+  boatStatus,
+  boatFeaturesEnum,
+  boatTypeEnum,
+  boatActivityTypeEnum,
+} from '../utils/constants';
 import Users from '../models/Users';
 
 export const createBoatController = async (req, res, next) => {
   try {
     const { latLng } = req.body;
+    // console.log({ body: req.body });
 
     const userId = req?.user?._id || '';
 
@@ -156,6 +162,27 @@ export const deleteBoatController = async (req, res, next) => {
 export const getBoatCategories = (req, res, next) => {
   try {
     res.send({ categoriesEnum, subCategoriesEnum, boatFeaturesEnum });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getBoatTypes = (req, res, next) => {
+  try {
+    res.send({ boatTypeEnum });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getBoatActivties = (req, res, next) => {
+  try {
+    res.send({ boatActivityTypeEnum });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getBoatFeatures = (req, res, next) => {
+  try {
+    res.send({ boatFeaturesEnum });
   } catch (error) {
     next(error);
   }

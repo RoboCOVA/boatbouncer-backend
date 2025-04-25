@@ -4,10 +4,13 @@ import {
   addOrRemoveFavoriteController,
   createBoatController,
   deleteBoatController,
+  getBoatActivties,
   getBoatCategories,
   getBoatController,
+  getBoatFeatures,
   getBoatListingController,
   getBoatsController,
+  getBoatTypes,
   getFavoritesController,
   updateBoatController,
 } from '../controller/boat';
@@ -31,6 +34,12 @@ router.post(
   parseValidationResult,
   createBoatController
 );
+
+router.get('/features', getBoatFeatures);
+
+router.get('/types', getBoatTypes);
+
+router.get('/activities', getBoatActivties);
 
 router.get('/categories', getBoatCategories);
 
