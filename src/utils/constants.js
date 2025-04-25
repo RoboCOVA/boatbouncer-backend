@@ -201,6 +201,8 @@ export const boatTypeEnum = generateEnumArrayFromObject(boatTypes);
 export const boatActivities = {
   LESSON: 'Lesson',
   TOUR_GUIDE: 'Tour/Guide',
+  CHARTER: 'Cruise/Charter',
+  EXPERIENCE: 'Experiences',
   OTHER: 'Other',
 };
 export const boatActivityTypeEnum = generateEnumArrayFromObject(boatActivities);
