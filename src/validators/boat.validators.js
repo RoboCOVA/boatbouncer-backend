@@ -23,33 +23,28 @@ const createBaseBoatValidator = () => [
     .withMessage('Description must be less than 2000 characters'),
 
   body('address')
-    .optional()
     .isString()
     .withMessage('Address should be a valid string')
     .isLength({ max: 255 })
     .withMessage('Address must be less than 255 characters'),
 
-  body('location')
-    .optional()
-    .custom((value) => {
-      if (value) {
-        if (!value.address || typeof value.address !== 'string') {
-          throw new Error(
-            'Location address is required and should be a string'
-          );
-        }
-        if (value.city && typeof value.city !== 'string') {
-          throw new Error('Location city should be a string');
-        }
-        if (value.state && typeof value.state !== 'string') {
-          throw new Error('Location state should be a string');
-        }
-        if (value.zipCode && typeof value.zipCode !== 'string') {
-          throw new Error('Location zip code should be a string');
-        }
+  body('location').custom((value) => {
+    if (value) {
+      if (!value.address || typeof value.address !== 'string') {
+        throw new Error('Location address is required and should be a string');
       }
-      return true;
-    }),
+      if (value.city && typeof value.city !== 'string') {
+        throw new Error('Location city should be a string');
+      }
+      if (value.state && typeof value.state !== 'string') {
+        throw new Error('Location state should be a string');
+      }
+      if (value.zipCode && typeof value.zipCode !== 'string') {
+        throw new Error('Location zip code should be a string');
+      }
+    }
+    return true;
+  }),
 
   body('maxPassengers')
     .isInt({ min: 1, max: 1000 })
@@ -61,30 +56,28 @@ const createBaseBoatValidator = () => [
 
   body('imageUrls.*').isURL().withMessage('Each image URL must be a valid URL'),
 
-  body('latLng')
-    .optional()
-    .custom((value) => {
-      if (value) {
-        if (
-          typeof value.latitude !== 'number' ||
-          typeof value.longitude !== 'number'
-        ) {
-          throw new Error(
-            'LatLng must contain latitude and longitude as numbers'
-          );
-        }
-        if (value.latitude < -90 || value.latitude > 90) {
-          throw new Error('Latitude must be between -90 and 90');
-        }
-        if (value.longitude < -180 || value.longitude > 180) {
-          throw new Error('Longitude must be between -180 and 180');
-        }
-        if (value.elevation && typeof value.elevation !== 'number') {
-          throw new Error('Elevation must be a number if provided');
-        }
+  body('latLng').custom((value) => {
+    if (value) {
+      if (
+        typeof value.latitude !== 'number' ||
+        typeof value.longitude !== 'number'
+      ) {
+        throw new Error(
+          'LatLng must contain latitude and longitude as numbers'
+        );
       }
-      return true;
-    }),
+      if (value.latitude < -90 || value.latitude > 90) {
+        throw new Error('Latitude must be between -90 and 90');
+      }
+      if (value.longitude < -180 || value.longitude > 180) {
+        throw new Error('Longitude must be between -180 and 180');
+      }
+      if (value.elevation && typeof value.elevation !== 'number') {
+        throw new Error('Elevation must be a number if provided');
+      }
+    }
+    return true;
+  }),
 ];
 
 const createActivityBoatValidator = () => [
@@ -102,25 +95,16 @@ const createActivityBoatValidator = () => [
 
   body('pricing.discountPercentage')
     .optional()
-    .isFloat({ min: 0, max: 100 })
-    .withMessage('Discount percentage must be between 0-100'),
-
-  body('pricing.minPeopleForDiscount')
-    .optional()
-    .isInt({ min: 2 })
-    .withMessage('Minimum people for discount must be at least 2'),
-  body('features')
-    .optional()
     .isArray()
-    .withMessage('Features must be an array'),
+    .withMessage('Discount percentage must be an array of discount objects'),
 
-  body('features.*')
-    .isIn(Object.values(boatFeatures))
-    .withMessage(
-      `Invalid feature. Valid features are: ${Object.values(boatFeatures).join(
-        ', '
-      )}`
-    ),
+  body('pricing.discountPercentage.*.percentage')
+    .isFloat({ min: 0, max: 100 })
+    .withMessage('Each discount percentage must be between 0-100'),
+
+  body('pricing.discountPercentage.*.minPeople')
+    .isInt({ min: 2 })
+    .withMessage('Each discount must have at least 2 minimum people'),
 ];
 
 const createRentalBoatValidator = () => [
@@ -129,18 +113,15 @@ const createRentalBoatValidator = () => [
     .withMessage(`Boat Type must be one of: ${boatTypeEnum.join(', ')}`),
 
   body('year')
-    .optional()
     .isInt({ min: 1900, max: new Date().getFullYear() + 1 })
     .withMessage(`Year must be between 1900-${new Date().getFullYear() + 1}`),
 
   body('manufacturer')
-    .optional()
     .isString()
     .isLength({ max: 100 })
     .withMessage('Manufacturer must be less than 100 characters'),
 
   body('model')
-    .optional()
     .isString()
     .isLength({ max: 100 })
     .withMessage('Model must be less than 100 characters'),
@@ -148,32 +129,42 @@ const createRentalBoatValidator = () => [
   body('pricing').isObject().withMessage('Pricing must be an object'),
 
   body('pricing.perDay')
-    .optional()
     .isFloat({ min: 0 })
     .withMessage('Per day price must be a positive number'),
 
   body('pricing.perHour')
-    .optional()
     .isFloat({ min: 0 })
     .withMessage('Per hour price must be a positive number'),
 
   body('pricing.dayDiscount')
-    .optional()
+    .isArray()
+    .withMessage('Day discount must be an array of discount objects'),
+
+  body('pricing.dayDiscount.*.discountPercentage')
     .isFloat({ min: 0, max: 100 })
-    .withMessage('Day discount must be between 0-100'),
+    .withMessage('Each day discount percentage must be between 0-100'),
+
+  body('pricing.dayDiscount.*.minDaysForDiscount')
+    .isInt({ min: 2 })
+    .withMessage('Each day discount must have at least 2 minimum days'),
+
+  body('pricing.minDays')
+    .isInt({ min: 0 })
+    .withMessage('Minimum days must be a non-negative integer'),
 
   body('pricing.hourDiscount')
-    .optional()
-    .isFloat({ min: 0, max: 100 })
-    .withMessage('Hour discount must be between 0-100'),
+    .isArray()
+    .withMessage('Hour discount must be an array of discount objects'),
 
-  body('pricing.minDaysForDiscount')
-    .optional()
-    .isInt({ min: 2 })
-    .withMessage('Minimum days for discount must be at least 2'),
+  body('pricing.hourDiscount.*.discountPercentage')
+    .isFloat({ min: 0, max: 100 })
+    .withMessage('Each hour discount percentage must be between 0-100'),
+
+  body('pricing.hourDiscount.*.minHoursForDiscount')
+    .isInt({ min: 1 })
+    .withMessage('Each hour discount must have at least 1 minimum hour'),
 
   body('pricing.minHours')
-    .optional()
     .isInt({ min: 1 })
     .withMessage('Minimum hours must be at least 1'),
 
@@ -314,13 +305,16 @@ const updateActivityBoatValidator = () => [
 
   body('pricing.discountPercentage')
     .optional()
-    .isFloat({ min: 0, max: 100 })
-    .withMessage('Discount percentage must be between 0-100'),
+    .isArray()
+    .withMessage('Discount percentage must be an array of discount objects'),
 
-  body('pricing.minPeopleForDiscount')
-    .optional()
+  body('pricing.discountPercentage.*.percentage')
+    .isFloat({ min: 0, max: 100 })
+    .withMessage('Each discount percentage must be between 0-100'),
+
+  body('pricing.discountPercentage.*.minPeople')
     .isInt({ min: 2 })
-    .withMessage('Minimum people for discount must be at least 2'),
+    .withMessage('Each discount must have at least 2 minimum people'),
 ];
 
 const updateRentalBoatValidator = () => [
@@ -346,10 +340,7 @@ const updateRentalBoatValidator = () => [
     .isLength({ max: 100 })
     .withMessage('Model must be less than 100 characters'),
 
-  body('pricing')
-    .optional()
-    .isObject()
-    .withMessage('Pricing must be an object'),
+  body('pricing').isObject().withMessage('Pricing must be an object'),
 
   body('pricing.perDay')
     .optional()
@@ -363,18 +354,34 @@ const updateRentalBoatValidator = () => [
 
   body('pricing.dayDiscount')
     .optional()
+    .isArray()
+    .withMessage('Day discount must be an array of discount objects'),
+
+  body('pricing.dayDiscount.*.discountPercentage')
     .isFloat({ min: 0, max: 100 })
-    .withMessage('Day discount must be between 0-100'),
+    .withMessage('Each day discount percentage must be between 0-100'),
+
+  body('pricing.dayDiscount.*.minDaysForDiscount')
+    .isInt({ min: 2 })
+    .withMessage('Each day discount must have at least 2 minimum days'),
+
+  body('pricing.minDays')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Minimum days must be a non-negative integer'),
 
   body('pricing.hourDiscount')
     .optional()
-    .isFloat({ min: 0, max: 100 })
-    .withMessage('Hour discount must be between 0-100'),
+    .isArray()
+    .withMessage('Hour discount must be an array of discount objects'),
 
-  body('pricing.minDaysForDiscount')
-    .optional()
-    .isInt({ min: 2 })
-    .withMessage('Minimum days for discount must be at least 2'),
+  body('pricing.hourDiscount.*.discountPercentage')
+    .isFloat({ min: 0, max: 100 })
+    .withMessage('Each hour discount percentage must be between 0-100'),
+
+  body('pricing.hourDiscount.*.minHoursForDiscount')
+    .isInt({ min: 1 })
+    .withMessage('Each hour discount must have at least 1 minimum hour'),
 
   body('pricing.minHours')
     .optional()

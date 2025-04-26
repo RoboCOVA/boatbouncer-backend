@@ -49,8 +49,15 @@ const baseBoatFieldsSchema = {
 const activityPricingSchema = new Schema(
   {
     perPerson: { type: Number, required: true },
-    discountPercentage: { type: Number, default: 0 },
-    minPeopleForDiscount: { type: Number, default: 0 },
+    discountPercentage: {
+      type: [
+        {
+          percentage: { type: Number, required: true },
+          minPeople: { type: Number, required: true },
+        },
+      ],
+      default: [],
+    },
   },
   { _id: false }
 );
@@ -67,10 +74,21 @@ const activityBoatFields = {
 const rentalPricingSchema = new Schema(
   {
     perDay: { type: Number },
-    dayDiscount: { type: Number, default: 0 },
-    minDaysForDiscount: { type: Number, default: 0 },
+    dayDiscount: [
+      {
+        discountPercentage: { type: Number, required: true },
+        minDaysForDiscount: { type: Number, required: true },
+      },
+    ],
+    minDays: { type: Number, default: 0 },
+
     perHour: { type: Number },
-    hourDiscount: { type: Number, default: 0 },
+    hourDiscount: [
+      {
+        discountPercentage: { type: Number, required: true },
+        minHoursForDiscount: { type: Number, required: true },
+      },
+    ],
     minHours: { type: Number, default: 1 },
   },
   { _id: false }
