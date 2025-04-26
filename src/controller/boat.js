@@ -13,7 +13,6 @@ import Users from '../models/Users';
 export const createBoatController = async (req, res, next) => {
   try {
     const { latLng } = req.body;
-    // console.log({ body: req.body });
 
     const userId = req?.user?._id || '';
 
@@ -47,12 +46,20 @@ export const getBoatsController = async (req, res, next) => {
       city,
       state,
       listingType,
+      boatTypes,
+      activityTypes,
       coordinates,
+      maxPassengers,
       bbox,
       features,
+      minPrice,
+      maxPrice,
     } = req.query || {};
+
     const filter = {};
 
+    if (minPrice) filter.minPrice = minPrice;
+    if (maxPrice) filter.maxPrice = maxPrice;
     if (boatName) filter.boatName = boatName;
     if (status) {
       filter.status = status;
@@ -63,7 +70,15 @@ export const getBoatsController = async (req, res, next) => {
     if (listingType) filter.listingType = listingType;
     if (city) filter.city = city;
     if (state) filter.state = state;
-    if (features) filter.features = features;
+    if (!listingType || (listingType && listingType === 'rental')) {
+      if (boatTypes) filter.boatTypes = JSON.parse(boatTypes);
+      if (features) filter.features = JSON.parse(features);
+    }
+
+    if (!listingType || (listingType && listingType === 'activity')) {
+      if (activityTypes) filter.activityTypes = JSON.parse(activityTypes);
+    }
+    if (maxPassengers) filter.maxPassengers = maxPassengers;
     if (coordinates)
       filter.coordinates =
         typeof coordinates === 'string' ? JSON.parse(coordinates) : coordinates;
@@ -88,11 +103,14 @@ export const getBoatListingController = async (req, res, next) => {
       pageNo,
       size,
       boatName,
+      status,
       address,
       city,
       state,
-      features,
       listingType,
+      boatTypes,
+      activityTypes,
+      features,
     } = req.query;
     const filter = {};
 
@@ -101,7 +119,16 @@ export const getBoatListingController = async (req, res, next) => {
     if (features) filter.features = features;
     if (city) filter.city = city;
     if (state) filter.state = state;
+    if (status) filter.status = status;
     if (listingType) filter.listingType = listingType;
+
+    if (!listingType || (listingType && listingType === 'rental')) {
+      if (boatTypes) filter.boatTypes = JSON.parse(boatTypes);
+      if (features) filter.features = JSON.parse(features);
+    }
+    if (!listingType || (listingType && listingType === 'activity')) {
+      if (activityTypes) filter.activityTypes = JSON.parse(activityTypes);
+    }
 
     const boats = await Boats.getBoatListings({
       pageNo,

@@ -17,35 +17,101 @@ import { boatStatus, bookingStatus } from '../../utils/constants';
 export async function getBoats({ pageNo, size, filter }) {
   const {
     boatName,
-    status,
-    captained,
-    category,
-    subCategory,
-    features,
-    coordinates,
-    bbox,
+    address,
+    city,
+    state,
     listingType,
+    boatTypes,
+    activityTypes,
+    coordinates,
+    features,
+    maxPassengers,
+    bbox,
+    minPrice,
+    maxPrice,
   } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
 
   const match = {};
 
   /** Temporarily disabled filters */
-  // if (city) match['location.city'] = { $regex: city.trim(), $options: 'i' };
-  // if (state) match['location.state'] = { $regex: state.trim(), $options: 'i' };
-  // if (address)
-  //   match['location.address'] = { $regex: address.trim(), $options: 'i' };
+  match.searchable = true;
+  if (boatName) match.boatName = { $regex: boatName.trim(), $options: 'i' };
+  if (city) match['location.city'] = { $regex: city.trim(), $options: 'i' };
+  if (state) match['location.state'] = { $regex: state.trim(), $options: 'i' };
+  if (address)
+    match['location.address'] = { $regex: address.trim(), $options: 'i' };
   /** Temporarily disabled filters */
 
-  if (status) match.status = { $regex: status.trim(), $options: 'i' };
+  match.status = { $regex: 'active', $options: 'i' };
   if (listingType)
     match.listingType = { $regex: listingType.trim(), $options: 'i' };
-  if (features) match.features = { $regex: features.trim(), $options: 'i' };
+  if (features && Array.isArray(features) && features.length > 0) {
+    match.features = { $in: features.map((f) => f.trim()) };
+  }
+  if (boatTypes && Array.isArray(boatTypes) && boatTypes.length > 0) {
+    match.boatType = { $in: boatTypes.map((f) => f.trim()) };
+  }
+
+  if (
+    activityTypes &&
+    Array.isArray(activityTypes) &&
+    activityTypes.length > 0
+  ) {
+    match.activityType = { $in: activityTypes.map((f) => f.trim()) };
+  }
+  if (maxPassengers) {
+    match.maxPassengers = { $eq: maxPassengers };
+  }
+
+  if (!listingType || (listingType && listingType === 'activity')) {
+    if (minPrice || maxPrice) {
+      match['pricing.perPerson'] = {};
+
+      if (minPrice) {
+        match['pricing.perPerson'].$gte = Number(minPrice);
+      }
+
+      if (maxPrice) {
+        match['pricing.perPerson'].$lte = Number(maxPrice);
+      }
+    }
+  }
+
+  if (!listingType || (listingType && listingType === 'rental')) {
+    if (minPrice || maxPrice) {
+      match.$or = [];
+
+      const priceConditions = [];
+
+      if (minPrice) {
+        priceConditions.push({
+          $or: [
+            { 'pricing.perHour': { $gte: Number(minPrice) } },
+            { 'pricing.perDay': { $gte: Number(minPrice) } },
+          ],
+        });
+      }
+
+      if (maxPrice) {
+        priceConditions.push({
+          $or: [
+            { 'pricing.perHour': { $lte: Number(maxPrice) } },
+            { 'pricing.perDay': { $lte: Number(maxPrice) } },
+          ],
+        });
+      }
+
+      if (priceConditions.length > 0) {
+        match.$and = priceConditions;
+      }
+    }
+  }
+
   // if (category) match.category = { $regex: category.trim(), $options: 'i' };
-  if (boatName) match.boatName = { $regex: boatName.trim(), $options: 'i' };
   // if (subCategory)
   //   match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
-  if (typeof captained === 'boolean') match.captained = captained;
+  // if (typeof captained === 'boolean') match.captained = captained;
   // if (typeof searchable === 'boolean') match.searchable = searchable;
 
   if (bbox?.length && Array.isArray(bbox)) {
@@ -191,30 +257,42 @@ export async function getBoats({ pageNo, size, filter }) {
 export async function getBoatListings({ pageNo, size, userId, filter }) {
   const {
     boatName,
+    status,
     address,
     city,
     state,
-    captained,
-    searchable,
-    category,
-    subCategory,
     listingType,
+    boatTypes,
+    activityTypes,
+    features,
   } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
   const query = {};
   query.owner = userId;
 
-  if (boatName) query.boatName = { $regex: boatName, $options: 'i' };
-  if (address) query['location.address'] = { $regex: address, $options: 'i' };
-  if (city) query['location.city'] = { $regex: city, $options: 'i' };
-  if (state) query['location.state'] = { $regex: state, $options: 'i' };
-  if (category) query.category = category;
-  if (subCategory) query.subCategory = subCategory;
-  if (listingType) query.listingType = listingType;
-  if (typeof captained === 'boolean') query.captained = captained;
-  else if (captained) query.captained = captained;
-  if (typeof searchable === 'boolean') query.searchable = searchable;
-  else if (searchable) query.searchable = searchable;
+  /** Temporarily disabled filters */
+  if (boatName) query.boatName = { $regex: boatName.trim(), $options: 'i' };
+  if (status) query.status = { $regex: status.trim(), $options: 'i' };
+  if (city) query['location.city'] = { $regex: city.trim(), $options: 'i' };
+  if (state) query['location.state'] = { $regex: state.trim(), $options: 'i' };
+  if (address)
+    query['location.address'] = { $regex: address.trim(), $options: 'i' };
+
+  if (listingType)
+    query.listingType = { $regex: listingType.trim(), $options: 'i' };
+  if (features && Array.isArray(features) && features.length > 0) {
+    query.features = { $in: features.map((f) => f.trim()) };
+  }
+  if (boatTypes && Array.isArray(boatTypes) && boatTypes.length > 0) {
+    query.boatType = { $in: boatTypes.map((f) => f.trim()) };
+  }
+  if (
+    activityTypes &&
+    Array.isArray(activityTypes) &&
+    activityTypes.length > 0
+  ) {
+    query.activityType = { $in: activityTypes.map((f) => f.trim()) };
+  }
 
   const boats = await this.find(
     { ...query, status: { $ne: 'deleted' } },

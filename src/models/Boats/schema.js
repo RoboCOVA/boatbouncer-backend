@@ -46,21 +46,43 @@ const baseBoatFieldsSchema = {
   listingType: { type: String, enum: boatListingTypeEnum, default: 'rental' },
 };
 
-const activityPricingSchema = new Schema(
-  {
-    perPerson: { type: Number, required: true },
-    discountPercentage: {
-      type: [
-        {
-          percentage: { type: Number, required: true },
-          minPeople: { type: Number, required: true },
-        },
-      ],
-      default: [],
-    },
-  },
-  { _id: false }
-);
+// const activityPricingSchema = new Schema(
+//   {
+//     perPerson: { type: Number, required: true },
+//     discountPercentage: {
+//       type: [
+//         {
+//           percentage: { type: Number, required: true },
+//           minPeople: { type: Number, required: true },
+//         },
+//       ],
+//       default: [],
+//     },
+//   },
+//   { _id: false }
+// );
+// const rentalPricingSchema = new Schema(
+//   {
+//     perDay: { type: Number },
+//     dayDiscount: [
+//       {
+//         discountPercentage: { type: Number, required: true },
+//         minDaysForDiscount: { type: Number, required: true },
+//       },
+//     ],
+//     minDays: { type: Number, default: 0 },
+
+//     perHour: { type: Number },
+//     hourDiscount: [
+//       {
+//         discountPercentage: { type: Number, required: true },
+//         minHoursForDiscount: { type: Number, required: true },
+//       },
+//     ],
+//     minHours: { type: Number, default: 1 },
+//   },
+//   { _id: false }
+// );
 
 const activityBoatFields = {
   activityType: {
@@ -68,28 +90,46 @@ const activityBoatFields = {
     enum: boatActivityTypeEnum,
     required: false,
   },
-  pricing: { type: activityPricingSchema, required: false },
+  // pricing: { type: activityPricingSchema, required: false },
 };
 
-const rentalPricingSchema = new Schema(
+const combinedPricingSchema = new Schema(
   {
-    perDay: { type: Number },
-    dayDiscount: [
-      {
-        discountPercentage: { type: Number, required: true },
-        minDaysForDiscount: { type: Number, required: true },
-      },
-    ],
-    minDays: { type: Number, default: 0 },
+    // Common fields
+    perPerson: { type: Number }, // For activity boat
+    perDay: { type: Number }, // For rental boat
+    perHour: { type: Number }, // For rental boat
 
-    perHour: { type: Number },
-    hourDiscount: [
-      {
-        discountPercentage: { type: Number, required: true },
-        minHoursForDiscount: { type: Number, required: true },
-      },
-    ],
-    minHours: { type: Number, default: 1 },
+    discountPercentage: {
+      type: [
+        {
+          percentage: { type: Number, required: true },
+          minPeople: { type: Number, required: true },
+        },
+      ],
+      default: undefined,
+    },
+
+    // Rental-specific discounts
+    dayDiscount: {
+      type: [
+        {
+          discountPercentage: { type: Number, required: true },
+        },
+      ],
+      default: undefined,
+    },
+
+    hourDiscount: {
+      type: [
+        {
+          discountPercentage: { type: Number, required: true },
+        },
+      ],
+      default: undefined,
+    },
+
+    minHours: { type: Number, default: undefined, required: false },
   },
   { _id: false }
 );
@@ -104,7 +144,7 @@ const rentalBoatFields = {
   year: { type: Number },
   manufacturer: { type: String },
   model: { type: String },
-  pricing: { type: rentalPricingSchema, required: false },
+  // pricing: { type: rentalPricingSchema, required: false },
   features: {
     type: [String],
     enum: boatFeaturesEnum,
@@ -116,6 +156,10 @@ const boatSchema = new mongoose.Schema(
     ...baseBoatFieldsSchema,
     ...activityBoatFields,
     ...rentalBoatFields,
+    pricing: {
+      type: combinedPricingSchema,
+      required: false,
+    },
   },
   { timestamps: true }
 );
