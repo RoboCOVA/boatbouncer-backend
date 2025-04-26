@@ -54,10 +54,14 @@ export const getBoatsController = async (req, res, next) => {
       features,
       minPrice,
       maxPrice,
+      startDate,
+      endDate,
     } = req.query || {};
 
     const filter = {};
 
+    if (startDate) filter.startDate = startDate;
+    if (endDate) filter.endDate = endDate;
     if (minPrice) filter.minPrice = minPrice;
     if (maxPrice) filter.maxPrice = maxPrice;
     if (boatName) filter.boatName = boatName;

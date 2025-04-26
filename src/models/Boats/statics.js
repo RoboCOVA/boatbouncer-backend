@@ -29,6 +29,8 @@ export async function getBoats({ pageNo, size, filter }) {
     bbox,
     minPrice,
     maxPrice,
+    startDate,
+    endDate,
   } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
 
@@ -230,7 +232,66 @@ export async function getBoats({ pageNo, size, filter }) {
     },
   ];
 
-  // If no bounding box and coordinate is present
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Validate date order
+    if (start >= end) {
+      throw new Error('End date must be after start date');
+    }
+
+    // Add lookup for conflicting bookings
+    aggregationQuery.unshift(
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { boatId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$boatId', '$$boatId'] },
+                    { $lt: ['$duration.start', new Date(endDate)] },
+                    { $gt: ['$duration.end', new Date(startDate)] },
+                  ],
+                },
+                status: { $nin: ['Cancelled', 'Completed'] }, // case-sensitive check
+              },
+            },
+          ],
+          as: 'conflictingBookings',
+        },
+      },
+      {
+        $match: {
+          conflictingBookings: { $size: 0 },
+        },
+      }
+    );
+
+    // Debugging: Add this temporary stage to see conflicts
+    aggregationQuery.unshift({
+      $addFields: {
+        debugConflicts: {
+          $map: {
+            input: '$conflictingBookings',
+            as: 'conflict',
+            in: {
+              start: '$$conflict.duration.startDate',
+              end: '$$conflict.duration.endDate',
+              status: '$$conflict.status',
+            },
+          },
+        },
+      },
+    });
+
+    // Only include boats with no conflicting bookings
+    match.conflictingBookings = { $size: 0 };
+  }
+
   if (
     !Array.isArray(bbox) &&
     !bbox?.length &&
@@ -244,7 +305,7 @@ export async function getBoats({ pageNo, size, filter }) {
           coordinates: [coordinates?.longitude, coordinates?.latitude],
         },
         distanceField: 'distance',
-        maxDistance: 50 * 1609.34, // 50 miles
+        maxDistance: 50 * 1609.34,
         key: 'latLng',
         spherical: true,
       },
