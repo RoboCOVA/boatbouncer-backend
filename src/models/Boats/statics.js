@@ -82,8 +82,6 @@ export async function getBoats({ pageNo, size, filter }) {
 
   if (!listingType || (listingType && listingType === 'rental')) {
     if (minPrice || maxPrice) {
-      match.$or = [];
-
       const priceConditions = [];
 
       if (minPrice) {

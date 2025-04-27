@@ -34,6 +34,7 @@ const locationSchema = new Schema(
 
 const baseBoatFieldsSchema = {
   boatName: { type: String, required: true },
+  securityAllowance: { type: String, required: true },
   description: { type: String, required: true },
   address: { type: String },
   location: locationSchema,

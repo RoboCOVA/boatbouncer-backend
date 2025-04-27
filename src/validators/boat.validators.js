@@ -16,6 +16,12 @@ const createBaseBoatValidator = () => [
     .isLength({ max: 100 })
     .withMessage('boat Name must be less than 100 characters'),
 
+  body('securityAllowance')
+    .isString()
+    .withMessage('Deposite  is required')
+    .isLength({ max: 100 })
+    .withMessage('Deposite must be less than 100 characters'),
+
   body('description')
     .isString()
     .withMessage('Description is required')
@@ -211,6 +217,13 @@ const updateBaseBoatValidator = () => [
     .isString()
     .isLength({ max: 100 })
     .withMessage('boat Name must be less than 100 characters'),
+
+  body('securityAllowance')
+    .optional()
+    .isString()
+    .withMessage('Deposite  is required')
+    .isLength({ max: 100 })
+    .withMessage('Deposite must be less than 100 characters'),
 
   body('description')
     .optional()
