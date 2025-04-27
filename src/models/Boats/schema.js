@@ -5,6 +5,7 @@ import {
   boatListingTypeEnum,
   boatStatusEnum,
   boatTypeEnum,
+  currencyCodeEnum,
 } from '../../utils/constants';
 
 const latLngSchema = new Schema(
@@ -32,9 +33,12 @@ const locationSchema = new Schema(
   { _id: false }
 );
 
+const cancelationSchema = {
+  refund: { type: Number },
+  priorHours: { type: Number },
+};
 const baseBoatFieldsSchema = {
   boatName: { type: String, required: true },
-  securityAllowance: { type: String, required: true },
   description: { type: String, required: true },
   address: { type: String },
   location: locationSchema,
@@ -44,46 +48,12 @@ const baseBoatFieldsSchema = {
   latLng: latLngSchema,
   searchable: { type: Boolean, default: false },
   status: { type: String, enum: boatStatusEnum },
+  currency: { type: String, enum: currencyCodeEnum, default: 'USD' },
   listingType: { type: String, enum: boatListingTypeEnum, default: 'rental' },
+  securityAllowance: { type: String, required: true },
+  cancelationPolicy: { type: [cancelationSchema] },
+  avgResponseTime: { type: Number, default: 0 },
 };
-
-// const activityPricingSchema = new Schema(
-//   {
-//     perPerson: { type: Number, required: true },
-//     discountPercentage: {
-//       type: [
-//         {
-//           percentage: { type: Number, required: true },
-//           minPeople: { type: Number, required: true },
-//         },
-//       ],
-//       default: [],
-//     },
-//   },
-//   { _id: false }
-// );
-// const rentalPricingSchema = new Schema(
-//   {
-//     perDay: { type: Number },
-//     dayDiscount: [
-//       {
-//         discountPercentage: { type: Number, required: true },
-//         minDaysForDiscount: { type: Number, required: true },
-//       },
-//     ],
-//     minDays: { type: Number, default: 0 },
-
-//     perHour: { type: Number },
-//     hourDiscount: [
-//       {
-//         discountPercentage: { type: Number, required: true },
-//         minHoursForDiscount: { type: Number, required: true },
-//       },
-//     ],
-//     minHours: { type: Number, default: 1 },
-//   },
-//   { _id: false }
-// );
 
 const activityBoatFields = {
   activityType: {
@@ -91,7 +61,6 @@ const activityBoatFields = {
     enum: boatActivityTypeEnum,
     required: false,
   },
-  // pricing: { type: activityPricingSchema, required: false },
 };
 
 const combinedPricingSchema = new Schema(
@@ -143,9 +112,9 @@ const rentalBoatFields = {
     required: false,
   },
   year: { type: Number },
+  length: { type: Number },
   manufacturer: { type: String },
   model: { type: String },
-  // pricing: { type: rentalPricingSchema, required: false },
   features: {
     type: [String],
     enum: boatFeaturesEnum,

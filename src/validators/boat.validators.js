@@ -4,6 +4,7 @@ import {
   boatFeatures,
   boatStatusEnum,
   boatTypeEnum,
+  currencyCodeEnum,
 } from '../utils/constants';
 import defaultValidators from './default.validator';
 
@@ -21,6 +22,13 @@ const createBaseBoatValidator = () => [
     .withMessage('Deposite  is required')
     .isLength({ max: 100 })
     .withMessage('Deposite must be less than 100 characters'),
+
+  body('currency')
+    .isString()
+    .optional()
+    .isIn(currencyCodeEnum)
+    .withMessage('Invalid currency')
+    .optional(),
 
   body('description')
     .isString()
@@ -84,6 +92,18 @@ const createBaseBoatValidator = () => [
     }
     return true;
   }),
+
+  body('cancelationPolicy')
+    .isArray({ min: 1 })
+    .withMessage('Cancellation policy must be a non-empty array'),
+
+  body('cancelationPolicy.*.refund')
+    .isNumeric()
+    .withMessage('Each cancellation policy refund must be a number'),
+
+  body('cancelationPolicy.*.priorHours')
+    .isNumeric()
+    .withMessage('Each cancellation policy priorHours must be a number'),
 ];
 
 const createActivityBoatValidator = () => [
@@ -117,6 +137,11 @@ const createRentalBoatValidator = () => [
   body('boatType')
     .isIn(boatTypeEnum)
     .withMessage(`Boat Type must be one of: ${boatTypeEnum.join(', ')}`),
+
+  body('length')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('length  should be an integer minimum of 0'),
 
   body('year')
     .isInt({ min: 1900, max: new Date().getFullYear() + 1 })
@@ -296,6 +321,27 @@ const updateBaseBoatValidator = () => [
       }
       return true;
     }),
+  body('cancelationPolicy')
+    .optional()
+    .isArray({ min: 1 })
+    .withMessage('Cancellation policy must be a non-empty array'),
+
+  body('cancelationPolicy.*.refund')
+    .optional()
+    .isNumeric()
+    .withMessage('Each cancellation policy refund must be a number'),
+
+  body('cancelationPolicy.*.priorHours')
+    .optional()
+    .isNumeric()
+    .withMessage('Each cancellation policy priorHours must be a number'),
+
+  body('currency')
+    .isString()
+    .optional()
+    .isIn(currencyCodeEnum)
+    .withMessage('Invalid currency')
+    .optional(),
 ];
 
 const updateActivityBoatValidator = () => [
@@ -335,6 +381,11 @@ const updateRentalBoatValidator = () => [
     .optional()
     .isIn(boatTypeEnum)
     .withMessage(`Boat Type must be one of: ${boatTypeEnum.join(', ')}`),
+
+  body('length')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('length  should be an integer minimum of 0'),
 
   body('year')
     .optional()
@@ -438,6 +489,7 @@ export const updateBoatValidator = () => [
     return true;
   }),
 ];
+
 export const getBoatValidator = () => [
   param('boatId').isMongoId().withMessage('Valid Boat id is required'),
 ];
@@ -446,39 +498,6 @@ export const getBoatsValidator = () => [
   defaultValidators.pageNo,
   defaultValidators.size,
 ];
-
-// export const updateBoatsValidator = () => [
-//   param('boatId').isMongoId().withMessage('Valid Boat id is required'),
-//   body('boatName').isString().optional(),
-//   body('boatType').isString().optional(),
-//   body('description').isString().optional(),
-//   body('manufacturer').isString().optional(),
-//   body('model').isString().optional(),
-//   body('year').isNumeric().optional(),
-//   body('length').isNumeric().optional(),
-//   body('amenities').isArray().optional(),
-//   body('amenities.*').isString().optional(),
-//   body('imageUrls').isArray().optional(),
-//   body('imageUrls.*').isString().optional(),
-//   body('location.address').isString().optional(),
-//   body('location.city').isString().optional(),
-//   body('location.state').isString().optional(),
-//   body('location.zipCode').isString().optional(),
-//   body('latLng.latitude').isNumeric().optional(),
-//   body('latLng.longitude').isNumeric().optional(),
-//   body('category').isArray().optional(),
-//   body('currency').isString().optional(),
-//   body('subCategory.*').isString().optional(),
-//   body('features').isArray().optional(),
-//   body('features.*').isString().optional(),
-//   body('securityAllowance').isString().optional(),
-//   body('pricing').isArray().optional(),
-//   body('pricing.*.type').isString().isIn(pricingTypeEnum).optional(),
-//   body('pricing.*.min').isNumeric().optional(),
-//   body('cancelationPolicy.refund').isNumeric().optional(),
-//   body('cancelationPolicy.priorHours').isNumeric().optional(),
-//   body('captained').isBoolean().optional(),
-// ];
 
 export const deleteBoatsValidator = () => [
   param('boatId').isMongoId().optional(),

@@ -196,6 +196,8 @@ export async function getBoats({ pageNo, size, filter }) {
         agreementInfo: 1,
         address: 1,
         activityType: 1,
+        cancelationPolicy: 1,
+        avgResponseTime: 1,
       },
     },
     {
