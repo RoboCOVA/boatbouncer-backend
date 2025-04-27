@@ -85,6 +85,7 @@ const combinedPricingSchema = new Schema(
       type: [
         {
           discountPercentage: { type: Number, required: true },
+          minDaysForDiscount: { type: Number, required: true },
         },
       ],
       default: undefined,
@@ -94,12 +95,14 @@ const combinedPricingSchema = new Schema(
       type: [
         {
           discountPercentage: { type: Number, required: true },
+          minHoursForDiscount: { type: Number, required: true },
         },
       ],
       default: undefined,
     },
 
     minHours: { type: Number, default: undefined, required: false },
+    minDays: { type: Number, default: undefined, required: false },
   },
   { _id: false }
 );
@@ -112,7 +115,7 @@ const rentalBoatFields = {
     required: false,
   },
   year: { type: Number },
-  length: { type: Number },
+  length: { type: Number, default: 10 },
   manufacturer: { type: String },
   model: { type: String },
   features: {

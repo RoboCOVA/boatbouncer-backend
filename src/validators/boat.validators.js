@@ -129,7 +129,7 @@ const createActivityBoatValidator = () => [
     .withMessage('Each discount percentage must be between 0-100'),
 
   body('pricing.discountPercentage.*.minPeople')
-    .isInt({ min: 2 })
+    .isInt({ min: 1 })
     .withMessage('Each discount must have at least 2 minimum people'),
 ];
 
@@ -176,7 +176,7 @@ const createRentalBoatValidator = () => [
     .withMessage('Each day discount percentage must be between 0-100'),
 
   body('pricing.dayDiscount.*.minDaysForDiscount')
-    .isInt({ min: 2 })
+    .isInt({ min: 1 })
     .withMessage('Each day discount must have at least 2 minimum days'),
 
   body('pricing.minDays')
@@ -372,7 +372,7 @@ const updateActivityBoatValidator = () => [
     .withMessage('Each discount percentage must be between 0-100'),
 
   body('pricing.discountPercentage.*.minPeople')
-    .isInt({ min: 2 })
+    .isInt({ min: 1 })
     .withMessage('Each discount must have at least 2 minimum people'),
 ];
 
@@ -426,7 +426,7 @@ const updateRentalBoatValidator = () => [
     .withMessage('Each day discount percentage must be between 0-100'),
 
   body('pricing.dayDiscount.*.minDaysForDiscount')
-    .isInt({ min: 2 })
+    .isInt({ min: 1 })
     .withMessage('Each day discount must have at least 2 minimum days'),
 
   body('pricing.minDays')
