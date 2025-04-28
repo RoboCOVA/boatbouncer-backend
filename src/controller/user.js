@@ -193,6 +193,21 @@ export const loginController = (req, res, next) => {
   })(req, res, next);
 };
 
+export const googleLoginController = (req, res, next) => {
+  passport.authenticate('google', {
+    scope: ['profile', 'email', 'phone'],
+    accessType: 'offline',
+    prompt: 'consent',
+  })(req, res, next);
+};
+
+export const googleLoginCallbackController = (req, res, next) => {
+  passport.authenticate('google', {
+    successRedirect: '/auth/google/success',
+    failureRedirect: '/auth/google/failure',
+  })(req, res, next);
+};
+
 export const createStripeAccountController = async (req, res, next) => {
   try {
     const userId = req?.user?._id;

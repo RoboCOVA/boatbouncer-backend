@@ -237,3 +237,11 @@ export const intentStatus = {
 };
 
 export const intentStatusEnum = generateEnumArrayFromObject(intentStatus);
+
+export const authProviders = {
+  LOCAL: 'local',
+  GOOGLE: 'google',
+  APPLE: 'apple',
+  FACEBOOK: 'facebook',
+};
+export const authProvidersEnum = generateEnumArrayFromObject(authProviders);
