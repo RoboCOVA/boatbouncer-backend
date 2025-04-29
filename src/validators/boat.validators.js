@@ -108,10 +108,22 @@ const createBaseBoatValidator = () => [
 
 const createActivityBoatValidator = () => [
   body('activityType')
-    .isIn(boatActivityTypeEnum)
-    .withMessage(
-      `Activity Type must be one of: ${boatActivityTypeEnum.join(', ')}`
-    ),
+    .isArray({ min: 1 })
+    .withMessage('Activity Type must be a non-empty array')
+    .custom((value) => {
+      // Check if every item is in the enum
+      const isValid = value.every((item) =>
+        boatActivityTypeEnum.includes(item)
+      );
+      if (!isValid) {
+        throw new Error(
+          `Each Activity Type must be one of: ${boatActivityTypeEnum.join(
+            ', '
+          )}`
+        );
+      }
+      return true;
+    }),
 
   body('pricing').isObject().withMessage('Pricing must be an object'),
 
@@ -347,10 +359,22 @@ const updateBaseBoatValidator = () => [
 const updateActivityBoatValidator = () => [
   body('activityType')
     .optional()
-    .isIn(boatActivityTypeEnum)
-    .withMessage(
-      `Activity Type must be one of: ${boatActivityTypeEnum.join(', ')}`
-    ),
+    .isArray({ min: 1 })
+    .withMessage('Activity Type must be a non-empty array')
+    .custom((value) => {
+      // Check if every item is in the enum
+      const isValid = value.every((item) =>
+        boatActivityTypeEnum.includes(item)
+      );
+      if (!isValid) {
+        throw new Error(
+          `Each Activity Type must be one of: ${boatActivityTypeEnum.join(
+            ', '
+          )}`
+        );
+      }
+      return true;
+    }),
 
   body('pricing')
     .optional()

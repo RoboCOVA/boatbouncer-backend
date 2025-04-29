@@ -1,5 +1,9 @@
 import mongoose, { Types } from 'mongoose';
-import { bookingStatusEnum, pricingType } from '../../utils/constants';
+import {
+  boatActivityTypeEnum,
+  bookingStatusEnum,
+  pricingTypeEnum,
+} from '../../utils/constants';
 import { modelNames } from '../constants';
 import Notifications from '../Notifications';
 import { notificationActionTypes } from '../Notifications/constants';
@@ -12,18 +16,53 @@ const durationSchema = {
 const bookingSchema = new mongoose.Schema(
   {
     boatId: { type: Types.ObjectId, ref: modelNames.BOATS, required: true },
-    type: { type: String, enum: [pricingType.PER_HOUR, pricingType.PER_DAY] },
+    type: { type: String, enum: pricingTypeEnum, required: true },
     duration: durationSchema,
     renter: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
     owner: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
-    renterPrice: { type: Number, min: 1 },
-    captainPrice: { type: Number, min: 0 },
     offerId: { type: Types.ObjectId, ref: modelNames.OFFERS },
     status: { type: String, enum: bookingStatusEnum },
     conversationId: {
       type: Types.ObjectId,
       ref: modelNames.CONVERSATIONS,
       required: true,
+    },
+    // captainPrice: { type: Number, min: 0 },
+    renterPrice: { type: Number, min: 1 },
+    discountPercentage: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0,
+    },
+    price: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+    activityType: {
+      type: String,
+      enum: boatActivityTypeEnum,
+      required: false,
+      default: undefined,
+    },
+    hours: {
+      type: Number,
+      min: 0,
+      required: false,
+      default: undefined,
+    },
+    days: {
+      type: Number,
+      min: 0,
+      required: false,
+      default: undefined,
+    },
+    noPeople: {
+      type: Number,
+      min: 1,
+      required: false,
+      default: undefined,
     },
   },
   { timestamps: true }

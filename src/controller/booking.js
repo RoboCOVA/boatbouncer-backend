@@ -1,8 +1,64 @@
+import httpStatus from 'http-status';
+import APIError from '../errors/APIError';
 import Boats from '../models/Boats';
 import Bookings from '../models/Bookings';
 import Users from '../models/Users';
-import { bookingStatus } from '../utils/constants';
+import { boatListTypes, bookingStatus, pricingType } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
+
+function calculateActivityBoatPrice(peopleCount, pricing) {
+  const price = pricing.perPerson;
+  let renterPrice = price;
+  let discountPercentage = 0;
+  const sortedDiscounts = pricing.discountPercentage.sort(
+    (a, b) => b.minPeople - a.minPeople
+  );
+
+  const applicableDiscount = sortedDiscounts.find(
+    (discount) => peopleCount >= discount.minPeople
+  );
+  if (applicableDiscount) {
+    renterPrice -= (price * applicableDiscount.percentage) / 100;
+    discountPercentage = applicableDiscount.percentage;
+  }
+
+  return { renterPrice, price, discountPercentage };
+}
+
+function calculateRentalBoatPrice(period, pricing, type) {
+  if (type === pricingType.PER_DAY && period.days < pricing.minDays)
+    throw new APIError(
+      `Number of days should be greater than ${pricing.minDays}`,
+      httpStatus.BAD_REQUEST
+    );
+  if (type === pricingType.PER_HOUR && period.hours < pricing.minHours)
+    throw new APIError(
+      `Number of hours should be greater than ${pricing.minHours}`,
+      httpStatus.BAD_REQUEST
+    );
+  const price = type === pricingType.PER_DAY ? pricing.perDay : pricing.perHour;
+  let renterPrice = price;
+  let discountPercentage = 0;
+
+  const sortedDiscounts =
+    type === pricingType.PER_DAY
+      ? pricing.dayDiscount.sort((a, b) => b.minPeople - a.minPeople)
+      : pricing.hourDiscount.sort((a, b) => b.minPeople - a.minPeople);
+
+  const applicableDiscount = sortedDiscounts.find((discount) => {
+    if (type === pricingType.PER_DAY)
+      return period.days >= discount.minDaysForDiscount;
+    if (type === pricingType.PER_HOUR)
+      return period.hours >= discount.minHoursForDiscount;
+    return period.days >= discount.minDaysForDiscount;
+  });
+  if (applicableDiscount) {
+    renterPrice -= (price * applicableDiscount.discountPercentage) / 100;
+    discountPercentage = applicableDiscount.discountPercentage;
+  }
+
+  return { price, renterPrice, discountPercentage };
+}
 
 /**
  * It creates a new booking and saves it to the database.
@@ -12,24 +68,95 @@ import { sendMessage } from '../utils/twilio';
  */
 export const createBookingController = async (req, res, next) => {
   try {
-    const { boatId, type, duration, renterPrice, captainPrice } = req.body;
+    // const { boatId, type, duration, renterPrice, captainPrice } = req.body;
+
+    const { boatId, type, duration, days, noPeople, hours, activityType } =
+      req.body;
+
     const id = req?.user?._id;
 
+    let boakingParam = {
+      boatId,
+      type,
+      duration,
+      renter: id,
+      status: bookingStatus.PENDING,
+    };
+
     const boat = await Boats.getBoat({ boatId });
-    if (!boat) throw new Error('Boat not found');
+    if (!boat) throw new 'Boat not found'();
+    const listingType = boat?.listingType;
+
+    if (listingType === boatListTypes.RENTAL) {
+      const isTypeValid = [pricingType.PER_HOUR, pricingType.PER_DAY].includes(
+        type
+      );
+      if (!isTypeValid)
+        throw new APIError(
+          `Invalid booking type for ${listingType} boat `,
+          httpStatus.BAD_REQUEST
+        );
+      if (type === pricingType.PER_HOUR) {
+        if (!hours)
+          throw new APIError(
+            `Hours are required for ${pricingType.PER_HOUR} pricing `,
+            httpStatus.BAD_REQUEST
+          );
+        boakingParam.hours = hours;
+        boakingParam.days = 0;
+      }
+
+      if (type === pricingType.PER_DAY) {
+        if (!days)
+          throw new APIError(
+            `Days are required for ${pricingType.PER_HOUR} pricing `,
+            httpStatus.BAD_REQUEST
+          );
+
+        boakingParam.days = days;
+        boakingParam.hours = 0;
+      }
+
+      boakingParam = {
+        ...boakingParam,
+        ...calculateRentalBoatPrice({ hours, days }, boat.pricing, type),
+      };
+    }
+    if (listingType === boatListTypes.ACTIVITY) {
+      const isTypeValid = [pricingType.PER_PERSON].includes(type);
+      if (!isTypeValid)
+        throw new APIError(
+          `Invalid booking type for ${listingType} boat `,
+          httpStatus.BAD_REQUEST
+        );
+
+      if (!activityType)
+        throw new APIError(
+          `activity Type is required for for ${listingType} boat `,
+          httpStatus.BAD_REQUEST
+        );
+
+      if (type === pricingType.PER_PERSON) {
+        if (!noPeople)
+          throw new APIError(
+            `Number of people  is required for ${pricingType.PER_PERSON} pricing `,
+            httpStatus.BAD_REQUEST
+          );
+      }
+      boakingParam.noPeople = noPeople;
+      boakingParam.activityType = activityType;
+      boakingParam = {
+        ...boakingParam,
+        ...calculateActivityBoatPrice(noPeople, boat.pricing),
+      };
+    }
 
     const ownerId = boat.owner;
     const owner = await Users.findOne({ _id: ownerId });
     if (!owner) throw new Error('Owner not found');
 
     const booking = new Bookings({
-      boatId,
-      type,
-      duration,
-      renter: id,
-      renterPrice,
-      captainPrice,
-      status: bookingStatus.PENDING,
+      ...boakingParam,
     });
 
     const savedReservation = await booking.createBooking();

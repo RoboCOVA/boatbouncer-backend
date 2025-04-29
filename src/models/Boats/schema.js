@@ -57,12 +57,11 @@ const baseBoatFieldsSchema = {
 
 const activityBoatFields = {
   activityType: {
-    type: String,
+    type: [String],
     enum: boatActivityTypeEnum,
     required: false,
   },
 };
-
 const combinedPricingSchema = new Schema(
   {
     // Common fields
