@@ -4,6 +4,7 @@ import Users from '../models/Users';
 import Boats from '../models/Boats';
 import Otp from '../models/Otp';
 import { emailToUsername } from '../utils';
+import * as environments from '../config/environments';
 
 export const createUserController = async (req, res, next) => {
   try {
@@ -193,21 +194,6 @@ export const loginController = (req, res, next) => {
   })(req, res, next);
 };
 
-export const googleLoginController = (req, res, next) => {
-  passport.authenticate('google', {
-    scope: ['profile', 'email', 'phone'],
-    accessType: 'offline',
-    prompt: 'consent',
-  })(req, res, next);
-};
-
-export const googleLoginCallbackController = (req, res, next) => {
-  passport.authenticate('google', {
-    successRedirect: '/auth/google/success',
-    failureRedirect: '/auth/google/failure',
-  })(req, res, next);
-};
-
 export const createStripeAccountController = async (req, res, next) => {
   try {
     const userId = req?.user?._id;
@@ -279,6 +265,97 @@ export const getCurrentUserController = async (req, res, next) => {
     const userId = req?.user?._id;
     const createAccount = await Users.getCurrentUser({ userId });
     res.send(createAccount);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** ========== Auth Related============   */
+
+export const googleLoginController = (req, res, next) => {
+  passport.authenticate('google', {
+    scope: ['profile', 'email', 'phone'],
+    accessType: 'offline',
+    prompt: 'consent',
+  })(req, res, next);
+};
+
+export const googleLoginCallbackControllerOLd = (req, res, next) => {
+  passport.authenticate('google', {
+    successRedirect: environments.googleSuccessRedict,
+    failureRedirect: environments.googleSuccessRedict,
+  })(req, res, next);
+};
+
+export const googleLoginCallbackController = (req, res, next) => {
+  passport.authenticate(
+    'google',
+    {
+      failureRedirect: environments.googleSuccessRedict,
+    },
+    (err, user, info) => {
+      if (err) {
+        return res.redirect(
+          `${environments.googlefailureRedict}?error=${encodeURIComponent(
+            err.message
+          )}`
+        );
+      }
+      if (!user) {
+        return res.redirect(
+          `${environments.googlefailureRedict}?error=authentication_failed`
+        );
+      }
+
+      return req.logIn(user, (loginErr) => {
+        if (!user) {
+          console.log({ loginErr, user });
+          return res.redirect(
+            `${environments.googlefailureRedict}?error=${encodeURIComponent(
+              'user not found'
+            )}`
+          );
+        }
+        // if (loginErr) {
+        //   console.log({ loginErr, user });
+        //   return res.redirect(
+        //     `${environments.googlefailureRedict}?error=${encodeURIComponent(
+        //       loginErr.message
+        //     )}`
+        //   );
+        // }
+
+        const { googleId } = user;
+        const redirectUrl = new URL(environments.googleSuccessRedict);
+        redirectUrl.searchParams.append('googleId', googleId);
+
+        return res.redirect(redirectUrl.toString());
+      });
+    }
+  )(req, res, next);
+};
+
+export const googleLoginGetAccountController = async (req, res, next) => {
+  try {
+    const { googleId } = req.params;
+    const authUser = await Users.authenticateUserWithGoogle(googleId);
+    return res.json(authUser);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const setLocalPasswordController = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    const userId = req?.user?._id || '';
+
+    const user = await Users.setLocalPassword({
+      password,
+      userId,
+    });
+
+    res.send(user);
   } catch (error) {
     next(error);
   }

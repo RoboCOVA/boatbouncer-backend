@@ -245,3 +245,5 @@ export const authProviders = {
   FACEBOOK: 'facebook',
 };
 export const authProvidersEnum = generateEnumArrayFromObject(authProviders);
+
+export const oAuthDefaultPassword = '123';

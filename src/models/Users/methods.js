@@ -55,22 +55,22 @@ export async function createNewUser() {
             .session(session);
 
         /** @CREATE_STRIPE_CUSTOMER ----- */
-        const Customer = await stripe.customers.create({
-          phone: user.phoneNumber,
-          email: user.email,
-          name: user.userName,
-          metadata: {
-            id: user._id,
-          },
-        });
+        // const Customer = await stripe.customers.create({
+        //   phone: user.phoneNumber,
+        //   email: user.email,
+        //   name: user.userName,
+        //   metadata: {
+        //     id: user._id,
+        //   },
+        // });
 
-        const userStripe = await Users.findOneAndUpdate(
-          { _id: user._id },
-          { stripeCustomerId: Customer.id },
-          { new: true }
-        ).session(session);
+        // const userStripe = await Users.findOneAndUpdate(
+        //   { _id: user._id },
+        //   { stripeCustomerId: Customer.id },
+        //   { new: true }
+        // ).session(session);
 
-        if (!userStripe?.stripeCustomerId) throw stripeUpdateFailed;
+        // if (!userStripe?.stripeCustomerId) throw stripeUpdateFailed;
         /** @END ----- */
 
         const cleanUser = user.clean();
@@ -89,6 +89,11 @@ export async function createNewUser() {
 export function clean() {
   const userObj = this.toObject({ virtuals: true });
   delete userObj.password;
+
+  // delete userObj?.authProviders;
+  delete userObj?.appleId;
+  delete userObj?.googleId;
+  delete userObj?.facebookId;
   // delete userObj.stripeCustomerId;
   // Delete other sensetive fields like this
   return userObj;

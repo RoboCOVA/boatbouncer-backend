@@ -22,6 +22,7 @@ import {
   existingStripCustomerNotFound,
   chargeEnableUpdateFailed,
   userNotVerified,
+  AuthProviderError,
 } from './errors';
 import {
   stripeFailedUrl,
@@ -29,6 +30,7 @@ import {
   stripeSuccessUrl,
 } from '../../config/environments';
 import { modelNames } from '../constants';
+import { authProviders } from '../../utils/constants';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -170,7 +172,9 @@ export async function authenticateUser(email, password) {
   if (!user) {
     throw doesntMatchError;
   }
-
+  if (!user.authProviders.includes(authProviders.LOCAL)) {
+    throw AuthProviderError(user.authProviders);
+  }
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (passwordMatch) {
     const cleanUser = user.clean();
@@ -182,6 +186,19 @@ export async function authenticateUser(email, password) {
   // If not match
   throw doesntMatchError;
 }
+export async function authenticateUserWithGoogle(googleId) {
+  const user = await this.findOne({
+    googleId,
+  }).exec();
+  if (!user) {
+    throw userNotFound;
+  }
+
+  const cleanUser = user.clean();
+  const token = generateJwtToken(user._id, cleanUser);
+  cleanUser.token = token;
+  return cleanUser;
+}
 
 export async function getUserById({ userId }) {
   const user = await this.findOne({ _id: userId });
@@ -189,6 +206,16 @@ export async function getUserById({ userId }) {
 
   const clean = await user.clean();
   return clean;
+}
+
+export async function getUserByGoogleId(googleId) {
+  return this.findOne({ googleId });
+}
+export async function getUserByAppleId(appleId) {
+  return this.findOne({ appleId });
+}
+export async function getUserByFacebookId(facebookId) {
+  return this.findOne({ facebookId });
 }
 
 export async function getCurrentUser({ userId }) {
@@ -379,7 +406,7 @@ export async function changeForgottenPassword({ newPassword, encryption }) {
 
   const { _id, phoneNumber } = parsedData || {};
 
-  const user = this.findOne({ _id, phoneNumber });
+  const user = await this.findOne({ _id, phoneNumber });
   if (!user) throw userNotFound;
 
   const hashedPassword = await generateHashedPassword(newPassword);
@@ -391,6 +418,24 @@ export async function changeForgottenPassword({ newPassword, encryption }) {
 
   if (!updatePassword) throw updateFailed;
 
+  await updatePassword.clean();
+  return updatePassword;
+}
+
+export async function setLocalPassword({ password, userId }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+  const hashedPassword = await generateHashedPassword(password);
+  console.log({ user });
+  const updatePassword = await this.findOneAndUpdate(
+    { _id: userId },
+    {
+      password: hashedPassword,
+      authProviders: [...user.authProviders, authProviders.LOCAL],
+    }
+  );
+
+  if (!updatePassword) throw updateFailed;
   await updatePassword.clean();
   return updatePassword;
 }

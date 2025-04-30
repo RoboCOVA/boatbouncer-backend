@@ -35,6 +35,8 @@ const envSchema = Joi.object({
   GOOGLE_CLIENT_ID: Joi.string().required(),
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
   GOOGLE_CALLBACK_URL: Joi.string().required(),
+  GOOGLE_SUCCESS_REDIRECT: Joi.string().required(),
+  GOOGLE_FAILURE_REDIRECT: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -73,3 +75,5 @@ export const mapboxApiToken = value.MAPBOX_API_TOKEN;
 export const googleClientId = value.GOOGLE_CLIENT_ID;
 export const googleClientSecret = value.GOOGLE_CLIENT_SECRET;
 export const googleCallbackUrl = value.GOOGLE_CALLBACK_URL;
+export const googlefailureRedict = value.GOOGLE_FAILURE_REDIRECT;
+export const googleSuccessRedict = value.GOOGLE_SUCCESS_REDIRECT;

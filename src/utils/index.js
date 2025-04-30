@@ -178,3 +178,9 @@ export function getMinutesDifference(date1, date2) {
 export function emailToUsername(email) {
   return email.split('@')[0];
 }
+
+export const generateUserNameFromEmail = (email) => {
+  const emailUsername = email.split('@')[0];
+  const randomBytes = crypto.randomBytes(2).toString('hex');
+  return `${emailUsername}.${randomBytes}`;
+};

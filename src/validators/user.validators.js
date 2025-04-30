@@ -129,3 +129,21 @@ export const resetPasswordValidator = () => [
     ),
   body('encryption').isString().withMessage('Encryption Key required'),
 ];
+
+export const setLocalPasswordValidator = () => [
+  body('password')
+    .isString()
+    .isLength({ min: 8, max: 60 })
+    .withMessage(
+      'Password should be at least 8 characters and not greater than 60'
+    )
+    .withMessage((val) => strongPasswordRegex.test(val))
+    .withMessage(
+      'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
+    ),
+];
+export const getGoogleAccoutnUserValidator = () => [
+  param('googleId')
+    .isString()
+    .withMessage('googleId must be included in param'),
+];

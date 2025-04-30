@@ -1,44 +1,86 @@
-// import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
 
-// import * as environments from '../../config/environments';
+import { google } from 'googleapis';
+import * as environments from '../environments';
+import Users from '../../models/Users';
+import { generateUserNameFromEmail } from '../../utils';
+import { authProviders, oAuthDefaultPassword } from '../../utils/constants';
 
-// const googleStrategy = new GoogleStrategy(
-//   {
-//     clientID: environments.googleClientId,
-//     clientSecret: environments.googleClientSecret,
-//     callbackURL: environments.googleCallbackUrl,
-//     passReqToCallback: true,
-//     scope: ['profile', 'email', 'phone'],
-//     accessType: 'offline',
-//   },
-//   function (request, accessToken, refreshToken, profile, done) {
-//     // The profile object will now contain more information
-//     console.log('Full profile:', profile);
+async function getGoogleUserPhone(oauthToken) {
+  const oauth2Client = new google.auth.OAuth2(
+    environments.googleClientId,
+    environments.googleClientSecret,
+    environments.googleCallbackUrl
+  );
+  oauth2Client.setCredentials({
+    access_token: oauthToken,
+  });
 
-//     // Example of user data you can access:
-//     const userData = {
-//       id: profile.id,
-//       email: profile.email,
-//       verifiedEmail: profile.verified_email,
-//       name: profile.displayName,
-//       firstName: profile.given_name,
-//       lastName: profile.family_name,
-//       picture: profile.picture,
-//       locale: profile.locale,
-//       phone: profile.phone || null, // Phone number if scope includes it
-//       accessToken: accessToken,
-//       refreshToken: refreshToken || null,
-//     };
+  const people = google.people({
+    version: 'v1',
+    auth: oauth2Client,
+  });
 
-//     console.log('Extracted user data:', userData);
+  try {
+    const res = await people.people.get({
+      resourceName: 'people/me',
+      personFields: 'phoneNumbers,emailAddresses,names,photos',
+    });
+    return res.data;
+  } catch (error) {
+    return null;
+  }
+}
 
-//     // User.findOrCreate({ googleId: profile.id }, userData, function (err, user) {
-//     //   return done(err, user);
-//     // });
+const googleStrategy = new GoogleStrategy(
+  {
+    clientID: environments.googleClientId,
+    clientSecret: environments.googleClientSecret,
+    callbackURL: environments.googleCallbackUrl,
+    passReqToCallback: true,
+    scope: [
+      'profile',
+      'email',
+      'openid',
+      'https://www.googleapis.com/auth/user.phonenumbers.read',
+    ],
+    accessType: 'offline',
+  },
+  async function (request, accessToken, refreshToken, profile, done) {
+    try {
+      // Get additional user data from People API
 
-//     // For now, just return the profile
-//     return done(null, profile);
-//   }
-// );
+      const userDetails = await getGoogleUserPhone(accessToken);
+      let googleId = '';
+      const userData = {
+        email: profile.emails[0].value,
+        firstName: profile.name.givenName,
+        lastName: profile.name.familyName,
+        profilePicture: profile.photos[0]?.value,
+        phoneNumber:
+          userDetails?.phoneNumbers?.length > 0
+            ? userDetails?.phoneNumbers[0].canonicalForm
+            : null,
+        googleId: profile.id,
+        authProviders: [authProviders.GOOGLE],
+        verified: true,
+        userName: generateUserNameFromEmail(profile.emails[0].value),
+        password: oAuthDefaultPassword,
+      };
+      googleId = userData.googleId;
+      const previouseUser = await Users.getUserByGoogleId(googleId);
 
-// export default googleStrategy;
+      if (!previouseUser) {
+        const newUser = new Users({
+          ...userData,
+        });
+        await newUser.createNewUser();
+      }
+      return done(null, { googleId });
+    } catch (error) {
+      return done(error, null);
+    }
+  }
+);
+
+export default googleStrategy;
