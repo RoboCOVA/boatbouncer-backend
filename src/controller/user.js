@@ -5,6 +5,7 @@ import Boats from '../models/Boats';
 import Otp from '../models/Otp';
 import { emailToUsername } from '../utils';
 import * as environments from '../config/environments';
+import { authProviders } from '../utils/constants';
 
 export const createUserController = async (req, res, next) => {
   try {
@@ -280,54 +281,39 @@ export const googleLoginController = (req, res, next) => {
   })(req, res, next);
 };
 
-export const googleLoginCallbackControllerOLd = (req, res, next) => {
-  passport.authenticate('google', {
-    successRedirect: environments.googleSuccessRedict,
-    failureRedirect: environments.googleSuccessRedict,
-  })(req, res, next);
-};
-
 export const googleLoginCallbackController = (req, res, next) => {
   passport.authenticate(
     'google',
     {
-      failureRedirect: environments.googleSuccessRedict,
+      failureRedirect: environments.oAuthSuccessRedict,
     },
     (err, user, info) => {
       if (err) {
         return res.redirect(
-          `${environments.googlefailureRedict}?error=${encodeURIComponent(
+          `${environments.oAuthfailureRedict}?error=${encodeURIComponent(
             err.message
           )}`
         );
       }
       if (!user) {
         return res.redirect(
-          `${environments.googlefailureRedict}?error=authentication_failed`
+          `${environments.oAuthfailureRedict}?error=authentication_failed`
         );
       }
 
       return req.logIn(user, (loginErr) => {
         if (!user) {
-          console.log({ loginErr, user });
           return res.redirect(
-            `${environments.googlefailureRedict}?error=${encodeURIComponent(
+            `${environments.oAuthfailureRedict}?error=${encodeURIComponent(
               'user not found'
             )}`
           );
         }
-        // if (loginErr) {
-        //   console.log({ loginErr, user });
-        //   return res.redirect(
-        //     `${environments.googlefailureRedict}?error=${encodeURIComponent(
-        //       loginErr.message
-        //     )}`
-        //   );
-        // }
 
         const { googleId } = user;
-        const redirectUrl = new URL(environments.googleSuccessRedict);
-        redirectUrl.searchParams.append('googleId', googleId);
+        const redirectUrl = new URL(environments.oAuthSuccessRedict);
+        redirectUrl.searchParams.append('id', googleId);
+        redirectUrl.searchParams.append('privider', authProviders.GOOGLE);
 
         return res.redirect(redirectUrl.toString());
       });
@@ -339,6 +325,63 @@ export const googleLoginGetAccountController = async (req, res, next) => {
   try {
     const { googleId } = req.params;
     const authUser = await Users.authenticateUserWithGoogle(googleId);
+    return res.json(authUser);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const facebookLoginController = (req, res, next) => {
+  passport.authenticate('facebook', {
+    scope: ['public_profile', 'email'],
+    accessType: 'offline',
+    prompt: 'consent',
+  })(req, res, next);
+};
+
+export const facebookLoginCallbackController = (req, res, next) => {
+  passport.authenticate(
+    'facebook',
+    {
+      failureRedirect: environments.oAuthSuccessRedict,
+    },
+    (err, user, info) => {
+      if (err) {
+        return res.redirect(
+          `${environments.oAuthfailureRedict}?error=${encodeURIComponent(
+            err.message
+          )}`
+        );
+      }
+      if (!user) {
+        return res.redirect(
+          `${environments.oAuthfailureRedict}?error=authentication_failed`
+        );
+      }
+
+      return req.logIn(user, (loginErr) => {
+        if (!user) {
+          return res.redirect(
+            `${environments.oAuthfailureRedict}?error=${encodeURIComponent(
+              'user not found'
+            )}`
+          );
+        }
+        const { facebookId } = user;
+        const redirectUrl = new URL(environments.oAuthSuccessRedict);
+        redirectUrl.searchParams.append('id', facebookId);
+        redirectUrl.searchParams.append('privider', authProviders.FACEBOOK);
+
+        return res.redirect(redirectUrl.toString());
+      });
+    }
+  )(req, res, next);
+};
+
+export const facebookLoginGetAccountController = async (req, res, next) => {
+  try {
+    const { facebookId } = req.params;
+    const authUser = await Users.authenticateUserWithFacebook(facebookId);
     return res.json(authUser);
   } catch (error) {
     return next(error);

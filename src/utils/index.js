@@ -184,3 +184,7 @@ export const generateUserNameFromEmail = (email) => {
   const randomBytes = crypto.randomBytes(2).toString('hex');
   return `${emailUsername}.${randomBytes}`;
 };
+
+export const generateRandomOAuthId = () => {
+  return Date.now();
+};

@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
 import { google } from 'googleapis';
 import * as environments from '../environments';
 import Users from '../../models/Users';
-import { generateUserNameFromEmail } from '../../utils';
+import { generateRandomOAuthId, generateUserNameFromEmail } from '../../utils';
 import { authProviders, oAuthDefaultPassword } from '../../utils/constants';
 
 async function getGoogleUserPhone(oauthToken) {
@@ -48,10 +48,9 @@ const googleStrategy = new GoogleStrategy(
   },
   async function (request, accessToken, refreshToken, profile, done) {
     try {
-      // Get additional user data from People API
-
+      let userId = '';
       const userDetails = await getGoogleUserPhone(accessToken);
-      let googleId = '';
+      const googleIdTemp = generateRandomOAuthId();
       const userData = {
         email: profile.emails[0].value,
         firstName: profile.name.givenName,
@@ -62,22 +61,31 @@ const googleStrategy = new GoogleStrategy(
             ? userDetails?.phoneNumbers[0].canonicalForm
             : null,
         googleId: profile.id,
+        googleIdTemp,
         authProviders: [authProviders.GOOGLE],
         verified: true,
         userName: generateUserNameFromEmail(profile.emails[0].value),
         password: oAuthDefaultPassword,
       };
-      googleId = userData.googleId;
-      const previouseUser = await Users.getUserByGoogleId(googleId);
+      const previousUser = await Users.getUserByGoogleId(userData.googleId);
 
-      if (!previouseUser) {
+      if (previousUser) {
+        userId = previousUser._id;
+        await Users.setOAuthId(previousUser._id, {
+          googleIdTemp,
+          googleId: profile.id,
+        });
+      } else {
         const newUser = new Users({
           ...userData,
         });
-        await newUser.createNewUser();
+        const user = await newUser.createNewUser();
+        userId = newUser._id;
       }
-      return done(null, { googleId });
+      Users.authClearTempOAuthId(userId, 'googleIdTemp');
+      return done(null, { googleId: googleIdTemp });
     } catch (error) {
+      console.log({ error });
       return done(error, null);
     }
   }

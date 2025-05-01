@@ -31,12 +31,21 @@ const envSchema = Joi.object({
   FROM_PHONE_NUMBER: Joi.string().required(),
   MAPBOX_API_TOKEN: Joi.string().required(),
 
+  //  O Auth
+
+  O_AUTH_SUCCESS_REDIRECT: Joi.string().required(),
+  O_AUTH_FAILURE_REDIRECT: Joi.string().required(),
+
   // Google auth envs
   GOOGLE_CLIENT_ID: Joi.string().required(),
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
   GOOGLE_CALLBACK_URL: Joi.string().required(),
-  GOOGLE_SUCCESS_REDIRECT: Joi.string().required(),
-  GOOGLE_FAILURE_REDIRECT: Joi.string().required(),
+
+  // Facebook auth envs
+
+  FACEBOOK_APP_ID: Joi.string().required(),
+  FACEBOOK_APP_SECRET: Joi.string().required(),
+  FACEBOOK_CALLBACK_URL: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -72,8 +81,13 @@ export const twilioAuthToken = value.TWILIO_AUTH_TOKEN;
 export const fromPhoneNumber = value.FROM_PHONE_NUMBER;
 export const mapboxApiToken = value.MAPBOX_API_TOKEN;
 
-export const googleClientId = value.GOOGLE_CLIENT_ID;
-export const googleClientSecret = value.GOOGLE_CLIENT_SECRET;
-export const googleCallbackUrl = value.GOOGLE_CALLBACK_URL;
-export const googlefailureRedict = value.GOOGLE_FAILURE_REDIRECT;
-export const googleSuccessRedict = value.GOOGLE_SUCCESS_REDIRECT;
+export const oAuthfailureRedict = value.O_AUTH_FAILURE_REDIRECT;
+export const oAuthSuccessRedict = value.O_AUTH_SUCCESS_REDIRECT;
+
+export const googleClientId = process.env.GOOGLE_CLIENT_ID;
+export const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+export const googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL;
+
+export const facebookAppId = process.env.FACEBOOK_APP_ID;
+export const facebookAppSecret = process.env.FACEBOOK_APP_SECRET;
+export const facebookCallbackUrl = process.env.FACEBOOK_CALLBACK_URL;

@@ -92,8 +92,12 @@ export function clean() {
 
   // delete userObj?.authProviders;
   delete userObj?.appleId;
+  delete userObj?.appleIdTemp;
   delete userObj?.googleId;
+  delete userObj?.googleIdTemp;
   delete userObj?.facebookId;
+  delete userObj?.facebookIdTemp;
+
   // delete userObj.stripeCustomerId;
   // Delete other sensetive fields like this
   return userObj;

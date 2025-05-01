@@ -5,10 +5,12 @@ const userSchema = new mongoose.Schema(
   {
     userName: { type: String, required: false },
     email: { type: String, required: true },
+    // email: { type: String, required: true },
     password: { type: String, required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    phoneNumber: { type: String, required: true },
+    phoneNumber: { type: String },
+    // phoneNumber: { type: String, required: true },
     verified: { type: Boolean, required: true },
     profilePicture: { type: String, required: false },
     session: { type: String },
@@ -36,6 +38,9 @@ const userSchema = new mongoose.Schema(
     googleId: { type: String, sparse: true },
     appleId: { type: String, sparse: true },
     facebookId: { type: String, sparse: true },
+    googleIdTemp: { type: String },
+    appleIdTemp: { type: String },
+    facebookIdTemp: { type: String },
   },
   { timestamps: true }
 );

@@ -142,8 +142,14 @@ export const setLocalPasswordValidator = () => [
       'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
     ),
 ];
+
 export const getGoogleAccoutnUserValidator = () => [
   param('googleId')
+    .isString()
+    .withMessage('googleId must be included in param'),
+];
+export const getFacebookAccoutnUserValidator = () => [
+  param('facebookId')
     .isString()
     .withMessage('googleId must be included in param'),
 ];

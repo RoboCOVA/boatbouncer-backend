@@ -186,18 +186,49 @@ export async function authenticateUser(email, password) {
   // If not match
   throw doesntMatchError;
 }
-export async function authenticateUserWithGoogle(googleId) {
-  const user = await this.findOne({
-    googleId,
-  }).exec();
+
+export async function clearTempOAuthId(userId, tempFieldName) {
+  await this.findOneAndUpdate(
+    { _id: userId },
+    { $unset: { [tempFieldName]: 1 } }
+  );
+}
+
+async function authenticateUserByOAuth(tempFieldName, tempFieldValue) {
+  const query = { [tempFieldName]: tempFieldValue };
+  const user = await this.findOne(query).exec();
+
   if (!user) {
     throw userNotFound;
   }
 
   const cleanUser = user.clean();
   const token = generateJwtToken(user._id, cleanUser);
+  clearTempOAuthId.call(this, user._id, tempFieldName);
+
   cleanUser.token = token;
   return cleanUser;
+}
+
+export async function setOAuthId(userId, updateObject) {
+  await this.findOneAndUpdate({ _id: userId }, { $set: updateObject });
+}
+
+export async function authClearTempOAuthId(userId, tempFieldName) {
+  setTimeout(() => {
+    clearTempOAuthId.call(this, userId, tempFieldName);
+  }, 3 * 60 * 1000);
+}
+export async function authenticateUserWithGoogle(googleIdTemp) {
+  return authenticateUserByOAuth.call(this, 'googleIdTemp', googleIdTemp);
+}
+
+export async function authenticateUserWithFacebook(facebookIdTemp) {
+  return authenticateUserByOAuth.call(this, 'facebookIdTemp', facebookIdTemp);
+}
+
+export async function authenticateUserWithApple(facebookIdTemp) {
+  return authenticateUserByOAuth.call(this, 'facebookIdTemp', facebookIdTemp);
 }
 
 export async function getUserById({ userId }) {
