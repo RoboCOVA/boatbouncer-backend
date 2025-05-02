@@ -129,10 +129,11 @@ export const currencyCode = {
 export const currencyCodeEnum = generateEnumArrayFromObject(currencyCode);
 
 export const pricingType = {
-  PER_HOUR: 'Per Hour',
-  PER_DAY: 'Per Day',
-  PER_NIGHT: 'Per Night',
-  PER_WEEK: 'Per Week',
+  PER_HOUR: 'Per_Hour',
+  PER_DAY: 'Per_Day',
+  // PER_NIGHT: 'Per_Night',
+  // PER_WEEK: 'Per_Week',
+  PER_PERSON: 'Per_Person',
 };
 
 export const pricingTypeEnum = generateEnumArrayFromObject(pricingType);
@@ -143,30 +144,30 @@ export const publicResources = {
 
 export const publicResourcesEnum = generateEnumArrayFromObject(publicResources);
 
-export const boatFeatures = {
-  BluetoothCapable: 'Bluetooth capable',
-  PremiumSoundSystem: 'Premium sound system',
-  Bathroom: 'Bathroom',
-  Grill: 'Grill',
-  Kitchen: 'Kitchen',
-  Refrigerator: 'Refrigerator',
-  SwimLadder: 'Swim ladder',
-  SunBed: 'Sun bed',
-  BiminiShade: 'Bimini / shade',
-  Heater: 'Heater',
-  AC: 'A/C',
-  FishFinder: 'Fish finder',
-  FishingRodHolders: 'Fishing rod holders',
-  LiveWell: 'Live well',
-  TrollingMotor: 'Trolling motor',
-  Cabin: 'Cabin',
-  WaterSportsCapable: 'Water sports capable',
-  Wifi: 'Wifi',
-  Shower: 'Shower',
-  RgbLights: 'RGB lights',
-};
+// export const boatFeatures = {
+//   BluetoothCapable: 'Bluetooth capable',
+//   PremiumSoundSystem: 'Premium sound system',
+//   Bathroom: 'Bathroom',
+//   Grill: 'Grill',
+//   Kitchen: 'Kitchen',
+//   Refrigerator: 'Refrigerator',
+//   SwimLadder: 'Swim ladder',
+//   SunBed: 'Sun bed',
+//   BiminiShade: 'Bimini / shade',
+//   Heater: 'Heater',
+//   AC: 'A/C',
+//   FishFinder: 'Fish finder',
+//   FishingRodHolders: 'Fishing rod holders',
+//   LiveWell: 'Live well',
+//   TrollingMotor: 'Trolling motor',
+//   Cabin: 'Cabin',
+//   WaterSportsCapable: 'Water sports capable',
+//   Wifi: 'Wifi',
+//   Shower: 'Shower',
+//   RgbLights: 'RGB lights',
+// };
 
-export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
+// export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
 
 export const boatStatus = {
   ACTIVE: 'active',
@@ -181,6 +182,43 @@ export const bookingStatus = {
   COMPLETED: 'Completed',
   CANCELLED: 'Cancelled',
 };
+
+export const boatListTypes = {
+  RENTAL: 'rental',
+  ACTIVITY: 'activity',
+};
+
+export const boatListingTypeEnum = generateEnumArrayFromObject(boatListTypes);
+
+const boatTypes = {
+  YACHT: 'Yacht',
+  MOTORIZED_BOAT: 'Motorized Boat',
+  NON_MOTORIZED_BOAT: 'Non-Motorized Boat',
+  SAIL_BOAT: 'Sail Boat',
+  PWC: 'PWC',
+};
+export const boatTypeEnum = generateEnumArrayFromObject(boatTypes);
+
+export const boatActivities = {
+  LESSON: 'Lesson',
+  TOUR_GUIDE: 'Tour/Guide',
+  CHARTER: 'Cruise/Charter',
+  EXPERIENCE: 'Experiences',
+  OTHER: 'Other',
+};
+export const boatActivityTypeEnum = generateEnumArrayFromObject(boatActivities);
+
+export const boatFeatures = {
+  CAPTAINED: 'Captained',
+  WATER_TOYS: 'Water Toys',
+  TOWABLE: 'Can be Towed on Trailer',
+  DELIVERABLE: 'Deliverable',
+  BATHROOM: 'Bathroom',
+  ANCHOR: 'Anchor',
+  ADDITIONAL_AMENITIES: 'Additional Amenities',
+};
+
+export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
 
 export const bookingStatusEnum = generateEnumArrayFromObject(bookingStatus);
 

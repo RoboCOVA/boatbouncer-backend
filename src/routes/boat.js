@@ -1,12 +1,16 @@
 import express from 'express';
+import { authenticateJwt } from '../controller/authenticate';
 import {
   addOrRemoveFavoriteController,
   createBoatController,
   deleteBoatController,
+  getBoatActivties,
   getBoatCategories,
   getBoatController,
+  getBoatFeatures,
   getBoatListingController,
   getBoatsController,
+  getBoatTypes,
   getFavoritesController,
   updateBoatController,
 } from '../controller/boat';
@@ -17,10 +21,9 @@ import {
   getBoatListingValidator,
   getBoatsValidator,
   getBoatValidator,
-  updateBoatsValidator,
+  updateBoatValidator,
 } from '../validators/boat.validators';
 import parseValidationResult from '../validators/errors.parser';
-import { authenticateJwt } from '../controller/authenticate';
 
 const router = express.Router();
 
@@ -31,6 +34,12 @@ router.post(
   parseValidationResult,
   createBoatController
 );
+
+router.get('/features', getBoatFeatures);
+
+router.get('/types', getBoatTypes);
+
+router.get('/activities', getBoatActivties);
 
 router.get('/categories', getBoatCategories);
 
@@ -56,7 +65,8 @@ router.get(
 router.put(
   '/:boatId',
   authenticateJwt,
-  updateBoatsValidator(),
+  updateBoatValidator(),
+  // updateBoatsValidator(),
   parseValidationResult,
   updateBoatController
 );

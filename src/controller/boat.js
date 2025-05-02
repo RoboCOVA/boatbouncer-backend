@@ -2,32 +2,17 @@ import Boats from '../models/Boats';
 import Favorites from '../models/Favorites';
 import { categoriesEnum, subCategoriesEnum } from '../models/constants';
 import { coordinateObjToGeoJson } from '../utils';
-import { boatStatus, boatFeaturesEnum } from '../utils/constants';
+import {
+  boatStatus,
+  boatFeaturesEnum,
+  boatTypeEnum,
+  boatActivityTypeEnum,
+} from '../utils/constants';
 import Users from '../models/Users';
 
 export const createBoatController = async (req, res, next) => {
   try {
-    const {
-      boatName,
-      boatType,
-      description,
-      manufacturer,
-      model,
-      year,
-      length,
-      amenities,
-      imageUrls,
-      location,
-      latLng,
-      category,
-      subCategory,
-      currency,
-      features,
-      pricing,
-      cancelationPolicy,
-      captained,
-      securityAllowance,
-    } = req.body;
+    const { latLng } = req.body;
 
     const userId = req?.user?._id || '';
 
@@ -36,27 +21,10 @@ export const createBoatController = async (req, res, next) => {
     const hasPaymentMethod = await Users.hasPaymentMethod({ userId });
 
     const newBoat = new Boats({
-      boatName,
-      boatType,
-      description,
-      manufacturer,
-      status: boatStatus.ACTIVE,
-      model,
-      year,
-      length,
-      amenities,
-      imageUrls,
-      location,
+      ...req.body,
       latLng: parsedLocation,
-      category,
-      subCategory,
-      currency,
-      features,
-      pricing,
-      cancelationPolicy,
-      securityAllowance,
       owner: userId,
-      captained,
+      status: boatStatus.ACTIVE,
       searchable: hasPaymentMethod,
     });
 
@@ -77,14 +45,25 @@ export const getBoatsController = async (req, res, next) => {
       address,
       city,
       state,
-      captained,
-      category,
-      subCategory,
+      listingType,
+      boatTypes,
+      activityTypes,
       coordinates,
+      maxPassengers,
       bbox,
+      features,
+      minPrice,
+      maxPrice,
+      startDate,
+      endDate,
     } = req.query || {};
+
     const filter = {};
 
+    if (startDate) filter.startDate = startDate;
+    if (endDate) filter.endDate = endDate;
+    if (minPrice) filter.minPrice = minPrice;
+    if (maxPrice) filter.maxPrice = maxPrice;
     if (boatName) filter.boatName = boatName;
     if (status) {
       filter.status = status;
@@ -92,18 +71,24 @@ export const getBoatsController = async (req, res, next) => {
       filter.status = boatStatus.ACTIVE;
     }
     if (address) filter.address = address;
+    if (listingType) filter.listingType = listingType;
     if (city) filter.city = city;
     if (state) filter.state = state;
-    if (category) filter.category = category;
-    if (subCategory) filter.subCategory = subCategory;
+    if (!listingType || (listingType && listingType === 'rental')) {
+      if (boatTypes) filter.boatTypes = JSON.parse(boatTypes);
+      if (features) filter.features = JSON.parse(features);
+    }
+
+    if (!listingType || (listingType && listingType === 'activity')) {
+      if (activityTypes) filter.activityTypes = JSON.parse(activityTypes);
+    }
+    if (maxPassengers) filter.maxPassengers = maxPassengers;
     if (coordinates)
       filter.coordinates =
         typeof coordinates === 'string' ? JSON.parse(coordinates) : coordinates;
     if (bbox) filter.bbox = typeof bbox === 'string' ? JSON.parse(bbox) : bbox;
 
-    filter.captained = captained;
     filter.searchable = true;
-
     const boats = await Boats.getBoats({
       pageNo,
       size,
@@ -122,22 +107,32 @@ export const getBoatListingController = async (req, res, next) => {
       pageNo,
       size,
       boatName,
+      status,
       address,
       city,
       state,
-      captained,
-      category,
-      subCategory,
+      listingType,
+      boatTypes,
+      activityTypes,
+      features,
     } = req.query;
     const filter = {};
 
     if (boatName) filter.boatName = boatName;
     if (address) filter.address = address;
+    if (features) filter.features = features;
     if (city) filter.city = city;
     if (state) filter.state = state;
-    if (category) filter.category = category;
-    if (subCategory) filter.subCategory = subCategory;
-    filter.captained = captained;
+    if (status) filter.status = status;
+    if (listingType) filter.listingType = listingType;
+
+    if (!listingType || (listingType && listingType === 'rental')) {
+      if (boatTypes) filter.boatTypes = JSON.parse(boatTypes);
+      if (features) filter.features = JSON.parse(features);
+    }
+    if (!listingType || (listingType && listingType === 'activity')) {
+      if (activityTypes) filter.activityTypes = JSON.parse(activityTypes);
+    }
 
     const boats = await Boats.getBoatListings({
       pageNo,
@@ -163,46 +158,10 @@ export const getBoatController = async (req, res, next) => {
 
 export const updateBoatController = async (req, res, next) => {
   try {
-    const {
-      boatName,
-      boatType,
-      description,
-      manufacturer,
-      status,
-      model,
-      year,
-      length,
-      amenities,
-      imageUrls,
-      owner,
-      location,
-      latLng,
-      category,
-      subCategory,
-      currency,
-      features,
-      pricing,
-      cancelationPolicy,
-      securityAllowance,
-      captained,
-    } = req.body;
-    const userId = req?.user?._id || '';
+    const { latLng } = req.body;
+    const user = req?.user;
     const { boatId } = req.params;
-    const updateObject = {};
-    const matchQuery = { _id: boatId, owner: userId };
-
-    if (boatName) updateObject.boatName = boatName;
-    if (boatType) updateObject.boatType = boatType;
-    if (description) updateObject.description = description;
-    if (manufacturer) updateObject.manufacturer = manufacturer;
-    if (status) updateObject.status = status;
-    if (model) updateObject.model = model;
-    if (year) updateObject.year = year;
-    if (length) updateObject.length = length;
-    if (amenities) updateObject.amenities = amenities;
-    if (imageUrls) updateObject.imageUrls = imageUrls;
-    if (owner) updateObject.owner = owner;
-    if (location) updateObject.location = location;
+    const updateObject = req.body;
     if (latLng) {
       if (latLng?.type && latLng?.coordinates) updateObject.latLng = latLng;
       else if (latLng?.latitude && latLng?.longitude) {
@@ -210,17 +169,9 @@ export const updateBoatController = async (req, res, next) => {
         updateObject.latLng = parsedLocation;
       }
     }
-
-    if (category) updateObject.category = category;
-    if (subCategory) updateObject.subCategory = subCategory;
-    if (currency) updateObject.currency = currency;
-    if (features) updateObject.features = features;
-    if (pricing) updateObject.pricing = pricing;
-    if (cancelationPolicy) updateObject.cancelationPolicy = cancelationPolicy;
-    if (securityAllowance) updateObject.securityAllowance = securityAllowance;
-    if (typeof captained === 'boolean') updateObject.captained = captained;
-
-    const boatUpdate = await Boats.updateBoat(matchQuery, updateObject);
+    const boatUpdate = await Boats.updateBoat(boatId, user?.id?.toString(), {
+      ...updateObject,
+    });
     res.send(boatUpdate);
   } catch (error) {
     next(error);
@@ -242,6 +193,27 @@ export const deleteBoatController = async (req, res, next) => {
 export const getBoatCategories = (req, res, next) => {
   try {
     res.send({ categoriesEnum, subCategoriesEnum, boatFeaturesEnum });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getBoatTypes = (req, res, next) => {
+  try {
+    res.send({ boatTypeEnum });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getBoatActivties = (req, res, next) => {
+  try {
+    res.send({ boatActivityTypeEnum });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getBoatFeatures = (req, res, next) => {
+  try {
+    res.send({ boatFeaturesEnum });
   } catch (error) {
     next(error);
   }

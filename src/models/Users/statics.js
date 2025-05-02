@@ -312,18 +312,19 @@ export async function getPaymentMethod({ userId }) {
 }
 
 export async function hasPaymentMethod({ userId }) {
-  const user = await this.findOne({ _id: userId });
-  if (!user) throw userNotFound;
-  if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
+  return true;
+  // const user = await this.findOne({ _id: userId });
+  // if (!user) throw userNotFound;
+  // if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
 
-  const customerPaymentMethods = await stripe.customers.listPaymentMethods(
-    user?.stripeCustomerId,
-    {
-      type: 'card',
-    }
-  );
+  // const customerPaymentMethods = await stripe.customers.listPaymentMethods(
+  //   user?.stripeCustomerId,
+  //   {
+  //     type: 'card',
+  //   }
+  // );
 
-  return customerPaymentMethods?.data?.length > 0;
+  // return customerPaymentMethods?.data?.length > 0;
 }
 
 export async function detachPaymentMethod({ userId, methodId }) {

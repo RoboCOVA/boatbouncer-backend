@@ -1,8 +1,14 @@
 import { getPaginationValues } from '../../utils';
-import { boatNotFound, boatUpdateFailed } from './errors';
+import {
+  boatDeleteFailed,
+  boatNameUsed,
+  boatNotFound,
+  boatUpdateFailed,
+  updatelistingTypeNotAllowed,
+} from './errors';
 import Bookings from '../Bookings';
 import { boatStatus, bookingStatus } from '../../utils/constants';
-
+//   const Conversations = this.model(modelNames.CONVERSATIONS);
 /**
  * It returns a list of boats, with a total count of all boats, based on the page number and size of
  * the page.
@@ -11,32 +17,132 @@ import { boatStatus, bookingStatus } from '../../utils/constants';
 export async function getBoats({ pageNo, size, filter }) {
   const {
     boatName,
-    status,
-    captained,
-    category,
-    subCategory,
-    features,
+    address,
+    city,
+    state,
+    listingType,
+    boatTypes,
+    activityTypes,
     coordinates,
+    features,
+    maxPassengers,
     bbox,
+    minPrice,
+    maxPrice,
+    startDate,
+    endDate,
   } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
 
   const match = {};
 
   /** Temporarily disabled filters */
-  // if (city) match['location.city'] = { $regex: city.trim(), $options: 'i' };
-  // if (state) match['location.state'] = { $regex: state.trim(), $options: 'i' };
-  // if (address)
-  //   match['location.address'] = { $regex: address.trim(), $options: 'i' };
+  match.searchable = true;
+  if (boatName) match.boatName = { $regex: boatName.trim(), $options: 'i' };
+  if (city) match['location.city'] = { $regex: city.trim(), $options: 'i' };
+  if (state) match['location.state'] = { $regex: state.trim(), $options: 'i' };
+  if (address)
+    match['location.address'] = { $regex: address.trim(), $options: 'i' };
   /** Temporarily disabled filters */
 
-  if (status) match.status = { $regex: status.trim(), $options: 'i' };
-  if (features) match.features = { $regex: features.trim(), $options: 'i' };
-  if (category) match.category = { $regex: category.trim(), $options: 'i' };
-  if (boatName) match.boatName = { $regex: boatName.trim(), $options: 'i' };
-  if (subCategory)
-    match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
-  if (typeof captained === 'boolean') match.captained = captained;
+  match.status = { $regex: 'active', $options: 'i' };
+  if (listingType)
+    match.listingType = { $regex: listingType.trim(), $options: 'i' };
+  if (features && Array.isArray(features) && features.length > 0) {
+    match.features = { $in: features.map((f) => f.trim()) };
+  }
+  if (boatTypes && Array.isArray(boatTypes) && boatTypes.length > 0) {
+    match.boatType = { $in: boatTypes.map((f) => f.trim()) };
+  }
+
+  if (
+    activityTypes &&
+    Array.isArray(activityTypes) &&
+    activityTypes.length > 0
+  ) {
+    match.activityType = { $in: activityTypes.map((f) => f.trim()) };
+  }
+  if (maxPassengers) {
+    match.maxPassengers = { $gte: parseFloat(maxPassengers) };
+  }
+
+  if (listingType && listingType === 'activity') {
+    if (minPrice || maxPrice) {
+      match['pricing.perPerson'] = {};
+
+      if (minPrice) {
+        match['pricing.perPerson'].$gte = Number(minPrice);
+      }
+
+      if (maxPrice) {
+        match['pricing.perPerson'].$lte = Number(maxPrice);
+      }
+    }
+  }
+  if (listingType && listingType === 'rental') {
+    if (minPrice || maxPrice) {
+      const priceConditions = [];
+
+      if (minPrice) {
+        priceConditions.push({
+          $or: [
+            { 'pricing.perHour': { $gte: Number(minPrice) } },
+            { 'pricing.perDay': { $gte: Number(minPrice) } },
+          ],
+        });
+      }
+
+      if (maxPrice) {
+        priceConditions.push({
+          $or: [
+            { 'pricing.perHour': { $lte: Number(maxPrice) } },
+            { 'pricing.perDay': { $lte: Number(maxPrice) } },
+          ],
+        });
+      }
+
+      if (priceConditions.length > 0) {
+        match.$and = priceConditions;
+      }
+    }
+  }
+
+  if (!listingType) {
+    if (minPrice || maxPrice) {
+      const priceConditions = [];
+
+      if (minPrice) {
+        priceConditions.push({
+          $or: [
+            { 'pricing.perHour': { $gte: Number(minPrice) } },
+            { 'pricing.perDay': { $gte: Number(minPrice) } },
+            { 'pricing.perPerson': { $gte: Number(minPrice) } },
+          ],
+        });
+      }
+
+      if (maxPrice) {
+        priceConditions.push({
+          $or: [
+            { 'pricing.perHour': { $lte: Number(maxPrice) } },
+            { 'pricing.perDay': { $lte: Number(maxPrice) } },
+            { 'pricing.perPerson': { $lte: Number(minPrice) } },
+          ],
+        });
+      }
+
+      if (priceConditions.length > 0) {
+        match.$or = priceConditions;
+      }
+    }
+  }
+
+  console.log({ match: JSON.stringify(match), type: typeof maxPassengers });
+
+  // if (category) match.category = { $regex: category.trim(), $options: 'i' };
+  // if (subCategory)
+  //   match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
+  // if (typeof captained === 'boolean') match.captained = captained;
   // if (typeof searchable === 'boolean') match.searchable = searchable;
 
   if (bbox?.length && Array.isArray(bbox)) {
@@ -111,14 +217,18 @@ export async function getBoats({ pageNo, size, filter }) {
         owner: 1,
         location: 1,
         latLng: 1,
-        category: 1,
-        subCategory: 1,
         currency: 1,
         features: 1,
         pricing: 1,
         securityAllowance: 1,
-        captained: 1,
         searchable: 1,
+        listingType: 1,
+        maxPassengers: 1,
+        agreementInfo: 1,
+        address: 1,
+        activityType: 1,
+        cancelationPolicy: 1,
+        avgResponseTime: 1,
       },
     },
     {
@@ -153,7 +263,66 @@ export async function getBoats({ pageNo, size, filter }) {
     },
   ];
 
-  // If no bounding box and coordinate is present
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Validate date order
+    if (start >= end) {
+      throw new Error('End date must be after start date');
+    }
+
+    // Add lookup for conflicting bookings
+    aggregationQuery.unshift(
+      {
+        $lookup: {
+          from: 'bookings',
+          let: { boatId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$boatId', '$$boatId'] },
+                    { $lt: ['$duration.start', new Date(endDate)] },
+                    { $gt: ['$duration.end', new Date(startDate)] },
+                  ],
+                },
+                status: { $nin: ['Cancelled', 'Completed'] }, // case-sensitive check
+              },
+            },
+          ],
+          as: 'conflictingBookings',
+        },
+      },
+      {
+        $match: {
+          conflictingBookings: { $size: 0 },
+        },
+      }
+    );
+
+    // Debugging: Add this temporary stage to see conflicts
+    aggregationQuery.unshift({
+      $addFields: {
+        debugConflicts: {
+          $map: {
+            input: '$conflictingBookings',
+            as: 'conflict',
+            in: {
+              start: '$$conflict.duration.startDate',
+              end: '$$conflict.duration.endDate',
+              status: '$$conflict.status',
+            },
+          },
+        },
+      },
+    });
+
+    // Only include boats with no conflicting bookings
+    match.conflictingBookings = { $size: 0 };
+  }
+
   if (
     !Array.isArray(bbox) &&
     !bbox?.length &&
@@ -167,7 +336,7 @@ export async function getBoats({ pageNo, size, filter }) {
           coordinates: [coordinates?.longitude, coordinates?.latitude],
         },
         distanceField: 'distance',
-        maxDistance: 50 * 1609.34, // 50 miles
+        maxDistance: 50 * 1609.34,
         key: 'latLng',
         spherical: true,
       },
@@ -180,28 +349,42 @@ export async function getBoats({ pageNo, size, filter }) {
 export async function getBoatListings({ pageNo, size, userId, filter }) {
   const {
     boatName,
+    status,
     address,
     city,
     state,
-    captained,
-    searchable,
-    category,
-    subCategory,
+    listingType,
+    boatTypes,
+    activityTypes,
+    features,
   } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
   const query = {};
   query.owner = userId;
 
-  if (boatName) query.boatName = { $regex: boatName, $options: 'i' };
-  if (address) query['location.address'] = { $regex: address, $options: 'i' };
-  if (city) query['location.city'] = { $regex: city, $options: 'i' };
-  if (state) query['location.state'] = { $regex: state, $options: 'i' };
-  if (category) query.category = category;
-  if (subCategory) query.subCategory = subCategory;
-  if (typeof captained === 'boolean') query.captained = captained;
-  else if (captained) query.captained = captained;
-  if (typeof searchable === 'boolean') query.searchable = searchable;
-  else if (searchable) query.searchable = searchable;
+  /** Temporarily disabled filters */
+  if (boatName) query.boatName = { $regex: boatName.trim(), $options: 'i' };
+  if (status) query.status = { $regex: status.trim(), $options: 'i' };
+  if (city) query['location.city'] = { $regex: city.trim(), $options: 'i' };
+  if (state) query['location.state'] = { $regex: state.trim(), $options: 'i' };
+  if (address)
+    query['location.address'] = { $regex: address.trim(), $options: 'i' };
+
+  if (listingType)
+    query.listingType = { $regex: listingType.trim(), $options: 'i' };
+  if (features && Array.isArray(features) && features.length > 0) {
+    query.features = { $in: features.map((f) => f.trim()) };
+  }
+  if (boatTypes && Array.isArray(boatTypes) && boatTypes.length > 0) {
+    query.boatType = { $in: boatTypes.map((f) => f.trim()) };
+  }
+  if (
+    activityTypes &&
+    Array.isArray(activityTypes) &&
+    activityTypes.length > 0
+  ) {
+    query.activityType = { $in: activityTypes.map((f) => f.trim()) };
+  }
 
   const boats = await this.find(
     { ...query, status: { $ne: 'deleted' } },
@@ -234,15 +417,38 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
  * @returns The boat object
  */
 export async function getBoat({ boatId }) {
-  const boat = await this.findOne({ _id: boatId });
+  const boat = await this.findOne({ _id: boatId, status: { $ne: 'deleted' } });
   if (!boat) throw boatNotFound;
   return boat;
 }
 
-export async function updateBoat(matchQuery, updateObject) {
-  const boatUpdate = await this.findOneAndUpdate(matchQuery, updateObject, {
-    new: true,
+export async function updateBoat(id, userId, updateObject) {
+  const boat = await this.findOne({
+    _id: id,
+    owner: userId,
+    status: { $ne: 'deleted' },
   });
+
+  if (!boat) throw boatNotFound;
+  if (boat.listingType !== updateObject.listingType)
+    throw updatelistingTypeNotAllowed;
+
+  const existingBoat = await this.findOne({
+    boatName: { $regex: new RegExp(`^${this.boatName}$`, 'i') },
+  });
+
+  if (existingBoat && existingBoat._id !== id) {
+    throw boatNameUsed;
+  }
+
+  const boatUpdate = await this.findOneAndUpdate(
+    { _id: id, owner: userId },
+    updateObject,
+    {
+      new: true,
+    }
+  );
+
   if (!boatUpdate) throw boatUpdateFailed;
   return boatUpdate;
 }
@@ -255,8 +461,22 @@ export async function deleteBoat({ boatId, userId }) {
   // if (!removedBoat) throw boatDeleteFailed;
   // return removedBoat;
 
-  return updateBoat(
+  const boat = await this.findOne({
+    _id: boatId,
+    owner: userId,
+    status: { $ne: 'deleted' },
+  });
+  if (!boat) throw boatNotFound;
+
+  const boatDeleted = await this.findOneAndUpdate(
     { _id: boatId, owner: userId },
-    { status: boatStatus.DELETED }
+    { status: boatStatus.DELETED, boatName: `${boat.boatName}_${boatId}` },
+    {
+      new: true,
+    }
   );
+
+  if (!boatDeleted) throw boatDeleteFailed;
+
+  return boatId;
 }
