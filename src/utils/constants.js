@@ -215,7 +215,7 @@ export const boatFeatures = {
   DELIVERABLE: 'Deliverable',
   BATHROOM: 'Bathroom',
   ANCHOR: 'Anchor',
-  ADDITIONAL_AMENITIES: 'Additional Amenities',
+  // ADDITIONAL_AMENITIES: 'Additional Amenities',
 };
 
 export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
