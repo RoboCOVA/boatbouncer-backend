@@ -194,6 +194,28 @@ export async function getBoats({ pageNo, size, filter }) {
       },
     },
     {
+      $lookup: {
+        from: 'bookings',
+        let: { boatId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$boatId', '$$boatId'] },
+              status: { $nin: ['Cancelled', 'Completed'] },
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              duration: 1,
+              status: 1,
+            },
+          },
+        ],
+        as: 'bookings',
+      },
+    },
+    {
       $unwind: {
         path: '$favorite',
         preserveNullAndEmptyArrays: true,
@@ -210,6 +232,7 @@ export async function getBoats({ pageNo, size, filter }) {
             false,
           ],
         },
+        bookings: 1,
         boatName: 1,
         boatType: 1,
         status: 1,
