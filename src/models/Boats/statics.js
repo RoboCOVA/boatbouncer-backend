@@ -63,10 +63,10 @@ export async function getBoats({ pageNo, size, filter }) {
     match.activityType = { $in: activityTypes.map((f) => f.trim()) };
   }
   if (maxPassengers) {
-    match.maxPassengers = { $eq: maxPassengers };
+    match.maxPassengers = { $gte: parseFloat(maxPassengers) };
   }
 
-  if (!listingType || (listingType && listingType === 'activity')) {
+  if (listingType && listingType === 'activity') {
     if (minPrice || maxPrice) {
       match['pricing.perPerson'] = {};
 
@@ -79,8 +79,7 @@ export async function getBoats({ pageNo, size, filter }) {
       }
     }
   }
-
-  if (!listingType || (listingType && listingType === 'rental')) {
+  if (listingType && listingType === 'rental') {
     if (minPrice || maxPrice) {
       const priceConditions = [];
 
@@ -107,6 +106,38 @@ export async function getBoats({ pageNo, size, filter }) {
       }
     }
   }
+
+  if (!listingType) {
+    if (minPrice || maxPrice) {
+      const priceConditions = [];
+
+      if (minPrice) {
+        priceConditions.push({
+          $or: [
+            { 'pricing.perHour': { $gte: Number(minPrice) } },
+            { 'pricing.perDay': { $gte: Number(minPrice) } },
+            { 'pricing.perPerson': { $gte: Number(minPrice) } },
+          ],
+        });
+      }
+
+      if (maxPrice) {
+        priceConditions.push({
+          $or: [
+            { 'pricing.perHour': { $lte: Number(maxPrice) } },
+            { 'pricing.perDay': { $lte: Number(maxPrice) } },
+            { 'pricing.perPerson': { $lte: Number(minPrice) } },
+          ],
+        });
+      }
+
+      if (priceConditions.length > 0) {
+        match.$or = priceConditions;
+      }
+    }
+  }
+
+  console.log({ match: JSON.stringify(match), type: typeof maxPassengers });
 
   // if (category) match.category = { $regex: category.trim(), $options: 'i' };
   // if (subCategory)

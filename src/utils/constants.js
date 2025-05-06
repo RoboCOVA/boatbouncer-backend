@@ -129,10 +129,11 @@ export const currencyCode = {
 export const currencyCodeEnum = generateEnumArrayFromObject(currencyCode);
 
 export const pricingType = {
-  PER_HOUR: 'Per Hour',
-  PER_DAY: 'Per Day',
-  PER_NIGHT: 'Per Night',
-  PER_WEEK: 'Per Week',
+  PER_HOUR: 'Per_Hour',
+  PER_DAY: 'Per_Day',
+  // PER_NIGHT: 'Per_Night',
+  // PER_WEEK: 'Per_Week',
+  PER_PERSON: 'Per_Person',
 };
 
 export const pricingTypeEnum = generateEnumArrayFromObject(pricingType);
@@ -182,7 +183,7 @@ export const bookingStatus = {
   CANCELLED: 'Cancelled',
 };
 
-const boatListTypes = {
+export const boatListTypes = {
   RENTAL: 'rental',
   ACTIVITY: 'activity',
 };
@@ -214,7 +215,7 @@ export const boatFeatures = {
   DELIVERABLE: 'Deliverable',
   BATHROOM: 'Bathroom',
   ANCHOR: 'Anchor',
-  ADDITIONAL_AMENITIES: 'Additional Amenities',
+  // ADDITIONAL_AMENITIES: 'Additional Amenities',
 };
 
 export const boatFeaturesEnum = generateEnumArrayFromObject(boatFeatures);
