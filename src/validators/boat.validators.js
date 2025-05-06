@@ -107,20 +107,40 @@ const createBaseBoatValidator = () => [
 ];
 
 const createActivityBoatValidator = () => [
-  body('activityType')
+  body('activityTypes')
     .isArray({ min: 1 })
-    .withMessage('Activity Type must be a non-empty array')
-    .custom((value) => {
-      // Check if every item is in the enum
-      const isValid = value.every((item) =>
-        boatActivityTypeEnum.includes(item)
-      );
-      if (!isValid) {
-        throw new Error(
-          `Each Activity Type must be one of: ${boatActivityTypeEnum.join(
-            ', '
-          )}`
-        );
+    .withMessage('activity Types must be a non-empty array')
+    .custom((activityTypes) => {
+      const seenTypes = new Set();
+      /* eslint-disable */
+      for (const activityType of activityTypes) {
+        if (
+          !activityType.type ||
+          !boatActivityTypeEnum.includes(activityType.type)
+        ) {
+          throw new Error(
+            `Each activity type must be one of: ${boatActivityTypeEnum.join(
+              ', '
+            )}`
+          );
+        }
+
+        if (
+          typeof activityType.durationHours !== 'number' ||
+          activityType.durationHours <= 0
+        ) {
+          throw new Error(
+            'Each activity type  must have a positive duration in hours'
+          );
+        }
+
+        // Check for duplicates
+        if (seenTypes.has(activityType.type)) {
+          throw new Error(
+            `Duplicate activity type found: ${activityType.type}. Each activity type must be unique.`
+          );
+        }
+        seenTypes.add(activityType.type);
       }
       return true;
     }),
@@ -357,21 +377,41 @@ const updateBaseBoatValidator = () => [
 ];
 
 const updateActivityBoatValidator = () => [
-  body('activityType')
+  body('activityTypes')
     .optional()
     .isArray({ min: 1 })
-    .withMessage('Activity Type must be a non-empty array')
-    .custom((value) => {
-      // Check if every item is in the enum
-      const isValid = value.every((item) =>
-        boatActivityTypeEnum.includes(item)
-      );
-      if (!isValid) {
-        throw new Error(
-          `Each Activity Type must be one of: ${boatActivityTypeEnum.join(
-            ', '
-          )}`
-        );
+    .withMessage('activity Types must be a non-empty array')
+    .custom((activityTypes) => {
+      const seenTypes = new Set();
+      /* eslint-disable */
+      for (const activityType of activityTypes) {
+        if (
+          !activityType.type ||
+          !boatActivityTypeEnum.includes(activityType.type)
+        ) {
+          throw new Error(
+            `Each activity type must be one of: ${boatActivityTypeEnum.join(
+              ', '
+            )}`
+          );
+        }
+
+        if (
+          typeof activityType.durationHours !== 'number' ||
+          activityType.durationHours <= 0
+        ) {
+          throw new Error(
+            'Each activity type  must have a positive duration in hours'
+          );
+        }
+
+        // Check for duplicates
+        if (seenTypes.has(activityType.type)) {
+          throw new Error(
+            `Duplicate activity type found: ${activityType.type}. Each activity type must be unique.`
+          );
+        }
+        seenTypes.add(activityType.type);
       }
       return true;
     }),

@@ -56,10 +56,24 @@ const baseBoatFieldsSchema = {
 };
 
 const activityBoatFields = {
-  activityType: {
-    type: [String],
-    enum: boatActivityTypeEnum,
+  activityTypes: {
+    type: [
+      {
+        type: {
+          type: String,
+          enum: boatActivityTypeEnum,
+          required: true,
+        },
+        durationHours: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+      },
+    ],
     required: false,
+    default: undefined,
+    _id: false,
   },
 };
 const combinedPricingSchema = new Schema(

@@ -19,7 +19,6 @@ export const createBoatController = async (req, res, next) => {
     const parsedLocation = latLng ? coordinateObjToGeoJson(latLng) : undefined;
 
     const hasPaymentMethod = await Users.hasPaymentMethod({ userId });
-
     const newBoat = new Boats({
       ...req.body,
       latLng: parsedLocation,
@@ -204,6 +203,7 @@ export const getBoatTypes = (req, res, next) => {
     next(error);
   }
 };
+
 export const getBoatActivties = (req, res, next) => {
   try {
     res.send({ boatActivityTypeEnum });

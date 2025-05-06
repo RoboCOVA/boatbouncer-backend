@@ -60,8 +60,16 @@ export async function getBoats({ pageNo, size, filter }) {
     Array.isArray(activityTypes) &&
     activityTypes.length > 0
   ) {
-    match.activityType = { $in: activityTypes.map((f) => f.trim()) };
+    const typesToMatch = activityTypes.map((item) => {
+      if (typeof item === 'object' && item.activityType) {
+        return item.activityType.trim();
+      }
+      return item.trim();
+    });
+
+    match['activityTypes.type'] = { $in: typesToMatch };
   }
+
   if (maxPassengers) {
     match.maxPassengers = { $gte: parseFloat(maxPassengers) };
   }
@@ -136,8 +144,6 @@ export async function getBoats({ pageNo, size, filter }) {
       }
     }
   }
-
-  console.log({ match: JSON.stringify(match), type: typeof maxPassengers });
 
   // if (category) match.category = { $regex: category.trim(), $options: 'i' };
   // if (subCategory)
@@ -226,7 +232,7 @@ export async function getBoats({ pageNo, size, filter }) {
         maxPassengers: 1,
         agreementInfo: 1,
         address: 1,
-        activityType: 1,
+        activityTypes: 1,
         cancelationPolicy: 1,
         avgResponseTime: 1,
       },
@@ -378,12 +384,20 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
   if (boatTypes && Array.isArray(boatTypes) && boatTypes.length > 0) {
     query.boatType = { $in: boatTypes.map((f) => f.trim()) };
   }
+
   if (
     activityTypes &&
     Array.isArray(activityTypes) &&
     activityTypes.length > 0
   ) {
-    query.activityType = { $in: activityTypes.map((f) => f.trim()) };
+    const typesToMatch = activityTypes.map((item) => {
+      if (typeof item === 'object' && item.activityType) {
+        return item.activityType.trim();
+      }
+      return item.trim();
+    });
+
+    query['activityTypes.type'] = { $in: typesToMatch };
   }
 
   const boats = await this.find(
