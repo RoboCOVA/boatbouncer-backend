@@ -51,7 +51,11 @@ const facebookStrategy = new FacebookStrategy(
         password: oAuthDefaultPassword,
       };
 
-      const previousUser = await Users.getUserByFacebookId(profile.id);
+      let previousUser = await Users.getUserByFacebookId(profile.id);
+
+      if (!previousUser) {
+        previousUser = await Users.getUserByEmail(userData.email);
+      }
 
       if (previousUser) {
         userId = previousUser._id;
@@ -60,6 +64,7 @@ const facebookStrategy = new FacebookStrategy(
           facebookId: profile.id,
         });
       } else {
+        if (!userData.phoneNumber) userData.verified = false;
         const newUser = new Users({
           ...userData,
         });

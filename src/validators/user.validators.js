@@ -1,5 +1,5 @@
 import { body, param } from 'express-validator';
-import { strongPasswordRegex } from '../utils/constants';
+import { authProviders, strongPasswordRegex } from '../utils/constants';
 import defaultValidators from './default.validator';
 
 export const createUserValidator = () => [
@@ -152,4 +152,16 @@ export const getFacebookAccoutnUserValidator = () => [
   param('facebookId')
     .isString()
     .withMessage('googleId must be included in param'),
+];
+
+export const addPhoneNumberValidator = () => [
+  body('id').isString().withMessage(' O auth provider is required  '),
+  body('provider')
+    .isString()
+    .isIn([authProviders.FACEBOOK, authProviders.GOOGLE, authProviders.APPLE])
+    .withMessage('Invalid auth provider'),
+  body('recaptchaToken')
+    .isString()
+    .withMessage('Valid recaptchaToken is required'),
+  defaultValidators.phoneNumber,
 ];

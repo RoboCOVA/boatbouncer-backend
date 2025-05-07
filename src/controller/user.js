@@ -1,10 +1,12 @@
+import httpStatus from 'http-status';
 import passport from 'passport';
+import * as environments from '../config/environments';
 import { identityToolkit } from '../config/googleApis';
-import Users from '../models/Users';
+import APIError from '../errors/APIError';
 import Boats from '../models/Boats';
 import Otp from '../models/Otp';
+import Users from '../models/Users';
 import { emailToUsername } from '../utils';
-import * as environments from '../config/environments';
 import { authProviders } from '../utils/constants';
 
 export const createUserController = async (req, res, next) => {
@@ -273,6 +275,7 @@ export const getCurrentUserController = async (req, res, next) => {
 
 /** ========== Auth Related============   */
 
+export const updtePhoneNumber = (req, res, next) => {};
 export const googleLoginController = (req, res, next) => {
   passport.authenticate('google', {
     scope: ['profile', 'email', 'phone'],
@@ -396,6 +399,53 @@ export const setLocalPasswordController = async (req, res, next) => {
     const user = await Users.setLocalPassword({
       password,
       userId,
+    });
+
+    res.send(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addPhoneNumberController = async (req, res, next) => {
+  try {
+    const { phoneNumber, recaptchaToken, id, provider } = req.body;
+
+    let userAccount;
+
+    switch (provider) {
+      case authProviders.APPLE: {
+        userAccount = await Users.getUserByAppleId(id);
+        break;
+      }
+      case authProviders.FACEBOOK: {
+        userAccount = await Users.getUserByFacebookId(id);
+        break;
+      }
+      case authProviders.GOOGLE: {
+        userAccount = await Users.getUserByGoogleId(id);
+        break;
+      }
+      default: {
+        throw new APIError('Invalid o auth provider', httpStatus.BAD_REQUEST);
+      }
+    }
+
+    if (!userAccount) {
+      throw new APIError(
+        'Invalide auth provider and id match',
+        httpStatus.NOT_FOUND
+      );
+    }
+    await Users.addPhoneNumber({ phoneNumber, userId: userAccount._id });
+    const response = await identityToolkit.relyingparty.sendVerificationCode({
+      phoneNumber,
+      recaptchaToken,
+    });
+
+    const user = await Users.saveUserSession({
+      phoneNumber,
+      session: response.data.sessionInfo,
     });
 
     res.send(user);

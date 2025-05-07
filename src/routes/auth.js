@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticateJwt } from '../controller/authenticate';
 import {
+  addPhoneNumberController,
   facebookLoginCallbackController,
   facebookLoginController,
   facebookLoginGetAccountController,
@@ -10,6 +11,7 @@ import {
   setLocalPasswordController,
 } from '../controller/user';
 import {
+  addPhoneNumberValidator,
   getFacebookAccoutnUserValidator,
   getGoogleAccoutnUserValidator,
   setLocalPasswordValidator,
@@ -18,6 +20,8 @@ import {
 import parseValidationResult from '../validators/errors.parser';
 
 const router = express.Router();
+
+router.get('/update', addPhoneNumberValidator(), addPhoneNumberController);
 
 router.get('/google', googleLoginController);
 

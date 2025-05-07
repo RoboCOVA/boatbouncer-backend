@@ -67,7 +67,11 @@ const googleStrategy = new GoogleStrategy(
         userName: generateUserNameFromEmail(profile.emails[0].value),
         password: oAuthDefaultPassword,
       };
-      const previousUser = await Users.getUserByGoogleId(userData.googleId);
+      let previousUser = await Users.getUserByGoogleId(userData.googleId);
+
+      if (!previousUser) {
+        previousUser = await Users.getUserByEmail(userData.email);
+      }
 
       if (previousUser) {
         userId = previousUser._id;

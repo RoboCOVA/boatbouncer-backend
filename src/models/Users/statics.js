@@ -238,6 +238,9 @@ export async function getUserById({ userId }) {
   const clean = await user.clean();
   return clean;
 }
+export async function getUserByEmail(email) {
+  return this.findOne({ email });
+}
 
 export async function getUserByGoogleId(googleId) {
   return this.findOne({ googleId });
@@ -469,4 +472,18 @@ export async function setLocalPassword({ password, userId }) {
   if (!updatePassword) throw updateFailed;
   await updatePassword.clean();
   return updatePassword;
+}
+export async function addPhoneNumber({ phoneNumber, userId }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+  const userUpdated = await this.findOneAndUpdate(
+    { _id: userId },
+    {
+      phoneNumber,
+    }
+  );
+
+  if (!userUpdated) throw updateFailed;
+  await userUpdated.clean();
+  return userUpdated;
 }
