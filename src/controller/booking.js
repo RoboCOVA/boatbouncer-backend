@@ -5,6 +5,7 @@ import Bookings from '../models/Bookings';
 import Users from '../models/Users';
 import { boatListTypes, bookingStatus, pricingType } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
+import { addHoursToDate } from '../utils';
 
 function calculateActivityBoatPrice(peopleCount, pricing) {
   const price = pricing.perPerson;
@@ -104,6 +105,10 @@ export const createBookingController = async (req, res, next) => {
           );
         boakingParam.hours = hours;
         boakingParam.days = 0;
+        boakingParam.duration = {
+          ...duration,
+          end: addHoursToDate(duration.start, hours),
+        };
       }
 
       if (type === pricingType.PER_DAY) {
@@ -115,6 +120,10 @@ export const createBookingController = async (req, res, next) => {
 
         boakingParam.days = days;
         boakingParam.hours = 0;
+        boakingParam.duration = {
+          ...duration,
+          end: addHoursToDate(duration.start, days * 24),
+        };
       }
 
       boakingParam = {
@@ -122,6 +131,7 @@ export const createBookingController = async (req, res, next) => {
         ...calculateRentalBoatPrice({ hours, days }, boat.pricing, type),
       };
     }
+
     if (listingType === boatListTypes.ACTIVITY) {
       const isTypeValid = [pricingType.PER_PERSON].includes(type);
       if (!isTypeValid)
@@ -145,6 +155,18 @@ export const createBookingController = async (req, res, next) => {
       }
       boakingParam.noPeople = noPeople;
       boakingParam.activityType = activityType;
+      const selectedAactivityType = boat?.activityTypes.find(
+        ({ type: fechtecType }) => fechtecType === activityType
+      );
+      if (selectedAactivityType) {
+        boakingParam.duration = {
+          ...duration,
+          end: addHoursToDate(
+            duration.start,
+            selectedAactivityType.durationHours
+          ),
+        };
+      }
       boakingParam = {
         ...boakingParam,
         ...calculateActivityBoatPrice(noPeople, boat.pricing),
@@ -160,7 +182,6 @@ export const createBookingController = async (req, res, next) => {
     });
 
     const savedReservation = await booking.createBooking();
-
     const ownerPhoneNumber = owner.phoneNumber;
 
     const requesterFirstName = req?.user?.firstName ?? '';

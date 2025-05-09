@@ -1,4 +1,8 @@
+/* eslint-disable */
+import { ObjectId } from 'mongodb';
 import { getPaginationValues } from '../../utils';
+import { boatStatus, bookingStatus } from '../../utils/constants';
+import Bookings from '../Bookings';
 import {
   boatDeleteFailed,
   boatNameUsed,
@@ -6,8 +10,6 @@ import {
   boatUpdateFailed,
   updatelistingTypeNotAllowed,
 } from './errors';
-import Bookings from '../Bookings';
-import { boatStatus, bookingStatus } from '../../utils/constants';
 //   const Conversations = this.model(modelNames.CONVERSATIONS);
 /**
  * It returns a list of boats, with a total count of all boats, based on the page number and size of
@@ -60,8 +62,16 @@ export async function getBoats({ pageNo, size, filter }) {
     Array.isArray(activityTypes) &&
     activityTypes.length > 0
   ) {
-    match.activityType = { $in: activityTypes.map((f) => f.trim()) };
+    const typesToMatch = activityTypes.map((item) => {
+      if (typeof item === 'object' && item.activityType) {
+        return item.activityType.trim();
+      }
+      return item.trim();
+    });
+
+    match['activityTypes.type'] = { $in: typesToMatch };
   }
+
   if (maxPassengers) {
     match.maxPassengers = { $gte: parseFloat(maxPassengers) };
   }
@@ -137,8 +147,6 @@ export async function getBoats({ pageNo, size, filter }) {
     }
   }
 
-  console.log({ match: JSON.stringify(match), type: typeof maxPassengers });
-
   // if (category) match.category = { $regex: category.trim(), $options: 'i' };
   // if (subCategory)
   //   match.subCategory = { $regex: subCategory.trim(), $options: 'i' };
@@ -188,6 +196,28 @@ export async function getBoats({ pageNo, size, filter }) {
       },
     },
     {
+      $lookup: {
+        from: 'bookings',
+        let: { boatId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$boatId', '$$boatId'] },
+              status: { $nin: ['Cancelled', 'Completed'] },
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              duration: 1,
+              status: 1,
+            },
+          },
+        ],
+        as: 'bookings',
+      },
+    },
+    {
       $unwind: {
         path: '$favorite',
         preserveNullAndEmptyArrays: true,
@@ -204,6 +234,7 @@ export async function getBoats({ pageNo, size, filter }) {
             false,
           ],
         },
+        bookings: 1,
         boatName: 1,
         boatType: 1,
         status: 1,
@@ -226,7 +257,7 @@ export async function getBoats({ pageNo, size, filter }) {
         maxPassengers: 1,
         agreementInfo: 1,
         address: 1,
-        activityType: 1,
+        activityTypes: 1,
         cancelationPolicy: 1,
         avgResponseTime: 1,
       },
@@ -378,12 +409,20 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
   if (boatTypes && Array.isArray(boatTypes) && boatTypes.length > 0) {
     query.boatType = { $in: boatTypes.map((f) => f.trim()) };
   }
+
   if (
     activityTypes &&
     Array.isArray(activityTypes) &&
     activityTypes.length > 0
   ) {
-    query.activityType = { $in: activityTypes.map((f) => f.trim()) };
+    const typesToMatch = activityTypes.map((item) => {
+      if (typeof item === 'object' && item.activityType) {
+        return item.activityType.trim();
+      }
+      return item.trim();
+    });
+
+    query['activityTypes.type'] = { $in: typesToMatch };
   }
 
   const boats = await this.find(
@@ -416,8 +455,57 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
  * It finds a boat by its id and returns it
  * @returns The boat object
  */
-export async function getBoat({ boatId }) {
+export async function getBoatd({ boatId }) {
   const boat = await this.findOne({ _id: boatId, status: { $ne: 'deleted' } });
+  if (!boat) throw boatNotFound;
+  return boat;
+}
+export async function getBoat({ boatId }) {
+  // Convert string ID to ObjectId if needed
+
+  const _id = ObjectId.isValid(boatId) ? new ObjectId(boatId) : boatId;
+
+  const [boat] = await this.aggregate([
+    {
+      $match: {
+        _id: {
+          $eq: _id,
+        },
+        status: { $ne: 'deleted' },
+      },
+    },
+    {
+      $lookup: {
+        from: 'bookings',
+        let: { boatId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$boatId', '$$boatId'] },
+              status: { $nin: ['Cancelled', 'Completed'] },
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              duration: 1,
+              status: 1,
+              startDate: 1,
+              endDate: 1,
+            },
+          },
+          { $sort: { startDate: 1 } }, // Sort bookings by date
+        ],
+        as: 'bookings',
+      },
+    },
+    {
+      $addFields: {
+        hasActiveBookings: { $gt: [{ $size: '$bookings' }, 0] },
+      },
+    },
+  ]);
+
   if (!boat) throw boatNotFound;
   return boat;
 }

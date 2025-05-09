@@ -178,3 +178,10 @@ export function getMinutesDifference(date1, date2) {
 export function emailToUsername(email) {
   return email.split('@')[0];
 }
+
+export function addHoursToDate(originalDate, hoursToAdd) {
+  const newDate = new Date(originalDate);
+  const millisecondsToAdd = hoursToAdd * 60 * 60 * 1000;
+  newDate.setTime(newDate.getTime() + millisecondsToAdd);
+  return newDate;
+}
