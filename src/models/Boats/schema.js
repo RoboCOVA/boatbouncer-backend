@@ -36,6 +36,7 @@ const locationSchema = new Schema(
 const cancelationSchema = {
   refund: { type: Number },
   priorHours: { type: Number },
+  _id: false,
 };
 const baseBoatFieldsSchema = {
   boatName: { type: String, required: true },

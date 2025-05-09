@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { ObjectId } from 'mongodb';
 import { getPaginationValues } from '../../utils';
 import { boatStatus, bookingStatus } from '../../utils/constants';
@@ -9,7 +10,6 @@ import {
   boatUpdateFailed,
   updatelistingTypeNotAllowed,
 } from './errors';
-
 //   const Conversations = this.model(modelNames.CONVERSATIONS);
 /**
  * It returns a list of boats, with a total count of all boats, based on the page number and size of
@@ -455,19 +455,22 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
  * It finds a boat by its id and returns it
  * @returns The boat object
  */
-// export async function getBoat({ boatId }) {
-//   const boat = await this.findOne({ _id: boatId, status: { $ne: 'deleted' } });
-//   if (!boat) throw boatNotFound;
-//   return boat;
-// }
-
+export async function getBoatd({ boatId }) {
+  const boat = await this.findOne({ _id: boatId, status: { $ne: 'deleted' } });
+  if (!boat) throw boatNotFound;
+  return boat;
+}
 export async function getBoat({ boatId }) {
   // Convert string ID to ObjectId if needed
+
   const _id = ObjectId.isValid(boatId) ? new ObjectId(boatId) : boatId;
+
   const [boat] = await this.aggregate([
     {
       $match: {
-        _id,
+        _id: {
+          $eq: _id,
+        },
         status: { $ne: 'deleted' },
       },
     },
