@@ -316,7 +316,7 @@ export const googleLoginCallbackController = (req, res, next) => {
         const { googleId } = user;
         const redirectUrl = new URL(environments.oAuthSuccessRedict);
         redirectUrl.searchParams.append('id', googleId);
-        redirectUrl.searchParams.append('privider', authProviders.GOOGLE);
+        redirectUrl.searchParams.append('provider', authProviders.GOOGLE);
 
         return res.redirect(redirectUrl.toString());
       });
@@ -373,7 +373,7 @@ export const facebookLoginCallbackController = (req, res, next) => {
         const { facebookId } = user;
         const redirectUrl = new URL(environments.oAuthSuccessRedict);
         redirectUrl.searchParams.append('id', facebookId);
-        redirectUrl.searchParams.append('privider', authProviders.FACEBOOK);
+        redirectUrl.searchParams.append('provider', authProviders.FACEBOOK);
 
         return res.redirect(redirectUrl.toString());
       });
