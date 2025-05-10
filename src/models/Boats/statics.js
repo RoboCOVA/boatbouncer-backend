@@ -33,6 +33,7 @@ export async function getBoats({ pageNo, size, filter }) {
     maxPrice,
     startDate,
     endDate,
+    radius = 50,
   } = filter || {};
   const { skip, limit } = getPaginationValues(pageNo, size);
 
@@ -367,7 +368,7 @@ export async function getBoats({ pageNo, size, filter }) {
           coordinates: [coordinates?.longitude, coordinates?.latitude],
         },
         distanceField: 'distance',
-        maxDistance: 50 * 1609.34,
+        maxDistance: radius * 1609.34,
         key: 'latLng',
         spherical: true,
       },
