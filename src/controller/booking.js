@@ -8,7 +8,7 @@ import { sendMessage } from '../utils/twilio';
 import { addHoursToDate } from '../utils';
 
 function calculateActivityBoatPrice(peopleCount, pricing) {
-  const price = pricing.perPerson;
+  const price = pricing.perPerson * peopleCount;
   let renterPrice = price;
   let discountPercentage = 0;
   const sortedDiscounts = pricing.discountPercentage.sort(
@@ -37,7 +37,11 @@ function calculateRentalBoatPrice(period, pricing, type) {
       `Number of hours should be greater than ${pricing.minHours}`,
       httpStatus.BAD_REQUEST
     );
-  const price = type === pricingType.PER_DAY ? pricing.perDay : pricing.perHour;
+
+  const price =
+    type === pricingType.PER_DAY
+      ? pricing.perDay * period.days
+      : pricing.perHour * period.hours;
   let renterPrice = price;
   let discountPercentage = 0;
 

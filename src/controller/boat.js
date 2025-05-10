@@ -55,6 +55,7 @@ export const getBoatsController = async (req, res, next) => {
       maxPrice,
       startDate,
       endDate,
+      radius = 50,
     } = req.query || {};
 
     const filter = {};
@@ -64,6 +65,7 @@ export const getBoatsController = async (req, res, next) => {
     if (minPrice) filter.minPrice = minPrice;
     if (maxPrice) filter.maxPrice = maxPrice;
     if (boatName) filter.boatName = boatName;
+    if (radius) filter.radius = radius;
     if (status) {
       filter.status = status;
     } else {
