@@ -11,11 +11,11 @@ function calculateActivityBoatPrice(peopleCount, pricing) {
   const price = pricing.perPerson * peopleCount;
   let renterPrice = price;
   let discountPercentage = 0;
-  const sortedDiscounts = pricing.discountPercentage.sort(
+  const sortedDiscounts = pricing.discountPercentage?.sort(
     (a, b) => b.minPeople - a.minPeople
   );
 
-  const applicableDiscount = sortedDiscounts.find(
+  const applicableDiscount = sortedDiscounts?.find(
     (discount) => peopleCount >= discount.minPeople
   );
   if (applicableDiscount) {
