@@ -134,7 +134,6 @@ const rentalBoatFields = {
   model: { type: String },
   features: {
     type: [String],
-    enum: boatFeaturesEnum,
     default: [],
   },
 };

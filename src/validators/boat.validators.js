@@ -236,15 +236,7 @@ const createRentalBoatValidator = () => [
     .isInt({ min: 1 })
     .withMessage('Minimum hours must be at least 1'),
 
-  body('features')
-    .isArray()
-    .withMessage('Features must be an array')
-    .isIn(Object.values(boatFeatures))
-    .withMessage(
-      `Invalid feature. Valid features are: ${Object.values(boatFeatures).join(
-        ', '
-      )}`
-    ),
+  body('features').isArray().withMessage('Features must be an array'),
 ];
 
 export const createBoatValidator = () => [
@@ -524,13 +516,7 @@ const updateRentalBoatValidator = () => [
   body('features')
     .optional()
     .isArray()
-    .withMessage('Features must be an array')
-    .isIn(Object.values(boatFeatures))
-    .withMessage(
-      `Invalid feature. Valid features are: ${Object.values(boatFeatures).join(
-        ', '
-      )}`
-    ),
+    .withMessage('Features must be an array'),
 ];
 
 export const updateBoatValidator = () => [

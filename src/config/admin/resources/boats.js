@@ -126,12 +126,6 @@ export const BoatsResource = {
           show: true,
           filter: false,
         },
-        availableValues: Object.entries(boatFeaturesEnum).map(
-          ([key, value]) => ({
-            value: key,
-            label: value,
-          })
-        ),
       },
       securityAllowance: {
         isVisible: {
