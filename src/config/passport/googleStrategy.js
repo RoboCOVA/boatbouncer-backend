@@ -80,6 +80,7 @@ const googleStrategy = new GoogleStrategy(
           googleId: profile.id,
         });
       } else {
+        if (!userData.phoneNumber) userData.verified = false;
         const newUser = new Users({
           ...userData,
         });
