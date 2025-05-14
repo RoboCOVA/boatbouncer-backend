@@ -31,6 +31,7 @@ import {
 } from '../../config/environments';
 import { modelNames } from '../constants';
 import { authProviders } from '../../utils/constants';
+import AppError from '../../errors/APPError';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -86,24 +87,25 @@ export async function verifyUser({
   if (!user?.session)
     throw new APIError('Session not found', httpStatus.BAD_REQUEST);
 
-  await identityToolkit.relyingparty.verifyPhoneNumber({
+  identityToolkit.relyingparty.verifyPhoneNumber({
     code: verificationCode,
     sessionInfo: user?.session,
   });
 
-  if (encryption && user)
-    return encryptData(
-      JSON.stringify({
-        _id: user?._id,
-        phoneNumber,
-      })
-    );
+  // if (encryption && user)
+  //   return encryptData(
+  //     JSON.stringify({
+  //       _id: user?._id,
+  //       phoneNumber,
+  //     })
+  //   );
 
   const verifiedUser = await this.findOneAndUpdate(
     { _id: user?._id },
     {
       verified: true,
-    }
+    },
+    { new: true }
   );
 
   await Otp.findOneAndRemove({ phoneNumber });
@@ -112,9 +114,7 @@ export async function verifyUser({
 
   const cleanUser = verifiedUser.clean();
   const token = generateJwtToken(user._id, cleanUser);
-  cleanUser.token = token;
-  console.log({ cleanUser, verifiedUser });
-  return cleanUser;
+  return { ...cleanUser, token };
 }
 
 /**
@@ -465,7 +465,6 @@ export async function setLocalPassword({ password, userId }) {
   const user = await this.findOne({ _id: userId });
   if (!user) throw userNotFound;
   const hashedPassword = await generateHashedPassword(password);
-  console.log({ user });
   const updatePassword = await this.findOneAndUpdate(
     { _id: userId },
     {
@@ -479,13 +478,19 @@ export async function setLocalPassword({ password, userId }) {
   return updatePassword;
 }
 export async function addPhoneNumber({ phoneNumber, userId }) {
+  // Check if the phone number is already taken by another user
+  const existingUser = await this.findOne({ phoneNumber });
+  if (existingUser && existingUser._id.toString() !== userId.toString()) {
+    throw new AppError('Phone number is already in use by another account');
+  }
+
   const user = await this.findOne({ _id: userId });
   if (!user) throw userNotFound;
+
   const userUpdated = await this.findOneAndUpdate(
     { _id: userId },
-    {
-      phoneNumber,
-    }
+    { phoneNumber },
+    { new: true }
   );
 
   if (!userUpdated) throw updateFailed;
