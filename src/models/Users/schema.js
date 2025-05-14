@@ -42,6 +42,7 @@ const userSchema = new mongoose.Schema(
     googleIdTemp: { type: String },
     appleIdTemp: { type: String },
     facebookIdTemp: { type: String },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

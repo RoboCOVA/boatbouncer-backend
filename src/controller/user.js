@@ -455,3 +455,14 @@ export const addPhoneNumberController = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteUserAccount = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const result = await Users.deleteUserAccount({ userId });
+
+    res.send(result);
+  } catch (error) {
+    next(error);
+  }
+};

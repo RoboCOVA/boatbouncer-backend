@@ -1,9 +1,11 @@
 import express from 'express';
+import { authenticateJwt } from '../controller/authenticate';
 import {
   attachPaymentMethodController,
   changeForgottenPasswordController,
   createStripeAccountController,
   createUserController,
+  deleteUserAccount,
   detachMethodController,
   forgetPasswordController,
   formValidatedController,
@@ -27,12 +29,11 @@ import {
   resetPasswordValidator,
   sendSmsValidator,
   updateMethodValidator,
-  updateUserValidator,
   updateUserProfilePictureValidator,
+  updateUserValidator,
   validateResetOTPValidator,
   verifyUserValidator,
 } from '../validators/user.validators';
-import { authenticateJwt } from '../controller/authenticate';
 
 const router = express.Router();
 
@@ -137,5 +138,7 @@ router.post(
 );
 
 router.get('/current', authenticateJwt, getCurrentUserController);
+
+router.delete('/account', authenticateJwt, deleteUserAccount);
 
 export default router;
