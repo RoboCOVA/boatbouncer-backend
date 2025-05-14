@@ -1,5 +1,5 @@
 import { body, param } from 'express-validator';
-import { strongPasswordRegex } from '../utils/constants';
+import { authProviders, strongPasswordRegex } from '../utils/constants';
 import defaultValidators from './default.validator';
 
 export const createUserValidator = () => [
@@ -128,4 +128,40 @@ export const resetPasswordValidator = () => [
       'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
     ),
   body('encryption').isString().withMessage('Encryption Key required'),
+];
+
+export const setLocalPasswordValidator = () => [
+  body('password')
+    .isString()
+    .isLength({ min: 8, max: 60 })
+    .withMessage(
+      'Password should be at least 8 characters and not greater than 60'
+    )
+    .withMessage((val) => strongPasswordRegex.test(val))
+    .withMessage(
+      'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
+    ),
+];
+
+export const getGoogleAccoutnUserValidator = () => [
+  param('googleId')
+    .isString()
+    .withMessage('googleId must be included in param'),
+];
+export const getFacebookAccoutnUserValidator = () => [
+  param('facebookId')
+    .isString()
+    .withMessage('googleId must be included in param'),
+];
+
+export const addPhoneNumberValidator = () => [
+  body('id').isString().withMessage(' O auth provider is required  '),
+  body('provider')
+    .isString()
+    .isIn([authProviders.FACEBOOK, authProviders.GOOGLE, authProviders.APPLE])
+    .withMessage('Invalid auth provider'),
+  body('recaptchaToken')
+    .isString()
+    .withMessage('Valid recaptchaToken is required'),
+  defaultValidators.phoneNumber,
 ];

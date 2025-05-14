@@ -27,9 +27,9 @@ function calculateActivityBoatPrice(peopleCount, pricing) {
 }
 
 function calculateRentalBoatPrice(period, pricing, type) {
-  if (type === pricingType.PER_DAY && period.days < pricing.minDays)
+  if (type === pricingType.PER_DAY && period.days < pricing?.minDays)
     throw new APIError(
-      `Number of days should be greater than ${pricing.minDays}`,
+      `Number of days should be greater than ${pricing?.minDays}`,
       httpStatus.BAD_REQUEST
     );
   if (type === pricingType.PER_HOUR && period.hours < pricing.minHours)
@@ -52,7 +52,7 @@ function calculateRentalBoatPrice(period, pricing, type) {
 
   const applicableDiscount = sortedDiscounts.find((discount) => {
     if (type === pricingType.PER_DAY)
-      return period.days >= discount.minDaysForDiscount;
+      return period.days >= discount?.minDaysForDiscount;
     if (type === pricingType.PER_HOUR)
       return period.hours >= discount.minHoursForDiscount;
     return period.days >= discount.minDaysForDiscount;

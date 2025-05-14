@@ -7,6 +7,14 @@ export const userNotFound = new APIError(
   httpStatus.NOT_FOUND,
   true
 );
+export const AuthProviderError = (provider) =>
+  new APIError(
+    `Current auth provider does not include Local,email login not activated use one of ${provider.join(
+      ','
+    )} , `,
+    httpStatus.UNAUTHORIZED,
+    true
+  );
 export const userAlreadyVerified = new APIError(
   'User is already verified!',
   httpStatus.NOT_FOUND,

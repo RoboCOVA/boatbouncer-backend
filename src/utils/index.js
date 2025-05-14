@@ -185,3 +185,13 @@ export function addHoursToDate(originalDate, hoursToAdd) {
   newDate.setTime(newDate.getTime() + millisecondsToAdd);
   return newDate;
 }
+
+export const generateUserNameFromEmail = (email) => {
+  const emailUsername = email.split('@')[0];
+  const randomBytes = crypto.randomBytes(2).toString('hex');
+  return `${emailUsername}.${randomBytes}`;
+};
+
+export const generateRandomOAuthId = () => {
+  return Date.now();
+};

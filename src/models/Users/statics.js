@@ -22,6 +22,7 @@ import {
   existingStripCustomerNotFound,
   chargeEnableUpdateFailed,
   userNotVerified,
+  AuthProviderError,
 } from './errors';
 import {
   stripeFailedUrl,
@@ -29,6 +30,7 @@ import {
   stripeSuccessUrl,
 } from '../../config/environments';
 import { modelNames } from '../constants';
+import { authProviders } from '../../utils/constants';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -80,6 +82,7 @@ export async function verifyUser({
   const user = await this.findOne(matchQuery);
 
   if (!user) throw userNotFound;
+  console.lg({ user });
   if (user?.verified && !encryption) throw userAlreadyVerified;
   if (!user?.session)
     throw new APIError('Session not found', httpStatus.BAD_REQUEST);
@@ -107,7 +110,12 @@ export async function verifyUser({
   await Otp.findOneAndRemove({ phoneNumber });
 
   if (!verifiedUser) throw updateFailed;
-  return verifiedUser;
+
+  const cleanUser = verifiedUser.clean();
+  const token = generateJwtToken(user._id, cleanUser);
+  cleanUser.token = token;
+  console.log({ cleanUser, verifiedUser });
+  return cleanUser;
 }
 
 /**
@@ -170,7 +178,9 @@ export async function authenticateUser(email, password) {
   if (!user) {
     throw doesntMatchError;
   }
-
+  if (!user.authProviders.includes(authProviders.LOCAL)) {
+    throw AuthProviderError(user.authProviders);
+  }
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (passwordMatch) {
     const cleanUser = user.clean();
@@ -183,12 +193,69 @@ export async function authenticateUser(email, password) {
   throw doesntMatchError;
 }
 
+export async function clearTempOAuthId(userId, tempFieldName) {
+  await this.findOneAndUpdate(
+    { _id: userId },
+    { $unset: { [tempFieldName]: 1 } }
+  );
+}
+
+async function authenticateUserByOAuth(tempFieldName, tempFieldValue) {
+  const query = { [tempFieldName]: tempFieldValue };
+  const user = await this.findOne(query).exec();
+
+  if (!user) {
+    throw userNotFound;
+  }
+
+  const cleanUser = user.clean();
+  const token = generateJwtToken(user._id, cleanUser);
+  clearTempOAuthId.call(this, user._id, tempFieldName);
+
+  cleanUser.token = token;
+  return cleanUser;
+}
+
+export async function setOAuthId(userId, updateObject) {
+  await this.findOneAndUpdate({ _id: userId }, { $set: updateObject });
+}
+
+export async function authClearTempOAuthId(userId, tempFieldName) {
+  setTimeout(() => {
+    clearTempOAuthId.call(this, userId, tempFieldName);
+  }, 3 * 60 * 1000);
+}
+export async function authenticateUserWithGoogle(googleIdTemp) {
+  return authenticateUserByOAuth.call(this, 'googleIdTemp', googleIdTemp);
+}
+
+export async function authenticateUserWithFacebook(facebookIdTemp) {
+  return authenticateUserByOAuth.call(this, 'facebookIdTemp', facebookIdTemp);
+}
+
+export async function authenticateUserWithApple(facebookIdTemp) {
+  return authenticateUserByOAuth.call(this, 'facebookIdTemp', facebookIdTemp);
+}
+
 export async function getUserById({ userId }) {
   const user = await this.findOne({ _id: userId });
   if (!user) throw userNotFound;
 
   const clean = await user.clean();
   return clean;
+}
+export async function getUserByEmail(email) {
+  return this.findOne({ email });
+}
+
+export async function getUserByGoogleId(googleId) {
+  return this.findOne({ googleId });
+}
+export async function getUserByAppleId(appleId) {
+  return this.findOne({ appleId });
+}
+export async function getUserByFacebookId(facebookId) {
+  return this.findOne({ facebookId });
 }
 
 export async function getCurrentUser({ userId }) {
@@ -379,7 +446,7 @@ export async function changeForgottenPassword({ newPassword, encryption }) {
 
   const { _id, phoneNumber } = parsedData || {};
 
-  const user = this.findOne({ _id, phoneNumber });
+  const user = await this.findOne({ _id, phoneNumber });
   if (!user) throw userNotFound;
 
   const hashedPassword = await generateHashedPassword(newPassword);
@@ -393,4 +460,36 @@ export async function changeForgottenPassword({ newPassword, encryption }) {
 
   await updatePassword.clean();
   return updatePassword;
+}
+
+export async function setLocalPassword({ password, userId }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+  const hashedPassword = await generateHashedPassword(password);
+  console.log({ user });
+  const updatePassword = await this.findOneAndUpdate(
+    { _id: userId },
+    {
+      password: hashedPassword,
+      authProviders: [...user.authProviders, authProviders.LOCAL],
+    }
+  );
+
+  if (!updatePassword) throw updateFailed;
+  await updatePassword.clean();
+  return updatePassword;
+}
+export async function addPhoneNumber({ phoneNumber, userId }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user) throw userNotFound;
+  const userUpdated = await this.findOneAndUpdate(
+    { _id: userId },
+    {
+      phoneNumber,
+    }
+  );
+
+  if (!userUpdated) throw updateFailed;
+  await userUpdated.clean();
+  return userUpdated;
 }
