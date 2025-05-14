@@ -179,6 +179,13 @@ export function emailToUsername(email) {
   return email.split('@')[0];
 }
 
+export function addHoursToDate(originalDate, hoursToAdd) {
+  const newDate = new Date(originalDate);
+  const millisecondsToAdd = hoursToAdd * 60 * 60 * 1000;
+  newDate.setTime(newDate.getTime() + millisecondsToAdd);
+  return newDate;
+}
+
 export const generateUserNameFromEmail = (email) => {
   const emailUsername = email.split('@')[0];
   const randomBytes = crypto.randomBytes(2).toString('hex');

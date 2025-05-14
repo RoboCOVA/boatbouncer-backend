@@ -36,6 +36,7 @@ const locationSchema = new Schema(
 const cancelationSchema = {
   refund: { type: Number },
   priorHours: { type: Number },
+  _id: false,
 };
 const baseBoatFieldsSchema = {
   boatName: { type: String, required: true },
@@ -56,10 +57,24 @@ const baseBoatFieldsSchema = {
 };
 
 const activityBoatFields = {
-  activityType: {
-    type: [String],
-    enum: boatActivityTypeEnum,
+  activityTypes: {
+    type: [
+      {
+        type: {
+          type: String,
+          enum: boatActivityTypeEnum,
+          required: true,
+        },
+        durationHours: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+      },
+    ],
     required: false,
+    default: undefined,
+    _id: false,
   },
 };
 const combinedPricingSchema = new Schema(

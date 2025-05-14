@@ -5,16 +5,17 @@ import Bookings from '../models/Bookings';
 import Users from '../models/Users';
 import { boatListTypes, bookingStatus, pricingType } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
+import { addHoursToDate } from '../utils';
 
 function calculateActivityBoatPrice(peopleCount, pricing) {
-  const price = pricing.perPerson;
+  const price = pricing.perPerson * peopleCount;
   let renterPrice = price;
   let discountPercentage = 0;
-  const sortedDiscounts = pricing.discountPercentage.sort(
+  const sortedDiscounts = pricing.discountPercentage?.sort(
     (a, b) => b.minPeople - a.minPeople
   );
 
-  const applicableDiscount = sortedDiscounts.find(
+  const applicableDiscount = sortedDiscounts?.find(
     (discount) => peopleCount >= discount.minPeople
   );
   if (applicableDiscount) {
@@ -36,7 +37,11 @@ function calculateRentalBoatPrice(period, pricing, type) {
       `Number of hours should be greater than ${pricing.minHours}`,
       httpStatus.BAD_REQUEST
     );
-  const price = type === pricingType.PER_DAY ? pricing.perDay : pricing.perHour;
+
+  const price =
+    type === pricingType.PER_DAY
+      ? pricing.perDay * period.days
+      : pricing.perHour * period.hours;
   let renterPrice = price;
   let discountPercentage = 0;
 
@@ -104,6 +109,10 @@ export const createBookingController = async (req, res, next) => {
           );
         boakingParam.hours = hours;
         boakingParam.days = 0;
+        boakingParam.duration = {
+          ...duration,
+          end: addHoursToDate(duration.start, hours),
+        };
       }
 
       if (type === pricingType.PER_DAY) {
@@ -115,6 +124,10 @@ export const createBookingController = async (req, res, next) => {
 
         boakingParam.days = days;
         boakingParam.hours = 0;
+        boakingParam.duration = {
+          ...duration,
+          end: addHoursToDate(duration.start, days * 24),
+        };
       }
 
       boakingParam = {
@@ -122,6 +135,7 @@ export const createBookingController = async (req, res, next) => {
         ...calculateRentalBoatPrice({ hours, days }, boat.pricing, type),
       };
     }
+
     if (listingType === boatListTypes.ACTIVITY) {
       const isTypeValid = [pricingType.PER_PERSON].includes(type);
       if (!isTypeValid)
@@ -145,6 +159,18 @@ export const createBookingController = async (req, res, next) => {
       }
       boakingParam.noPeople = noPeople;
       boakingParam.activityType = activityType;
+      const selectedAactivityType = boat?.activityTypes.find(
+        ({ type: fechtecType }) => fechtecType === activityType
+      );
+      if (selectedAactivityType) {
+        boakingParam.duration = {
+          ...duration,
+          end: addHoursToDate(
+            duration.start,
+            selectedAactivityType.durationHours
+          ),
+        };
+      }
       boakingParam = {
         ...boakingParam,
         ...calculateActivityBoatPrice(noPeople, boat.pricing),
@@ -160,7 +186,6 @@ export const createBookingController = async (req, res, next) => {
     });
 
     const savedReservation = await booking.createBooking();
-
     const ownerPhoneNumber = owner.phoneNumber;
 
     const requesterFirstName = req?.user?.firstName ?? '';

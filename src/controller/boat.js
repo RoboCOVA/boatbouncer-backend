@@ -19,7 +19,6 @@ export const createBoatController = async (req, res, next) => {
     const parsedLocation = latLng ? coordinateObjToGeoJson(latLng) : undefined;
 
     const hasPaymentMethod = await Users.hasPaymentMethod({ userId });
-
     const newBoat = new Boats({
       ...req.body,
       latLng: parsedLocation,
@@ -56,6 +55,7 @@ export const getBoatsController = async (req, res, next) => {
       maxPrice,
       startDate,
       endDate,
+      radius = 50,
     } = req.query || {};
 
     const filter = {};
@@ -65,6 +65,7 @@ export const getBoatsController = async (req, res, next) => {
     if (minPrice) filter.minPrice = minPrice;
     if (maxPrice) filter.maxPrice = maxPrice;
     if (boatName) filter.boatName = boatName;
+    if (radius) filter.radius = radius;
     if (status) {
       filter.status = status;
     } else {
@@ -204,6 +205,7 @@ export const getBoatTypes = (req, res, next) => {
     next(error);
   }
 };
+
 export const getBoatActivties = (req, res, next) => {
   try {
     res.send({ boatActivityTypeEnum });
