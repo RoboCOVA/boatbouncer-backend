@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema(
     // email: { type: String, required: true },
     password: { type: String, required: true },
     firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    // lastName: { type: String, required: true },
+    lastName: { type: String },
     phoneNumber: { type: String },
     // phoneNumber: { type: String, required: true },
     verified: { type: Boolean, required: true },
@@ -41,6 +42,7 @@ const userSchema = new mongoose.Schema(
     googleIdTemp: { type: String },
     appleIdTemp: { type: String },
     facebookIdTemp: { type: String },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -1,9 +1,15 @@
-import { startSession } from 'mongoose';
-import httpStatus from 'http-status';
 import bcrypt from 'bcrypt';
+import httpStatus from 'http-status';
+import { startSession } from 'mongoose';
 import Stripe from 'stripe';
+import {
+  stripeFailedUrl,
+  stripeSecretKey,
+  stripeSuccessUrl,
+} from '../../config/environments';
 import { identityToolkit } from '../../config/googleApis';
 import APIError from '../../errors/APIError';
+import AppError from '../../errors/APPError';
 import {
   comparePassword,
   decryptData,
@@ -11,26 +17,25 @@ import {
   generateHashedPassword,
   generateJwtToken,
 } from '../../utils';
+import { authProviders, boatStatus } from '../../utils/constants';
+import Boats from '../Boats';
+import Bookings from '../Bookings';
+import { modelNames } from '../constants';
 import {
+  AuthProviderError,
+  chargeEnableUpdateFailed,
+  deleteFailed,
+  doesntMatchError,
   emailAlreadyUsed,
+  existingStripCustomerNotFound,
   passwordDontMatch,
   phoneNumberAlreadyUsed,
   updateFailed,
   userAlreadyVerified,
+  userHasPeningBookings,
   userNotFound,
-  doesntMatchError,
-  existingStripCustomerNotFound,
-  chargeEnableUpdateFailed,
   userNotVerified,
-  AuthProviderError,
 } from './errors';
-import {
-  stripeFailedUrl,
-  stripeSecretKey,
-  stripeSuccessUrl,
-} from '../../config/environments';
-import { modelNames } from '../constants';
-import { authProviders } from '../../utils/constants';
 
 const stripe = new Stripe(stripeSecretKey);
 
@@ -86,24 +91,25 @@ export async function verifyUser({
   if (!user?.session)
     throw new APIError('Session not found', httpStatus.BAD_REQUEST);
 
-  await identityToolkit.relyingparty.verifyPhoneNumber({
+  identityToolkit.relyingparty.verifyPhoneNumber({
     code: verificationCode,
     sessionInfo: user?.session,
   });
 
-  if (encryption && user)
-    return encryptData(
-      JSON.stringify({
-        _id: user?._id,
-        phoneNumber,
-      })
-    );
+  // if (encryption && user)
+  //   return encryptData(
+  //     JSON.stringify({
+  //       _id: user?._id,
+  //       phoneNumber,
+  //     })
+  //   );
 
   const verifiedUser = await this.findOneAndUpdate(
     { _id: user?._id },
     {
       verified: true,
-    }
+    },
+    { new: true }
   );
 
   await Otp.findOneAndRemove({ phoneNumber });
@@ -112,9 +118,7 @@ export async function verifyUser({
 
   const cleanUser = verifiedUser.clean();
   const token = generateJwtToken(user._id, cleanUser);
-  cleanUser.token = token;
-  console.log({ cleanUser, verifiedUser });
-  return cleanUser;
+  return { ...cleanUser, token };
 }
 
 /**
@@ -420,6 +424,14 @@ export async function updatePaymentMethod({ userId, methodId, updateObject }) {
 
 export async function forgetPassword({ phoneNumber, recaptchaToken }) {
   const user = await this.findOne({ phoneNumber });
+
+  if (!user.authProviders.includes(authProviders.LOCAL)) {
+    throw new AppError(
+      `Please setup local password first, you are using ${user.authProviders.join(
+        ','
+      )} now`
+    );
+  }
   if (!user) throw userNotFound;
   if (!user?.verified) throw userNotVerified;
 
@@ -465,7 +477,6 @@ export async function setLocalPassword({ password, userId }) {
   const user = await this.findOne({ _id: userId });
   if (!user) throw userNotFound;
   const hashedPassword = await generateHashedPassword(password);
-  console.log({ user });
   const updatePassword = await this.findOneAndUpdate(
     { _id: userId },
     {
@@ -478,17 +489,84 @@ export async function setLocalPassword({ password, userId }) {
   await updatePassword.clean();
   return updatePassword;
 }
+
 export async function addPhoneNumber({ phoneNumber, userId }) {
+  // Check if the phone number is already taken by another user
+  const existingUser = await this.findOne({ phoneNumber });
+  if (existingUser && existingUser._id.toString() !== userId.toString()) {
+    throw phoneNumberAlreadyUsed;
+  }
+
   const user = await this.findOne({ _id: userId });
   if (!user) throw userNotFound;
+
   const userUpdated = await this.findOneAndUpdate(
     { _id: userId },
-    {
-      phoneNumber,
-    }
+    { phoneNumber },
+    { new: true }
   );
 
   if (!userUpdated) throw updateFailed;
   await userUpdated.clean();
   return userUpdated;
+}
+
+export async function deleteUserAccount({ userId }) {
+  const existingUser = await this.findOne({ _id: userId });
+  if (!existingUser) {
+    throw userNotFound;
+  }
+
+  const activeBookings = await Bookings.find({
+    status: 'Pending',
+    renter: userId,
+  });
+  if (activeBookings && activeBookings.length > 0) throw userHasPeningBookings;
+
+  await Boats.updateMany({ owner: userId }, { status: boatStatus.DELETED });
+
+  const deletionSuffix = `_deleted_${Date.now()}_${Math.random()
+    .toString(36)
+    .substring(2, 8)}`;
+
+  const updateFields = {
+    $unset: {
+      session: 1,
+      stripeCustomerId: 1,
+      stripeAccountId: 1,
+    },
+    $set: {
+      verified: false,
+      chargesEnabled: false,
+      isDeleted: true,
+    },
+  };
+
+  if (existingUser.email) {
+    updateFields.$set.email = `${existingUser.email}_${deletionSuffix}`;
+  }
+  if (existingUser.phoneNumber) {
+    updateFields.$set.phoneNumber = `${existingUser.phoneNumber}_${deletionSuffix}`;
+  }
+  if (existingUser.userName) {
+    updateFields.$set.userName = `${existingUser.userName}_${deletionSuffix}`;
+  }
+  if (existingUser.googleId) {
+    updateFields.$set.googleId = `${existingUser.googleId}_${deletionSuffix}`;
+  }
+  if (existingUser.facebookId) {
+    updateFields.$set.facebookId = `${existingUser.facebookId}_${deletionSuffix}`;
+  }
+  if (existingUser.appleId) {
+    updateFields.$set.appleId = `${existingUser.appleId}_${deletionSuffix}`;
+  }
+
+  const userUpdated = await this.findOneAndUpdate(
+    { _id: userId },
+    updateFields,
+    { new: true }
+  );
+
+  if (!userUpdated) throw deleteFailed;
+  return userId;
 }

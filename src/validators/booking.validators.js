@@ -27,6 +27,7 @@ export const createBookingValidator = () => [
     ),
 
   body('duration.end')
+    .optional()
     .custom(customDateValidator)
     .withMessage(
       'Valid end date and time in ISO 8601 format is required (e.g., "2023-05-01T17:00:00Z")'

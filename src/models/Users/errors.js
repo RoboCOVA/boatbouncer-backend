@@ -25,6 +25,17 @@ export const updateFailed = new APIError(
   httpStatus.NOT_FOUND,
   true
 );
+export const deleteFailed = new APIError(
+  'Delete operation failed!',
+  httpStatus.NOT_FOUND,
+  true
+);
+
+export const userHasPeningBookings = new APIError(
+  'User has pendig bookings',
+  httpStatus.NOT_FOUND,
+  true
+);
 
 export const stripeUpdateFailed = new APIError(
   'Failed to create stripe customer Id!',

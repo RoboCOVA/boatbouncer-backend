@@ -50,6 +50,7 @@ const googleStrategy = new GoogleStrategy(
     try {
       let userId = '';
       const userDetails = await getGoogleUserPhone(accessToken);
+
       const googleIdTemp = generateRandomOAuthId();
       const userData = {
         email: profile.emails[0].value,
@@ -80,6 +81,7 @@ const googleStrategy = new GoogleStrategy(
           googleId: profile.id,
         });
       } else {
+        if (!userData.phoneNumber) userData.verified = false;
         const newUser = new Users({
           ...userData,
         });
