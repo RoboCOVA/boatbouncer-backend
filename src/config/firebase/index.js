@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import adminSDK from './bb-adminsdk.json';
+import adminSDK from './firebase-adminsdk.json';
 
 admin.initializeApp({
   credential: admin.credential.cert(adminSDK),

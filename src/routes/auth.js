@@ -21,7 +21,7 @@ import parseValidationResult from '../validators/errors.parser';
 
 const router = express.Router();
 
-router.get('/update', addPhoneNumberValidator(), addPhoneNumberController);
+router.post('/update', addPhoneNumberValidator(), addPhoneNumberController);
 
 router.get('/google', googleLoginController);
 
