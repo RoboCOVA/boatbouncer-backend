@@ -6,7 +6,7 @@ import APIError from '../errors/APIError';
 import Boats from '../models/Boats';
 import Otp from '../models/Otp';
 import Users from '../models/Users';
-import { emailToUsername } from '../utils';
+import { emailToUsername, encryptData } from '../utils';
 import { authProviders } from '../utils/constants';
 
 export const createUserController = async (req, res, next) => {
@@ -437,6 +437,7 @@ export const addPhoneNumberController = async (req, res, next) => {
         httpStatus.NOT_FOUND
       );
     }
+
     await Users.addPhoneNumber({ phoneNumber, userId: userAccount._id });
     const response = await identityToolkit.relyingparty.sendVerificationCode({
       phoneNumber,
@@ -448,7 +449,8 @@ export const addPhoneNumberController = async (req, res, next) => {
       session: response.data.sessionInfo,
     });
 
-    res.send(user);
+    const encryption = encryptData(user?._id?.toString());
+    res.send(encryption);
   } catch (error) {
     next(error);
   }
