@@ -82,7 +82,6 @@ export async function verifyUser({
   const user = await this.findOne(matchQuery);
 
   if (!user) throw userNotFound;
-  console.lg({ user });
   if (user?.verified && !encryption) throw userAlreadyVerified;
   if (!user?.session)
     throw new APIError('Session not found', httpStatus.BAD_REQUEST);
