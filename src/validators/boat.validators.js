@@ -193,6 +193,7 @@ const createRentalBoatValidator = () => [
 
   body('pricing.perDay')
     .isFloat({ min: 0 })
+    .optional()
     .withMessage('Per day price must be a positive number'),
 
   body('pricing.perHour')
@@ -200,18 +201,22 @@ const createRentalBoatValidator = () => [
     .withMessage('Per hour price must be a positive number'),
 
   body('pricing.dayDiscount')
+    .optional()
     .isArray()
     .withMessage('Day discount must be an array of discount objects'),
 
   body('pricing.dayDiscount.*.discountPercentage')
+    .optional()
     .isFloat({ min: 0, max: 100 })
     .withMessage('Each day discount percentage must be between 0-100'),
 
   body('pricing.dayDiscount.*.minDaysForDiscount')
+    .optional()
     .isInt({ min: 1 })
     .withMessage('Each day discount must have at least 2 minimum days'),
 
   body('pricing.minDays')
+    .optional()
     .isInt({ min: 0 })
     .withMessage('Minimum days must be a non-negative integer'),
 
