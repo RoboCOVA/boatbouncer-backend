@@ -33,7 +33,8 @@ export async function createNewUser() {
           phoneNumber,
         });
 
-        if (existingPhoneNumber?.verified) throw phoneNumberAlreadyUsed;
+        if (phoneNumber && existingPhoneNumber?.verified)
+          throw phoneNumberAlreadyUsed;
 
         const hashedPassword = await generateHashedPassword(password);
 
