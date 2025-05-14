@@ -489,7 +489,7 @@ export async function addPhoneNumber({ phoneNumber, userId }) {
   // Check if the phone number is already taken by another user
   const existingUser = await this.findOne({ phoneNumber });
   if (existingUser && existingUser._id.toString() !== userId.toString()) {
-    throw new AppError('Phone number is already in use by another account');
+    throw phoneNumberAlreadyUsed;
   }
 
   const user = await this.findOne({ _id: userId });
