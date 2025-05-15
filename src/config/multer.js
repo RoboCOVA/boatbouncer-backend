@@ -5,7 +5,7 @@ import { uploadImageSizeLimitInMB } from './environments';
 const getResourceBasedMaxUploadFileLimit = (resource) => {
   switch (resource) {
     case publicResources.BOAT:
-      return 6;
+      return 20;
     default:
       return 1;
   }
