@@ -5,6 +5,7 @@ import { components } from '../components/components';
 export const UsersResource = {
   resource: Users,
   options: {
+    id: 'User',
     properties: {
       newPassword: {
         type: 'custom',

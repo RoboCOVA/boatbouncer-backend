@@ -1,5 +1,3 @@
-import { categoriesEnum, subCategoriesEnum } from '../../../models/constants';
-import { boatFeaturesEnum } from '../../../utils/constants';
 import { components } from '../components/components';
 import Boats from '../../../models/Boats';
 
@@ -12,6 +10,23 @@ export const BoatsResource = {
       },
       amenities: {
         type: 'array',
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: false,
+        },
+      },
+      'location.address': {
+        label: 'Address',
+        isVisible: {
+          list: true,
+          edit: true,
+          show: true,
+          filter: false,
+        },
+      },
+      location: {
         isVisible: {
           list: false,
           edit: true,
@@ -55,6 +70,14 @@ export const BoatsResource = {
           filter: false,
         },
       },
+      latLng: {
+        isVisible: {
+          list: false,
+          edit: true,
+          show: true,
+          filter: false,
+        },
+      },
       'latLng.type': {
         isVisible: {
           list: false,
@@ -86,30 +109,6 @@ export const BoatsResource = {
           show: components.StatusButton,
         },
       },
-      category: {
-        isVisible: {
-          list: false,
-          edit: true,
-          show: true,
-          filter: false,
-        },
-        availableValues: Object.entries(categoriesEnum).map(([, value]) => ({
-          value,
-          label: value,
-        })),
-      },
-      subCategory: {
-        isVisible: {
-          list: false,
-          edit: true,
-          show: true,
-          filter: false,
-        },
-        availableValues: Object.entries(subCategoriesEnum).map(([, value]) => ({
-          value,
-          label: value,
-        })),
-      },
       currency: {
         isVisible: {
           list: false,
@@ -140,14 +139,6 @@ export const BoatsResource = {
           list: false,
           edit: true,
           show: true,
-        },
-      },
-      captained: {
-        isVisible: {
-          list: false,
-          edit: true,
-          show: true,
-          filter: false,
         },
       },
       createdAt: {
