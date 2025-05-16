@@ -204,14 +204,20 @@ const Statistics = () => {
             </TableBody>
           </Table>
 
-          <Text py="xl" textAlign="center">
-            <Pagination
-              total={response.metadata[0].total}
-              page={page}
-              perPage={10}
-              onChange={(item) => setPage(item)}
-            />
-          </Text>
+          {response.metadata[0]?.total ? (
+            <Text py="xl" textAlign="center">
+              <Pagination
+                total={response.metadata[0].total}
+                page={page}
+                perPage={10}
+                onChange={(item) => setPage(item)}
+              />
+            </Text>
+          ) : (
+            <Text py="xl" textAlign="center">
+              There are no bookings records
+            </Text>
+          )}
         </Box>
       )}
     </Box>

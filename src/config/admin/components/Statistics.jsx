@@ -169,18 +169,21 @@ const Statistics = () => {
                     </p>
                     <p>
                       <strong>Pricing:</strong>
-                      <ul style="padding-left: 20px;">
                         ${
-                          prices[0]
-                            ? `<li>${prices[0].type}: ${prices[0].value} ${currency}</li>`
+                          prices?.perHour
+                            ? `<span>${currency} ${prices?.perHour}/hr</span>`
                             : ''
                         }
+                       ${
+                         prices?.perDay
+                           ? `<span>${currency} ${prices?.perDay}/day</span>`
+                           : ''
+                       }
                         ${
-                          prices[1]
-                            ? `<li>${prices[1].type}: ${prices[1].value} ${currency}</li>`
+                          prices?.perPerson
+                            ? `<span>${currency} ${prices?.perPerson}/person</span>`
                             : ''
                         }
-                      </ul>
                     </p>
                   </div>
                 `
