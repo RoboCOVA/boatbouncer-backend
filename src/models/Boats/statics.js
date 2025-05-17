@@ -41,11 +41,6 @@ export async function getBoats({ pageNo, size, filter }) {
 
   /** Temporarily disabled filters */
   match.searchable = true;
-  if (boatName) match.boatName = { $regex: boatName.trim(), $options: 'i' };
-  if (city) match['location.city'] = { $regex: city.trim(), $options: 'i' };
-  if (state) match['location.state'] = { $regex: state.trim(), $options: 'i' };
-  if (address)
-    match['location.address'] = { $regex: address.trim(), $options: 'i' };
   /** Temporarily disabled filters */
 
   match.status = { $regex: 'active', $options: 'i' };
@@ -164,6 +159,13 @@ export async function getBoats({ pageNo, size, filter }) {
         $box: boundingBox,
       },
     };
+  } else {
+    if (boatName) match.boatName = { $regex: boatName.trim(), $options: 'i' };
+    if (city) match['location.city'] = { $regex: city.trim(), $options: 'i' };
+    if (state)
+      match['location.state'] = { $regex: state.trim(), $options: 'i' };
+    if (address)
+      match['location.address'] = { $regex: address.trim(), $options: 'i' };
   }
 
   const aggregationQuery = [
