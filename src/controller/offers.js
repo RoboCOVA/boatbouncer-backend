@@ -3,6 +3,7 @@ import { bookingStatus } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
 import Bookings from '../models/Bookings';
 import Users from '../models/Users';
+import { formatDuration } from '../utils';
 
 export const createOfferController = async (req, res, next) => {
   try {
@@ -49,6 +50,10 @@ export const createOfferController = async (req, res, next) => {
     sendMessage(renterPhoneNumber, 'offerSent', {
       ownerFirstName,
       ownerLastName,
+      boatName: booking?.boatId?.boatName,
+      duration: formatDuration(booking.duration),
+      departureTime: new Date(departureDate).toLocaleTimeString(),
+      bookingId: booking._id.toString(),
     });
 
     res.send(savedOffer);
@@ -109,6 +114,10 @@ export const acceptOfferController = async (req, res, next) => {
     sendMessage(phoneNumber, 'offerAccepted', {
       firstName,
       lastName,
+      boatName: booking?.boatId?.boatName,
+      duration: formatDuration(booking.duration),
+      departureTime: new Date(offer?.departureDate).toLocaleTimeString(),
+      bookingId: booking._id.toString(),
     });
 
     res.send(accept);
