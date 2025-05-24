@@ -1,7 +1,10 @@
 import Bookings from '../models/Bookings';
 import Offers from '../models/Offers';
-import Users from '../models/Users';
-import { getMinutesDifference } from '../utils';
+import {
+  formatDuration,
+  getMinutesDifference,
+  getRemainingTime,
+} from '../utils';
 import { bookingStatus, offerStatus } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
 
@@ -52,25 +55,46 @@ export const Scheduler = async () => {
 
       const bookIds = notNotifiedOffers.map(({ bookId }) => bookId);
 
-      const bookingDetails = await Bookings.find({ _id: { $in: bookIds } });
+      const bookingDetails = await Bookings.find({ _id: { $in: bookIds } })
+        .populate({
+          path: 'owner',
+          select: 'firstName lastName phoneNumber',
+        })
+        .populate({
+          path: 'renter',
+          select: 'firstName lastName phoneNumber',
+        });
 
-      const renters = bookingDetails.map(({ renter }) => renter);
-      const owners = bookingDetails.map(({ owner }) => owner);
+      bookingDetails.forEach((booking) => {
+        const departureTime = new Date(
+          notNotifiedOffers.find(
+            (offer) => offer.bookId.toString() === booking._id.toString()
+          )?.departureDate
+        );
+        const now = new Date();
+        const remainingMs = departureTime - now;
+        const remainingMinutes = Math.floor(remainingMs / (1000 * 60));
+        const remainingTime = getRemainingTime(remainingMinutes);
 
-      const rentersPhoneNumber = (
-        await Users.find({ _id: { $in: renters } })
-      ).map(({ phoneNumber }) => phoneNumber);
+        // Renter notification
+        sendMessage(booking.renter.phoneNumber, 'notifyRenter', {
+          remainingTime,
+          ownerFirstName: booking.owner.firstName,
+          ownerLastName: booking.owner.lastName,
+          departureTime: departureTime.toLocaleTimeString(),
+          duration: formatDuration(booking.duration),
+          bookingId: booking._id.toString(),
+        });
 
-      const ownersPhoneNumber = (
-        await Users.find({ _id: { $in: owners } })
-      ).map(({ phoneNumber }) => phoneNumber);
-
-      rentersPhoneNumber.forEach((number) => {
-        sendMessage(number, 'notifyRenter');
-      });
-
-      ownersPhoneNumber.forEach((number) => {
-        sendMessage(number, 'notifyOwner');
+        // Owner notification
+        sendMessage(booking.owner.phoneNumber, 'notifyOwner', {
+          remainingTime,
+          renterFirstName: booking.renter.firstName,
+          renterLastName: booking.renter.lastName,
+          departureTime: departureTime.toLocaleTimeString(),
+          duration: formatDuration(booking.duration),
+          bookingId: booking._id.toString(),
+        });
       });
 
       await Offers.updateMany(

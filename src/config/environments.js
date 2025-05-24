@@ -46,6 +46,8 @@ const envSchema = Joi.object({
   FACEBOOK_APP_ID: Joi.string().required(),
   FACEBOOK_APP_SECRET: Joi.string().required(),
   FACEBOOK_CALLBACK_URL: Joi.string().required(),
+
+  FRONTEND_URL: Joi.string().required(),
 })
   .unknown()
   .required();
@@ -91,3 +93,5 @@ export const googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL;
 export const facebookAppId = process.env.FACEBOOK_APP_ID;
 export const facebookAppSecret = process.env.FACEBOOK_APP_SECRET;
 export const facebookCallbackUrl = process.env.FACEBOOK_CALLBACK_URL;
+
+export const frontendUrl = process.env.FRONTEND_URL;
