@@ -91,8 +91,8 @@ export const Scheduler = async () => {
           remainingTime,
           renterFirstName: booking.renter.firstName,
           renterLastName: booking.renter.lastName,
-          departureTime: departureTime.toLocaleTimeString(),
           duration: formatDuration(booking.duration),
+          departureTime: departureTime.toLocaleTimeString(),
           bookingId: booking._id.toString(),
         });
       });

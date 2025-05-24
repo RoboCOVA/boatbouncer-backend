@@ -9,12 +9,36 @@ import {
 const client = twilio(twilioAccountSid, twilioAuthToken);
 
 const SMSTemplates = {
-  bookingRequest: `<requesterFirstName> <requesterLastName> is requesting a booking on BoatBouncer. Please visit boatbouncer.com to view your view bookings. \n ${frontendUrl}/`,
-  offerSent: `An offer has been sent to you by <ownerFirstName> <ownerLastName>. Please check out on our website. \n ${frontendUrl}/`,
-  offerAccepted: `You offer has been accepted by <firstName> <lastName> \n ${frontendUrl}/`,
-  bookingCancellation: `<firstName> <lastName> has cancelled Booking request. \n ${frontendUrl}/`,
+  bookingRequest:
+    `<requesterFirstName> <requesterLastName> is requesting a booking on BoatBouncer.\n` +
+    `Boat: <boatName>\n` +
+    `Duration: <duration>\n\n` +
+    `Please visit to view your bookings.\n` +
+    `${frontendUrl}/bookings?bookingId=<bookingId>&type=owner`,
+
+  offerSent:
+    `An offer has been sent to you by <ownerFirstName> <ownerLastName>.\n` +
+    `Boat: <boatName>\n` +
+    `Duration: <duration>\n` +
+    `Departure: <departureTime>\n\n` +
+    `Please check out on our website.\n` +
+    `${frontendUrl}/bookings?bookingId=<bookingId>&type=renter`,
+
+  offerAccepted:
+    `Your offer has been accepted by <firstName> <lastName>.\n` +
+    `Boat: <boatName>\n` +
+    `Duration: <duration>\n` +
+    `Departure: <departureTime>\n\n` +
+    `View booking details:\n` +
+    `${frontendUrl}/bookings?bookingId=<bookingId>&type=owner`,
+
+  // offerAccepted: `You offer has been accepted by <firstName> <lastName> \n ${frontendUrl}/`,
+  bookingCancellation:
+    `<firstName> <lastName> has cancelled Booking request.\n` +
+    `Boat: <boatName>\n`,
+
   notifyRenter:
-    `Reminder: Your departure is in <remainingTime>.\n` +
+    `Reminder: Your depart  ure is in <remainingTime>.\n` +
     `Boat Owner: <ownerFirstName> <ownerLastName>\n` +
     `Departure Time: <departureTime>\n` +
     `Duration: <duration>\n\n` +
