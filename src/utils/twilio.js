@@ -38,7 +38,7 @@ const SMSTemplates = {
     `Boat: <boatName>\n`,
 
   notifyRenter:
-    `Reminder: Your depart  ure is in <remainingTime>.\n` +
+    `Reminder: Your departure is in <remainingTime>.\n` +
     `Boat Owner: <ownerFirstName> <ownerLastName>\n` +
     `Departure Time: <departureTime>\n` +
     `Duration: <duration>\n\n` +
