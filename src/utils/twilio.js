@@ -1,6 +1,7 @@
 import twilio from 'twilio';
 import {
   fromPhoneNumber,
+  frontendUrl,
   twilioAccountSid,
   twilioAuthToken,
 } from '../config/environments';
@@ -9,17 +10,48 @@ const client = twilio(twilioAccountSid, twilioAuthToken);
 
 const SMSTemplates = {
   bookingRequest:
-    '<requesterFirstName> <requesterLastName> is requesting a booking on BoatBouncer. Please visit boatbouncer.com to view your view bookings. \n https://boatbouncer.com/',
+    `<requesterFirstName> <requesterLastName> is requesting a booking on BoatBouncer.\n` +
+    `Boat: <boatName>\n` +
+    `Duration: <duration>\n\n` +
+    `Please visit to view your bookings.\n` +
+    `${frontendUrl}/bookings?bookingId=<bookingId>&type=owner`,
+
   offerSent:
-    'An offer has been sent to you by <ownerFirstName> <ownerLastName>. Please check out on our website. \n https://boatbouncer.com/',
+    `An offer has been sent to you by <ownerFirstName> <ownerLastName>.\n` +
+    `Boat: <boatName>\n` +
+    `Duration: <duration>\n` +
+    `Departure: <departureTime>\n\n` +
+    `Please check out on our website.\n` +
+    `${frontendUrl}/bookings?bookingId=<bookingId>&type=renter`,
+
   offerAccepted:
-    'You offer has been accepted by <firstName> <lastName> \n https://boatbouncer.com/',
+    `Your offer has been accepted by <firstName> <lastName>.\n` +
+    `Boat: <boatName>\n` +
+    `Duration: <duration>\n` +
+    `Departure: <departureTime>\n\n` +
+    `View booking details:\n` +
+    `${frontendUrl}/bookings?bookingId=<bookingId>&type=owner`,
+
+  // offerAccepted: `You offer has been accepted by <firstName> <lastName> \n ${frontendUrl}/`,
   bookingCancellation:
-    '<firstName> <lastName> has cancelled Booking request. \n https://boatbouncer.com/',
+    `<firstName> <lastName> has cancelled Booking request.\n` +
+    `Boat: <boatName>\n`,
+
   notifyRenter:
-    'Reminder: Your departure is in an hour. Please make sure all belongings are packed and the property is left in good condition. Safe travels!',
+    `Reminder: Your departure is in <remainingTime>.\n` +
+    `Boat Owner: <ownerFirstName> <ownerLastName>\n` +
+    `Departure Time: <departureTime>\n` +
+    `Duration: <duration>\n\n` +
+    `Please make sure all belongings are packed and the property is left in good condition. Safe travels!\n` +
+    `${frontendUrl}/bookings?bookingId=<bookingId>&type=renter`,
+
   notifyOwner:
-    'Notice: The renter will be departing in an hour. Please prepare for their departure and ensure the property is ready for the next steps.',
+    `Notice: The renter will be departing in <remainingTime>.\n` +
+    `Renter: <renterFirstName> <renterLastName>\n` +
+    `Departure Time: <departureTime>\n` +
+    `Duration: <duration>\n\n` +
+    `Please prepare for their departure and ensure the property is ready for the next steps.\n` +
+    `${frontendUrl}/bookings?bookingId=<bookingId>&type=owner`,
 };
 
 function fillTemplate(template, values) {

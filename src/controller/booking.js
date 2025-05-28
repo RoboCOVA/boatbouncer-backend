@@ -5,7 +5,7 @@ import Bookings from '../models/Bookings';
 import Users from '../models/Users';
 import { boatListTypes, bookingStatus, pricingType } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
-import { addHoursToDate } from '../utils';
+import { addHoursToDate, formatDuration } from '../utils';
 
 function calculateActivityBoatPrice(peopleCount, pricing) {
   const price = pricing.perPerson * peopleCount;
@@ -87,6 +87,7 @@ export const createBookingController = async (req, res, next) => {
       renter: id,
       status: bookingStatus.PENDING,
     };
+    boakingParam.duration.start = new Date(duration.start);
 
     const boat = await Boats.getBoat({ boatId });
     if (!boat) throw new 'Boat not found'();
@@ -190,10 +191,12 @@ export const createBookingController = async (req, res, next) => {
 
     const requesterFirstName = req?.user?.firstName ?? '';
     const requesterLastName = req?.user?.lastName ?? '';
-
     sendMessage(ownerPhoneNumber, 'bookingRequest', {
       requesterFirstName,
       requesterLastName,
+      boatName: boat.boatName,
+      duration: formatDuration(boakingParam.duration),
+      bookingId: booking._id.toString(),
     });
 
     res.send(savedReservation);
@@ -248,6 +251,7 @@ export const cancelBookingController = async (req, res, next) => {
     sendMessage(phoneNumber, 'bookingCancellation', {
       firstName,
       lastName,
+      boatName: booking?.boatId?.boatName,
     });
 
     res.send(cancelledBooking);

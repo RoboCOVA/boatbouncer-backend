@@ -195,3 +195,48 @@ export const generateUserNameFromEmail = (email) => {
 export const generateRandomOAuthId = () => {
   return Date.now();
 };
+
+export function formatDuration(durationObj) {
+  console.log({ durationObj });
+  const durationMs = durationObj.end - durationObj.start;
+  const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+
+  if (durationHours >= 24) {
+    const days = Math.floor(durationHours / 24);
+    const hours = durationHours % 24;
+    return `${days} day${days !== 1 ? 's' : ''}`.concat(
+      hours > 0 ? ` ${hours} hour${hours !== 1 ? 's' : ''}` : ''
+    );
+  }
+  return `${durationHours} hour${durationHours !== 1 ? 's' : ''}`;
+}
+
+export function getRemainingTime(departureTime) {
+  // Convert to Date object if it's not already
+  const departureDate = new Date(departureTime);
+  const now = new Date();
+
+  // Calculate remaining time in milliseconds
+  const remainingMs = departureDate - now;
+  let remainingTime = '';
+  if (remainingMs <= 0) remainingTime = 'an hour';
+
+  // Convert to minutes
+  const remainingMinutes = Math.floor(remainingMs / (1000 * 60));
+
+  // Format the remaining time
+  if (remainingMinutes < 60) {
+    remainingTime = `${remainingMinutes} minute${
+      remainingMinutes !== 1 ? 's' : ''
+    }`;
+  } else {
+    const hours = Math.floor(remainingMinutes / 60);
+    const mins = remainingMinutes % 60;
+    let result = `${hours} hour${hours !== 1 ? 's' : ''}`;
+    if (mins > 0) {
+      result += ` ${mins} minute${mins !== 1 ? 's' : ''}`;
+    }
+    remainingTime = result;
+  }
+  return remainingTime;
+}
