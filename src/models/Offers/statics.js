@@ -47,7 +47,7 @@ export async function acceptOffer({ offerId, userId }) {
 
         /** @EXISTING_CHECK */
         const user = await Users.findOne({ _id: userId });
-        if (!user) throw userNotFound;
+        if (!user || user.isDeleted) throw userNotFound;
 
         const matchQuery = {
           _id: offerId,
@@ -100,7 +100,7 @@ export async function getOffer({ offerId, userId }) {
 
   /** @EXISTING_CHECK */
   const user = await Users.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
 
   const matchQuery = {
     _id: offerId,

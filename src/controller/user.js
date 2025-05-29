@@ -298,14 +298,14 @@ export const googleLoginCallbackController = (req, res, next) => {
           )}`
         );
       }
-      if (!user) {
+      if (!user || user.isDeleted) {
         return res.redirect(
           `${environments.oAuthfailureRedict}?error=authentication_failed`
         );
       }
 
       return req.logIn(user, (loginErr) => {
-        if (!user) {
+        if (!user || user.isDeleted) {
           return res.redirect(
             `${environments.oAuthfailureRedict}?error=${encodeURIComponent(
               'user not found'
@@ -356,14 +356,14 @@ export const facebookLoginCallbackController = (req, res, next) => {
           )}`
         );
       }
-      if (!user) {
+      if (!user || user.isDeleted) {
         return res.redirect(
           `${environments.oAuthfailureRedict}?error=authentication_failed`
         );
       }
 
       return req.logIn(user, (loginErr) => {
-        if (!user) {
+        if (!user || user.isDeleted) {
           return res.redirect(
             `${environments.oAuthfailureRedict}?error=${encodeURIComponent(
               'user not found'

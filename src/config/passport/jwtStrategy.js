@@ -12,11 +12,10 @@ const strategy = new Strategy(
   async (payload, done) => {
     try {
       const user = await Users.findOne({ _id: payload._id });
-
-      if (!user) {
+      if (!user || user.isDeleted) {
         const NotFound = new APIError(
-          'User not found',
-          httpStatus.NOT_FOUND,
+          'Unuathorized',
+          httpStatus.UNAUTHORIZED,
           true
         );
 

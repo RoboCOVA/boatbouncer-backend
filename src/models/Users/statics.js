@@ -53,7 +53,7 @@ export async function saveUserSession({
 }) {
   const user = await this.findOne({ phoneNumber });
 
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
   if (user?.verified && !isForgetPassword) throw userAlreadyVerified;
 
   const sessionSaved = await this.findOneAndUpdate(
@@ -86,7 +86,7 @@ export async function verifyUser({
 
   const user = await this.findOne(matchQuery);
 
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
   if (user?.verified && !encryption) throw userAlreadyVerified;
   if (!user?.session)
     throw new APIError('Session not found', httpStatus.BAD_REQUEST);
@@ -128,7 +128,7 @@ export async function verifyUser({
 export async function updateUser({ matchQuery, updateObject }) {
   const updateQuery = { ...updateObject };
   const user = await this.findOne(matchQuery);
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
 
   if (
     updateObject?.phoneNumber &&
@@ -178,7 +178,7 @@ export async function authenticateUser(email, password) {
   const user = await this.findOne({
     email: { $regex: new RegExp(`^${email}$`, 'i') },
   }).exec();
-  if (!user) {
+  if (!user || user.isDeleted) {
     throw doesntMatchError;
   }
   if (!user.authProviders.includes(authProviders.LOCAL)) {
@@ -207,7 +207,7 @@ async function authenticateUserByOAuth(tempFieldName, tempFieldValue) {
   const query = { [tempFieldName]: tempFieldValue };
   const user = await this.findOne(query).exec();
 
-  if (!user) {
+  if (!user || user.isDeleted) {
     throw userNotFound;
   }
 
@@ -242,7 +242,7 @@ export async function authenticateUserWithApple(facebookIdTemp) {
 
 export async function getUserById({ userId }) {
   const user = await this.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
 
   const clean = await user.clean();
   return clean;
@@ -263,7 +263,7 @@ export async function getUserByFacebookId(facebookId) {
 
 export async function getCurrentUser({ userId }) {
   const user = await this.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
 
   if (user?.stripeAccountId) {
     const decryptedId = decryptData(user.stripeAccountId);
@@ -356,7 +356,7 @@ export async function createStripeAccount({ userId, country = 'US' }) {
 
 export async function attachPaymentMethod({ userId, methodId }) {
   const user = await this.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
   if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
 
   const attachedMethod = await stripe.paymentMethods.attach(methodId, {
@@ -368,7 +368,7 @@ export async function attachPaymentMethod({ userId, methodId }) {
 
 export async function getPaymentMethod({ userId }) {
   const user = await this.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
   if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
 
   const customerPaymentMethods = await stripe.customers.listPaymentMethods(
@@ -384,7 +384,7 @@ export async function getPaymentMethod({ userId }) {
 export async function hasPaymentMethod({ userId }) {
   return true;
   // const user = await this.findOne({ _id: userId });
-  // if (!user) throw userNotFound;
+  // if (!user||user.isDeleted) throw userNotFound;
   // if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
 
   // const customerPaymentMethods = await stripe.customers.listPaymentMethods(
@@ -399,7 +399,7 @@ export async function hasPaymentMethod({ userId }) {
 
 export async function detachPaymentMethod({ userId, methodId }) {
   const user = await this.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
   if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
 
   const detached = await stripe.paymentMethods.detach(methodId);
@@ -408,7 +408,7 @@ export async function detachPaymentMethod({ userId, methodId }) {
 
 export async function updatePaymentMethod({ userId, methodId, updateObject }) {
   const user = await this.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
   if (!user?.stripeCustomerId) throw existingStripCustomerNotFound;
 
   const data = {};
@@ -432,7 +432,7 @@ export async function forgetPassword({ phoneNumber, recaptchaToken }) {
       )} now`
     );
   }
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
   if (!user?.verified) throw userNotVerified;
 
   const encryption = encryptData(user?._id?.toString());
@@ -458,7 +458,7 @@ export async function changeForgottenPassword({ newPassword, encryption }) {
   const { _id, phoneNumber } = parsedData || {};
 
   const user = await this.findOne({ _id, phoneNumber });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
 
   const hashedPassword = await generateHashedPassword(newPassword);
 
@@ -475,7 +475,7 @@ export async function changeForgottenPassword({ newPassword, encryption }) {
 
 export async function setLocalPassword({ password, userId }) {
   const user = await this.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
   const hashedPassword = await generateHashedPassword(password);
   const updatePassword = await this.findOneAndUpdate(
     { _id: userId },
@@ -498,7 +498,7 @@ export async function addPhoneNumber({ phoneNumber, userId }) {
   }
 
   const user = await this.findOne({ _id: userId });
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
 
   const userUpdated = await this.findOneAndUpdate(
     { _id: userId },

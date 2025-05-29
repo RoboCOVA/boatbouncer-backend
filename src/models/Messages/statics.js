@@ -56,7 +56,7 @@ export async function readMessage({ messageId, userId }) {
   const Users = this.model(modelNames.USERS);
 
   const user = await Users.findById(userId);
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
 
   let message = await this.findOne({ _id: messageId });
   if (!message) throw messageNotFound;
@@ -103,7 +103,7 @@ export async function deleteMessage({ messageId, userId }) {
   const Users = this.model(modelNames.USERS);
 
   const user = await Users.findById(userId);
-  if (!user) throw userNotFound;
+  if (!user || user.isDeleted) throw userNotFound;
 
   const message = await this.findOne({ _id: messageId });
   if (!message) throw messageNotFound;

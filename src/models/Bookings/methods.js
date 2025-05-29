@@ -41,7 +41,7 @@ export async function createBooking() {
         if (!isAvailable) throw bookingNotAvailable;
         /** Check if the provided user exists */
         const user = await Users.findOne({ _id: renter });
-        if (!user) throw userNotFound;
+        if (!user || user.isDeleted) throw userNotFound;
 
         if (!boat?.owner) throw userNotFound;
 

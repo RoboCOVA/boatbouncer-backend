@@ -10,7 +10,7 @@ export async function createConversation() {
   await Promise.all(
     members.map(async (_id) => {
       const user = await Users.findOne({ _id });
-      if (!user) exsitingUser = false;
+      if (!user || user.isDeleted) exsitingUser = false;
     })
   );
 
