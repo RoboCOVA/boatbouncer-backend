@@ -19,7 +19,7 @@ export const reservationNotFound = new APIError(
 
 export const authorizationError = new APIError(
   'User not authorized to perform this action!',
-  httpStatus.UNAUTHORIZED
+  httpStatus.FORBIDDEN
 );
 
 export const statusChangeError = new APIError(
