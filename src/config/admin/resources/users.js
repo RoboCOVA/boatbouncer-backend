@@ -3,9 +3,9 @@ import Users from '../../../models/Users';
 import { components } from '../components/components';
 
 export const UsersResource = {
+  id: 'Users',
   resource: Users,
   options: {
-    id: 'User',
     properties: {
       newPassword: {
         type: 'custom',

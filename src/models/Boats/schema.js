@@ -7,6 +7,7 @@ import {
   boatTypeEnum,
   currencyCodeEnum,
 } from '../../utils/constants';
+import { modelNames } from '../constants';
 
 const latLngSchema = new Schema(
   {
@@ -45,7 +46,7 @@ const baseBoatFieldsSchema = {
   location: locationSchema,
   maxPassengers: { type: Number },
   imageUrls: [{ type: String }],
-  owner: { type: Types.ObjectId, ref: 'User', required: true },
+  owner: { type: Types.ObjectId, ref: modelNames.USERS, required: true },
   latLng: latLngSchema,
   searchable: { type: Boolean, default: false },
   status: { type: String, enum: boatStatusEnum },

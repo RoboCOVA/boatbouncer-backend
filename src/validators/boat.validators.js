@@ -465,7 +465,10 @@ const updateRentalBoatValidator = () => [
     .isLength({ max: 100 })
     .withMessage('Model must be less than 100 characters'),
 
-  body('pricing').isObject().withMessage('Pricing must be an object'),
+  body('pricing')
+    .optional()
+    .isObject()
+    .withMessage('Pricing must be an object'),
 
   body('pricing.perDay')
     .optional()
@@ -526,7 +529,7 @@ export const updateBoatValidator = () => [
     .isString()
     .withMessage('listingType must be a string')
     .isIn(['rental', 'activity'])
-    .withMessage('Ulisting Type  must be either "rental" or "activity"'),
+    .withMessage('llisting Type  must be either "rental" or "activity"'),
 
   body('status').isString().isIn(boatStatusEnum).optional(),
 

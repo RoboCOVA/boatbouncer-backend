@@ -44,9 +44,14 @@ export async function uploadAndSaveUrl({ files, userId }) {
 
           // eslint-disable-next-line no-await-in-loop
           const savedEntry = await tempUploadEntry.save();
+          const optimizedSecureUrl = savedEntry.secureUrl.replace(
+            '/upload/',
+            '/upload/f_auto,q_auto/'
+          );
+
           uploadedFiles.push({
             url: savedEntry?.url,
-            secureUrl: savedEntry.secureUrl,
+            secureUrl: optimizedSecureUrl, // ✅ this is now optimized for browser
           });
         }
       } catch (error) {
