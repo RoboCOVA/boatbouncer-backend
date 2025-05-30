@@ -425,6 +425,8 @@ export async function updatePaymentMethod({ userId, methodId, updateObject }) {
 export async function forgetPassword({ phoneNumber, recaptchaToken }) {
   const user = await this.findOne({ phoneNumber });
 
+  if (!user || user.isDeleted) throw userNotFound;
+
   if (!user.authProviders.includes(authProviders.LOCAL)) {
     throw new AppError(
       `Please setup local password first, you are using ${user.authProviders.join(

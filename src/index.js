@@ -74,15 +74,19 @@ const start = async () => {
         addUser(userId, socket.id);
       });
 
-      socket.on(socketConstant.SEND_MESSAGE, ({ senderId, reciverId, msg }) => {
-        const user = getUser(reciverId);
-        if (user) {
-          io.to(user.socketId).emit(socketConstant.GET_MESSAGE, {
-            senderId,
-            msg,
-          });
+      socket.on(
+        socketConstant.SEND_MESSAGE,
+        ({ senderId, reciverId, msg, conversationId }) => {
+          const user = getUser(reciverId);
+          if (user) {
+            io.to(user.socketId).emit(socketConstant.GET_MESSAGE, {
+              senderId,
+              msg,
+              conversationId,
+            });
+          }
         }
-      });
+      );
 
       socket.on(socketConstant.DISCONNECT, (userId) => {
         removeUser(userId);
