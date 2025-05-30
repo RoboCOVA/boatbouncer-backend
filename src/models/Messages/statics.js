@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { modelNames } from '../constants';
 import { userNotFound } from '../Users/errors';
 import {
@@ -127,7 +128,8 @@ export async function readMessagesByConversationId({ conversationId, userId }) {
   const unreadMessages = await Messages.find({
     conversation: conversationId,
     isRead: false,
-    sender: { $ne: userId },
+    // sender: { $ne: userId },
+    sender: { $ne: new ObjectId(userId) },
   });
 
   const messageIdsToUpdate = unreadMessages.map((msg) => msg._id);
@@ -224,7 +226,7 @@ export async function getUnreadMessagesCount({ userId }) {
       $match: {
         conversation: { $in: conversationIds },
         isRead: false,
-        sender: { $ne: userId },
+        sender: { $ne: new ObjectId(userId) },
       },
     },
     {
