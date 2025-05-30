@@ -123,24 +123,75 @@ export async function deleteMessage({ messageId, userId }) {
   return messageId;
 }
 
+// export async function getUnreadMessagesCount({ userId }) {
+//   const Conversations = this.model(modelNames.CONVERSATIONS);
+
+//   const conversations = await Conversations.find({
+//     members: userId,
+//   });
+
+//   if (!conversations.length) {
+//     return 0;
+//   }
+
+//   const conversationIds = conversations.map((conv) => conv._id);
+
+//   const unreadCount = await this.countDocuments({
+//     conversation: { $in: conversationIds },
+//     isRead: false,
+//     sender: { $ne: userId },
+//   });
+
+//   return unreadCount;
+// }
+
 export async function getUnreadMessagesCount({ userId }) {
   const Conversations = this.model(modelNames.CONVERSATIONS);
+  const Messages = this.model(modelNames.MESSAGES);
 
+  // Step 1: Find all conversations for the user
   const conversations = await Conversations.find({
     members: userId,
   });
 
   if (!conversations.length) {
-    return 0;
+    return {
+      totalUnread: 0,
+      unreadByConversation: [],
+    };
   }
 
   const conversationIds = conversations.map((conv) => conv._id);
 
-  const unreadCount = await this.countDocuments({
-    conversation: { $in: conversationIds },
-    isRead: false,
-    sender: { $ne: userId },
-  });
+  // Step 2: Aggregate unread messages grouped by conversation
+  const unreadAggregation = await Messages.aggregate([
+    {
+      $match: {
+        conversation: { $in: conversationIds },
+        isRead: false,
+        sender: { $ne: userId },
+      },
+    },
+    {
+      $group: {
+        _id: '$conversation',
+        count: { $sum: 1 },
+      },
+    },
+  ]);
 
-  return unreadCount;
+  const totalUnread = unreadAggregation.reduce(
+    (sum, conv) => sum + conv.count,
+    0
+  );
+
+  const unreadByConversation = unreadAggregation.map((item) => ({
+    conversationId: item._id,
+    count: item.count,
+  }));
+
+  return {
+    unreadCount: totalUnread,
+    unreadByConversation,
+  };
 }
