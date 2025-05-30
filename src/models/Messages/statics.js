@@ -191,7 +191,7 @@ export async function getUnreadMessagesCount({ userId }) {
   }));
 
   return {
-    unreadCount: totalUnread,
+    newMessageCount: totalUnread,
     unreadByConversation,
   };
 }

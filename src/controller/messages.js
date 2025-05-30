@@ -70,7 +70,7 @@ export const getUnMessgesCountController = async (req, res, next) => {
     const newMessageCount = await Messages.getUnreadMessagesCount({
       userId: user?.id,
     });
-    res.send({ newMessageCount });
+    res.send({ ...newMessageCount });
   } catch (error) {
     next(error);
   }
