@@ -103,7 +103,11 @@ export async function readMessage({ messageId, userId, onPost }) {
   return updatedMessage;
 }
 
-export async function readMessagesByConversationId({ conversationId, userId }) {
+export async function readMessagesByConversationId({
+  conversationId,
+  userId,
+  force,
+}) {
   const Conversations = this.model(modelNames.CONVERSATIONS);
   const Users = this.model(modelNames.USERS);
   const Messages = this.model(modelNames.MESSAGES);
@@ -125,12 +129,17 @@ export async function readMessagesByConversationId({ conversationId, userId }) {
   if (!isMember) throw userNotMember;
 
   // Step 4: Find all unread messages in this conversation sent by others
-  const unreadMessages = await Messages.find({
-    conversation: conversationId,
-    isRead: false,
-    // sender: { $ne: userId },
-    sender: { $ne: new ObjectId(userId) },
-  });
+
+  const query = force
+    ? {
+        conversation: conversationId,
+      }
+    : {
+        conversation: conversationId,
+        isRead: false,
+        sender: { $ne: new ObjectId(userId) },
+      };
+  const unreadMessages = await Messages.find(query);
 
   const messageIdsToUpdate = unreadMessages.map((msg) => msg._id);
 

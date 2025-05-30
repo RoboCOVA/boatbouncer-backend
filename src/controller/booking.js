@@ -6,6 +6,7 @@ import Users from '../models/Users';
 import { boatListTypes, bookingStatus, pricingType } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
 import { addHoursToDate, formatDuration } from '../utils';
+import Messages from '../models/Messages';
 
 function calculateActivityBoatPrice(peopleCount, pricing) {
   const price = pricing.perPerson * peopleCount;
@@ -247,7 +248,11 @@ export const cancelBookingController = async (req, res, next) => {
       lastName = booking.renter.lastName;
       phoneNumber = booking.renter.phoneNumber;
     }
-
+    await Messages.readMessagesByConversationId({
+      conversationId: cancelledBooking.conversationId,
+      userId,
+      force: true,
+    });
     sendMessage(phoneNumber, 'bookingCancellation', {
       firstName,
       lastName,
@@ -329,11 +334,11 @@ export const getCompletedBookingsController = async (req, res, next) => {
   try {
     const userId = req?.user?._id || ' ';
     const { as } = req.query;
-    const canceledBookings = await Bookings.getCompletedBookings({
+    const completedBookings = await Bookings.getCompletedBookings({
       userId,
       as,
     });
-    res.send(canceledBookings);
+    res.send(completedBookings);
   } catch (error) {
     next(error);
   }
