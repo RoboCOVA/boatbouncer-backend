@@ -52,7 +52,8 @@ export async function getMessages({ conversationId, userId }) {
   return message;
 }
 
-export async function readMessage({ messageId, userId }) {
+// on post is optional boolean value to read all message on post
+export async function readMessage({ messageId, userId, onPost }) {
   const Users = this.model(modelNames.USERS);
 
   const user = await Users.findById(userId);
@@ -61,7 +62,7 @@ export async function readMessage({ messageId, userId }) {
   let message = await this.findOne({ _id: messageId });
   if (!message) throw messageNotFound;
 
-  if (message.sender.equals(userId)) {
+  if (message.sender.equals(userId) && !onPost) {
     return message;
   }
 
@@ -82,7 +83,9 @@ export async function readMessage({ messageId, userId }) {
     sender: { $ne: userId },
   });
 
-  const messageIdsToUpdate = [messageId, ...olderMessages.map((m) => m._id)];
+  const messageIdsToUpdate = onPost
+    ? [...olderMessages.map((m) => m._id)]
+    : [messageId, ...olderMessages.map((m) => m._id)];
 
   await this.updateMany(
     {

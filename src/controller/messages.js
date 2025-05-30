@@ -10,6 +10,11 @@ export const createMessageController = async (req, res, next) => {
     });
 
     const savedMessage = await message.createMessage();
+    await Messages.readMessage({
+      messageId: savedMessage.id,
+      userId: sender,
+      onPost: true,
+    });
     res.send(savedMessage);
   } catch (error) {
     next(error);
@@ -34,7 +39,11 @@ export const readMessageController = async (req, res, next) => {
   try {
     const { user } = req;
     const { messageId } = req.params;
-    const message = await Messages.readMessage({ messageId, userId: user?.id });
+    const message = await Messages.readMessage({
+      messageId,
+      userId: user?.id,
+      onPost: false,
+    });
     res.send(message);
   } catch (error) {
     next(error);
