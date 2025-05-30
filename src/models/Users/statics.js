@@ -431,7 +431,8 @@ export async function forgetPassword({ phoneNumber, recaptchaToken }) {
       `Please setup local password first, you are using ${user.authProviders.join(
         ','
       )} now`,
-      httpStatus.BAD_REQUEST
+      httpStatus.BAD_REQUEST,
+      true
     );
   }
   if (!user || user.isDeleted) throw userNotFound;
