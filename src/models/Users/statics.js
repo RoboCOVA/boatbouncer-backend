@@ -428,9 +428,9 @@ export async function forgetPassword({ phoneNumber, recaptchaToken }) {
 
   if (!user.authProviders.includes(authProviders.LOCAL)) {
     throw new APIError(
-      `Please setup local password first, you are using ${user.authProviders.join(
+      `You signed up using ${user.authProviders.join(
         ','
-      )} now`,
+      )}. Please set up a local password before trying to reset it.`,
       httpStatus.BAD_REQUEST,
       true
     );
