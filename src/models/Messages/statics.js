@@ -102,6 +102,61 @@ export async function readMessage({ messageId, userId, onPost }) {
   return updatedMessage;
 }
 
+export async function readMessagesByConversationId({ conversationId, userId }) {
+  const Conversations = this.model(modelNames.CONVERSATIONS);
+  const Users = this.model(modelNames.USERS);
+  const Messages = this.model(modelNames.MESSAGES);
+
+  // Step 1: Validate user
+  const user = await Users.findById(userId);
+  if (!user || user.isDeleted) throw userNotFound;
+
+  // Step 2: Validate conversation
+  const conversation = await Conversations.findById(conversationId);
+  if (!conversation) {
+    return {};
+  }
+
+  // Step 3: Ensure user is a member of the conversation
+  const isMember = conversation.members.some((memberId) =>
+    memberId.equals(userId)
+  );
+  if (!isMember) throw userNotMember;
+
+  // Step 4: Find all unread messages in this conversation sent by others
+  const unreadMessages = await Messages.find({
+    conversation: conversationId,
+    isRead: false,
+    sender: { $ne: userId },
+  });
+
+  const messageIdsToUpdate = unreadMessages.map((msg) => msg._id);
+
+  if (!messageIdsToUpdate.length) {
+    return {
+      updatedCount: 0,
+      message: 'No unread messages found for this conversation.',
+    };
+  }
+
+  // Step 5: Mark messages as read
+  const result = await Messages.updateMany(
+    {
+      _id: { $in: messageIdsToUpdate },
+      isRead: false,
+    },
+    {
+      $set: { isRead: true },
+      $addToSet: { readBy: userId },
+    }
+  );
+
+  return {
+    updatedCount: result.modifiedCount,
+    message: `${result.modifiedCount} messages marked as read.`,
+  };
+}
+
 export async function deleteMessage({ messageId, userId }) {
   const Users = this.model(modelNames.USERS);
 
