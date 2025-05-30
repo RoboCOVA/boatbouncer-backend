@@ -76,13 +76,14 @@ const start = async () => {
 
       socket.on(
         socketConstant.SEND_MESSAGE,
-        ({ senderId, reciverId, msg, conversationId }) => {
+        ({ senderId, reciverId, msg, conversationId, _id }) => {
           const user = getUser(reciverId);
           if (user) {
             io.to(user.socketId).emit(socketConstant.GET_MESSAGE, {
               senderId,
               msg,
               conversationId,
+              _id,
             });
           }
         }
