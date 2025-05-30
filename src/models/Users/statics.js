@@ -9,7 +9,6 @@ import {
 } from '../../config/environments';
 import { identityToolkit } from '../../config/googleApis';
 import APIError from '../../errors/APIError';
-import AppError from '../../errors/APPError';
 import {
   comparePassword,
   decryptData,
@@ -425,11 +424,15 @@ export async function updatePaymentMethod({ userId, methodId, updateObject }) {
 export async function forgetPassword({ phoneNumber, recaptchaToken }) {
   const user = await this.findOne({ phoneNumber });
 
+  if (!user || user.isDeleted) throw userNotFound;
+
   if (!user.authProviders.includes(authProviders.LOCAL)) {
-    throw new AppError(
-      `Please setup local password first, you are using ${user.authProviders.join(
+    throw new APIError(
+      `You signed up using ${user.authProviders.join(
         ','
-      )} now`
+      )}. Please set up a local password before trying to reset it.`,
+      httpStatus.BAD_REQUEST,
+      true
     );
   }
   if (!user || user.isDeleted) throw userNotFound;

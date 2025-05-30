@@ -10,10 +10,15 @@ export const createMessageController = async (req, res, next) => {
     });
 
     const savedMessage = await message.createMessage();
-    await Messages.readMessage({
-      messageId: savedMessage.id,
+    // await Messages.readMessage({
+    //   messageId: savedMessage.id,
+    //   userId: sender,
+    //   onPost: true,
+    // });
+
+    await Messages.readMessagesByConversationId({
+      conversationId: conversation,
       userId: sender,
-      onPost: true,
     });
     res.send(savedMessage);
   } catch (error) {
@@ -26,6 +31,10 @@ export const getMessagesController = async (req, res, next) => {
     const { user } = req;
     const { conversationId } = req.params;
     const message = await Messages.getMessages({
+      conversationId,
+      userId: user?.id,
+    });
+    await Messages.readMessagesByConversationId({
       conversationId,
       userId: user?.id,
     });
@@ -70,7 +79,7 @@ export const getUnMessgesCountController = async (req, res, next) => {
     const newMessageCount = await Messages.getUnreadMessagesCount({
       userId: user?.id,
     });
-    res.send({ newMessageCount });
+    res.send({ ...newMessageCount });
   } catch (error) {
     next(error);
   }

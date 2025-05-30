@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { modelNames } from '../constants';
 import { userNotFound } from '../Users/errors';
 import {
@@ -102,6 +103,71 @@ export async function readMessage({ messageId, userId, onPost }) {
   return updatedMessage;
 }
 
+export async function readMessagesByConversationId({
+  conversationId,
+  userId,
+  force,
+}) {
+  const Conversations = this.model(modelNames.CONVERSATIONS);
+  const Users = this.model(modelNames.USERS);
+  const Messages = this.model(modelNames.MESSAGES);
+
+  // Step 1: Validate user
+  const user = await Users.findById(userId);
+  if (!user || user.isDeleted) throw userNotFound;
+
+  // Step 2: Validate conversation
+  const conversation = await Conversations.findById(conversationId);
+  if (!conversation) {
+    return {};
+  }
+
+  // Step 3: Ensure user is a member of the conversation
+  const isMember = conversation.members.some((memberId) =>
+    memberId.equals(userId)
+  );
+  if (!isMember) throw userNotMember;
+
+  // Step 4: Find all unread messages in this conversation sent by others
+
+  const query = force
+    ? {
+        conversation: conversationId,
+      }
+    : {
+        conversation: conversationId,
+        isRead: false,
+        sender: { $ne: new ObjectId(userId) },
+      };
+  const unreadMessages = await Messages.find(query);
+
+  const messageIdsToUpdate = unreadMessages.map((msg) => msg._id);
+
+  if (!messageIdsToUpdate.length) {
+    return {
+      updatedCount: 0,
+      message: 'No unread messages found for this conversation.',
+    };
+  }
+
+  // Step 5: Mark messages as read
+  const result = await Messages.updateMany(
+    {
+      _id: { $in: messageIdsToUpdate },
+      isRead: false,
+    },
+    {
+      $set: { isRead: true },
+      $addToSet: { readBy: userId },
+    }
+  );
+
+  return {
+    updatedCount: result.modifiedCount,
+    message: `${result.modifiedCount} messages marked as read.`,
+  };
+}
+
 export async function deleteMessage({ messageId, userId }) {
   const Users = this.model(modelNames.USERS);
 
@@ -123,24 +189,75 @@ export async function deleteMessage({ messageId, userId }) {
   return messageId;
 }
 
+// export async function getUnreadMessagesCount({ userId }) {
+//   const Conversations = this.model(modelNames.CONVERSATIONS);
+
+//   const conversations = await Conversations.find({
+//     members: userId,
+//   });
+
+//   if (!conversations.length) {
+//     return 0;
+//   }
+
+//   const conversationIds = conversations.map((conv) => conv._id);
+
+//   const unreadCount = await this.countDocuments({
+//     conversation: { $in: conversationIds },
+//     isRead: false,
+//     sender: { $ne: userId },
+//   });
+
+//   return unreadCount;
+// }
+
 export async function getUnreadMessagesCount({ userId }) {
   const Conversations = this.model(modelNames.CONVERSATIONS);
+  const Messages = this.model(modelNames.MESSAGES);
 
+  // Step 1: Find all conversations for the user
   const conversations = await Conversations.find({
     members: userId,
   });
 
   if (!conversations.length) {
-    return 0;
+    return {
+      totalUnread: 0,
+      unreadByConversation: [],
+    };
   }
 
   const conversationIds = conversations.map((conv) => conv._id);
 
-  const unreadCount = await this.countDocuments({
-    conversation: { $in: conversationIds },
-    isRead: false,
-    sender: { $ne: userId },
-  });
+  // Step 2: Aggregate unread messages grouped by conversation
+  const unreadAggregation = await Messages.aggregate([
+    {
+      $match: {
+        conversation: { $in: conversationIds },
+        isRead: false,
+        sender: { $ne: new ObjectId(userId) },
+      },
+    },
+    {
+      $group: {
+        _id: '$conversation',
+        count: { $sum: 1 },
+      },
+    },
+  ]);
 
-  return unreadCount;
+  const totalUnread = unreadAggregation.reduce(
+    (sum, conv) => sum + conv.count,
+    0
+  );
+
+  const unreadByConversation = unreadAggregation.map((item) => ({
+    conversationId: item._id,
+    count: item.count,
+  }));
+
+  return {
+    newMessageCount: totalUnread,
+    unreadByConversation,
+  };
 }
