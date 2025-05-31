@@ -8,6 +8,7 @@ import { modelNames } from '../constants';
 otpSchema.static(staticFunctions);
 otpSchema.method(methodFunction);
 
-const otpVerification = mongoose.model(modelNames.OTP, otpSchema);
+const otpVerification =
+  mongoose.models[modelNames.OTP] || mongoose.model(modelNames.OTP, otpSchema);
 
 export default otpVerification;
