@@ -20,7 +20,8 @@ AdminJS.registerAdapter(AdminJSMongoose);
 
 export const adminJs = new AdminJS({
   assets: {
-    styles: ['/CSS/style.css', '/CSS/mapbox-gl.css'], // add assets path
+    styles: ['/CSS/style.css'], // add assets path
+    // styles: ['/CSS/style.css', '/CSS/mapbox-gl.css'], // add assets path
   },
   databases: [], // We don’t have any resources connected yet.
   resources: [
@@ -45,16 +46,16 @@ export const adminJs = new AdminJS({
   dashboard: { component: AdminJS.bundle('./components/dashboard') },
   rootPath: '/admin', // Path to the AdminJS dashboard.
   pages: {
-    Analytics: {
-      icon: 'Analytics',
-      component: components.Analytics,
-      handler: getPaginatedBookingsPerStatusForAllBoats,
-    },
-    Statistics: {
-      icon: 'Statistics',
-      component: components.Statistics,
-      handler: getAllBoats,
-    },
+    // Analytics: {
+    //   icon: 'Analytics',
+    //   component: components.Analytics,
+    //   handler: getPaginatedBookingsPerStatusForAllBoats,
+    // },
+    // Statistics: {
+    //   icon: 'Statistics',
+    //   component: components.Statistics,
+    //   handler: getAllBoats,
+    // },
   },
   session: {
     cookieMaxAge: 60 * 60 * 1000,
