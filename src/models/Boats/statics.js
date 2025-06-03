@@ -441,7 +441,7 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
     copyOfBoats.map(async (boat) => {
       const matchQuery = {
         boatId: { $in: boat._id },
-        status: { $nin: [bookingStatus.CANCELLED] },
+        status: { $nin: [bookingStatus.CANCELLED, bookingStatus.COMPLETED] },
       };
       const numofboatbooked = await Bookings.countDocuments(matchQuery);
       // eslint-disable-next-line no-param-reassign
