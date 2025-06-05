@@ -197,7 +197,6 @@ export const generateRandomOAuthId = () => {
 };
 
 export function formatDuration(durationObj) {
-  console.log({ durationObj });
   const durationMs = durationObj.end - durationObj.start;
   const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
 
