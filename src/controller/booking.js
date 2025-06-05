@@ -48,16 +48,18 @@ function calculateRentalBoatPrice(period, pricing, type) {
 
   const sortedDiscounts =
     type === pricingType.PER_DAY
-      ? pricing.dayDiscount.sort((a, b) => b.minPeople - a.minPeople)
-      : pricing.hourDiscount.sort((a, b) => b.minPeople - a.minPeople);
+      ? pricing?.dayDiscount?.sort((a, b) => b.minPeople - a.minPeople)
+      : pricing?.hourDiscount?.sort((a, b) => b.minPeople - a.minPeople);
 
-  const applicableDiscount = sortedDiscounts.find((discount) => {
-    if (type === pricingType.PER_DAY)
-      return period.days >= discount?.minDaysForDiscount;
-    if (type === pricingType.PER_HOUR)
-      return period.hours >= discount.minHoursForDiscount;
-    return period.days >= discount.minDaysForDiscount;
-  });
+  const applicableDiscount = sortedDiscounts
+    ? sortedDiscounts.find((discount) => {
+        if (type === pricingType.PER_DAY)
+          return period.days >= discount?.minDaysForDiscount;
+        if (type === pricingType.PER_HOUR)
+          return period.hours >= discount.minHoursForDiscount;
+        return period.days >= discount.minDaysForDiscount;
+      })
+    : null;
   if (applicableDiscount) {
     renterPrice -= (price * applicableDiscount.discountPercentage) / 100;
     discountPercentage = applicableDiscount.discountPercentage;
