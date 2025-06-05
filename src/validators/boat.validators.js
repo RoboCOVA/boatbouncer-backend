@@ -222,18 +222,22 @@ const createRentalBoatValidator = () => [
 
   body('pricing.hourDiscount')
     .isArray()
+    .optional()
     .withMessage('Hour discount must be an array of discount objects'),
 
   body('pricing.hourDiscount.*.discountPercentage')
     .isFloat({ min: 0, max: 100 })
+    .optional()
     .withMessage('Each hour discount percentage must be between 0-100'),
 
   body('pricing.hourDiscount.*.minHoursForDiscount')
     .isInt({ min: 1 })
+    .optional()
     .withMessage('Each hour discount must have at least 1 minimum hour'),
 
   body('pricing.minHours')
     .isInt({ min: 1 })
+    .optional()
     .withMessage('Minimum hours must be at least 1'),
 
   body('features').isArray().withMessage('Features must be an array'),
