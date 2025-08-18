@@ -215,6 +215,7 @@ export const boatFeatures = {
   DELIVERABLE: 'Deliverable',
   BATHROOM: 'Bathroom',
   ANCHOR: 'Anchor',
+  FUEL_INCLUDED: 'Fuel Included',
   // ADDITIONAL_AMENITIES: 'Additional Amenities',
 };
 
