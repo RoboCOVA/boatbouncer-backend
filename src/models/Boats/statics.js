@@ -604,6 +604,7 @@ export async function getBoats({ pageNo, size, filter }) {
         activityTypes: 1,
         cancelationPolicy: 1,
         avgResponseTime: 1,
+        blockedSchedule: 1,
         ...(coordinates?.longitude && { distance: 1 }),
       },
     },

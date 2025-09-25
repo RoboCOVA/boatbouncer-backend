@@ -104,6 +104,42 @@ const createBaseBoatValidator = () => [
   body('cancelationPolicy.*.priorHours')
     .isNumeric()
     .withMessage('Each cancellation policy priorHours must be a number'),
+
+  body('blockedSchedule')
+    .isArray()
+    .optional()
+    .withMessage('Blocked schedule must be an array if provided'),
+
+  body('blockedSchedule.*.start')
+    .isISO8601()
+    .withMessage('Blocked schedule start must be a valid ISO 8601 date')
+    .custom((value, { req }) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Blocked schedule start must be in the future');
+      }
+      return true;
+    }),
+
+  body('blockedSchedule.*.end')
+    .isISO8601()
+    .withMessage('Blocked schedule end must be a valid ISO 8601 date')
+    .custom((value, { req, path }) => {
+      const index = path.match(/\[(\d+)\]/)?.[1];
+      if (index !== undefined && req.body.blockedSchedule) {
+        const start = new Date(req.body.blockedSchedule[index].start);
+        const end = new Date(value);
+        if (end <= start) {
+          throw new Error('Blocked schedule end must be after start');
+        }
+      }
+      return true;
+    }),
+
+  body('blockedSchedule.*.reason')
+    .isString()
+    .optional()
+    .isLength({ max: 200 })
+    .withMessage('Blocked schedule reason must be less than 200 characters'),
 ];
 
 const createActivityBoatValidator = () => [
@@ -375,6 +411,42 @@ const updateBaseBoatValidator = () => [
     .isIn(currencyCodeEnum)
     .withMessage('Invalid currency')
     .optional(),
+
+  body('blockedSchedule')
+    .isArray()
+    .optional()
+    .withMessage('Blocked schedule must be an array if provided'),
+
+  body('blockedSchedule.*.start')
+    .isISO8601()
+    .withMessage('Blocked schedule start must be a valid ISO 8601 date')
+    .custom((value, { req }) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Blocked schedule start must be in the future');
+      }
+      return true;
+    }),
+
+  body('blockedSchedule.*.end')
+    .isISO8601()
+    .withMessage('Blocked schedule end must be a valid ISO 8601 date')
+    .custom((value, { req, path }) => {
+      const index = path.match(/\[(\d+)\]/)?.[1];
+      if (index !== undefined && req.body.blockedSchedule) {
+        const start = new Date(req.body.blockedSchedule[index].start);
+        const end = new Date(value);
+        if (end <= start) {
+          throw new Error('Blocked schedule end must be after start');
+        }
+      }
+      return true;
+    }),
+
+  body('blockedSchedule.*.reason')
+    .isString()
+    .optional()
+    .isLength({ max: 200 })
+    .withMessage('Blocked schedule reason must be less than 200 characters'),
 ];
 
 const updateActivityBoatValidator = () => [
