@@ -10,6 +10,7 @@ import {
   boatUpdateFailed,
   updatelistingTypeNotAllowed,
 } from './errors';
+import { modelNames } from '../constants';
 //   const Conversations = this.model(modelNames.CONVERSATIONS);
 /**
  * It returns a list of boats, with a total count of all boats, based on the page number and size of
@@ -605,6 +606,7 @@ export async function getBoats({ pageNo, size, filter }) {
         cancelationPolicy: 1,
         avgResponseTime: 1,
         blockedSchedule: 1,
+        rating: 1,
         ...(coordinates?.longitude && { distance: 1 }),
       },
     },
@@ -817,4 +819,42 @@ export async function deleteBoat({ boatId, userId }) {
   if (!boatDeleted) throw boatDeleteFailed;
 
   return boatId;
+}
+
+export async function calculateRating(boatId) {
+  console.log({ boatId });
+  try {
+    const ratingStats = await this.model(modelNames.REVIEW).aggregate([
+      { $match: { boatId: new ObjectId(boatId) } },
+      {
+        $sort: { date: -1 }, // Get latest reviews first
+      },
+      {
+        $group: {
+          _id: '$bookingId', // Group by user
+          latestRating: { $first: '$rating' }, // Get latest rating for each user
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: '$latestRating' },
+          totalReviews: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const result = ratingStats[0] || { averageRating: 0, totalReviews: 0 };
+    const newRating = Math.round(result.averageRating * 10) / 10; // Round to 1 decimal
+
+    // Update the boat's rating
+    await this.findByIdAndUpdate(boatId, {
+      rating: newRating,
+    });
+
+    return {
+      rating: newRating,
+      totalReviews: result.totalReviews,
+    };
+  } catch (error) {}
 }

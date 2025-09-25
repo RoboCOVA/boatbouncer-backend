@@ -17,6 +17,7 @@ export const modelNames = {
   SETTINGS: 'Settings',
   FAVORITES: 'Favorites',
   OTP: 'Otp',
+  REVIEW: 'review',
 };
 
 export const categories = {

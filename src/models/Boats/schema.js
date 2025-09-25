@@ -64,6 +64,7 @@ const baseBoatFieldsSchema = {
   cancelationPolicy: { type: [cancelationSchema] },
   avgResponseTime: { type: Number, default: 0 },
   blockedSchedule: { type: [blockedScheduleSchema], default: [] },
+  rating: { type: Number, default: 0, min: 0, max: 5 },
 };
 
 const activityBoatFields = {
