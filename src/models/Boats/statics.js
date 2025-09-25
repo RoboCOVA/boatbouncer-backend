@@ -72,73 +72,56 @@ export async function getBoats({ pageNo, size, filter }) {
     match.maxPassengers = { $gte: parseFloat(maxPassengers) };
   }
 
-  if (listingType && listingType === 'activity') {
-    if (minPrice || maxPrice) {
-      match['pricing.perPerson'] = {};
+  // IMPROVED: Check if price field exists and has a valid value
+  if (minPrice || maxPrice) {
+    const priceConditions = [];
 
-      if (minPrice) {
-        match['pricing.perPerson'].$gte = Number(minPrice);
-      }
+    // Define price fields with existence checks
+    const priceFieldChecks = [
+      { field: 'pricing.perHour', existsCheck: { $gt: 0 } },
+      { field: 'pricing.perDay', existsCheck: { $gt: 0 } },
+      { field: 'pricing.perPerson', existsCheck: { $gt: 0 } },
+    ];
 
-      if (maxPrice) {
-        match['pricing.perPerson'].$lte = Number(maxPrice);
-      }
+    if (minPrice && maxPrice) {
+      // Range conditions with existence check
+      const rangeConditions = priceFieldChecks.map(
+        ({ field, existsCheck }) => ({
+          $and: [
+            { [field]: existsCheck }, // Field exists and has value > 0
+            { [field]: { $gte: Number(minPrice), $lte: Number(maxPrice) } },
+          ],
+        })
+      );
+
+      priceConditions.push({ $or: rangeConditions });
+    } else if (minPrice) {
+      // Min price with existence check
+      const minConditions = priceFieldChecks.map(({ field, existsCheck }) => ({
+        $and: [
+          { [field]: existsCheck },
+          { [field]: { $gte: Number(minPrice) } },
+        ],
+      }));
+
+      priceConditions.push({ $or: minConditions });
+    } else if (maxPrice) {
+      // Max price with existence check
+      const maxConditions = priceFieldChecks.map(({ field, existsCheck }) => ({
+        $and: [
+          { [field]: existsCheck },
+          { [field]: { $lte: Number(maxPrice) } },
+        ],
+      }));
+
+      priceConditions.push({ $or: maxConditions });
     }
-  }
-  if (listingType && listingType === 'rental') {
-    if (minPrice || maxPrice) {
-      const priceConditions = [];
 
-      if (minPrice) {
-        priceConditions.push({
-          $or: [
-            { 'pricing.perHour': { $gte: Number(minPrice) } },
-            { 'pricing.perDay': { $gte: Number(minPrice) } },
-          ],
-        });
-      }
-
-      if (maxPrice) {
-        priceConditions.push({
-          $or: [
-            { 'pricing.perHour': { $lte: Number(maxPrice) } },
-            { 'pricing.perDay': { $lte: Number(maxPrice) } },
-          ],
-        });
-      }
-
-      if (priceConditions.length > 0) {
+    if (priceConditions.length > 0) {
+      if (match.$and) {
+        match.$and.push(...priceConditions);
+      } else {
         match.$and = priceConditions;
-      }
-    }
-  }
-
-  if (!listingType) {
-    if (minPrice || maxPrice) {
-      const priceConditions = [];
-
-      if (minPrice) {
-        priceConditions.push({
-          $or: [
-            { 'pricing.perHour': { $gte: Number(minPrice) } },
-            { 'pricing.perDay': { $gte: Number(minPrice) } },
-            { 'pricing.perPerson': { $gte: Number(minPrice) } },
-          ],
-        });
-      }
-
-      if (maxPrice) {
-        priceConditions.push({
-          $or: [
-            { 'pricing.perHour': { $lte: Number(maxPrice) } },
-            { 'pricing.perDay': { $lte: Number(maxPrice) } },
-            { 'pricing.perPerson': { $lte: Number(minPrice) } },
-          ],
-        });
-      }
-
-      if (priceConditions.length > 0) {
-        match.$or = priceConditions;
       }
     }
   }
@@ -344,8 +327,8 @@ export async function getBoats({ pageNo, size, filter }) {
             input: '$conflictingBookings',
             as: 'conflict',
             in: {
-              start: '$$conflict.duration.startDate',
-              end: '$$conflict.duration.endDate',
+              start: '$$conflict.duration.start',
+              end: '$$conflict.duration.end',
               status: '$$conflict.status',
             },
           },
