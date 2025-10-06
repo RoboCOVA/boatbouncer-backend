@@ -1,5 +1,6 @@
 import Bookings from '../models/Bookings';
 import Offers from '../models/Offers';
+import SpecialPricing from '../models/SpecialPricing';
 import {
   formatDuration,
   getMinutesDifference,
@@ -102,6 +103,8 @@ export const Scheduler = async () => {
         { $set: { notified: true } }
       );
     }
+
+    SpecialPricing.updateAllSpecialPricingStatuses();
   } catch (error) {
     console.log('scheduler failed to run');
   }

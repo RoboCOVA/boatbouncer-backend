@@ -11,6 +11,7 @@ import testRoute from '../routes/test';
 import uploadRoute from '../routes/upload';
 import userRoute from '../routes/user';
 import reviewRoute from '../routes/review';
+import spcailPricingRoute from '../routes/specialPricing';
 
 const router = express.Router();
 
@@ -25,5 +26,6 @@ router.use('/booking', authenticateJwt, bookingRoute);
 router.use('/message', authenticateJwt, messageRoute);
 router.use('/conversation', authenticateJwt, conversationRoute);
 router.use('/reviews', authenticateJwt, reviewRoute);
+router.use('/special-pricing', authenticateJwt, spcailPricingRoute);
 
 export default router;

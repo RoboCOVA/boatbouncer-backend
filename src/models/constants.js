@@ -17,7 +17,8 @@ export const modelNames = {
   SETTINGS: 'Settings',
   FAVORITES: 'Favorites',
   OTP: 'Otp',
-  REVIEW: 'review',
+  REVIEW: 'Review',
+  SPECIAL_PRICING: 'Specialpricing',
 };
 
 export const categories = {

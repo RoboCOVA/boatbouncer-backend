@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import APIError from '../errors/APIError';
 import Boats from '../models/Boats';
 import Bookings from '../models/Bookings';
+import SpecialPricing from '../models/SpecialPricing';
 import Users from '../models/Users';
 import { boatListTypes, bookingStatus, pricingType } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
@@ -66,6 +67,83 @@ function calculateRentalBoatPrice(period, pricing, type) {
   }
 
   return { price, renterPrice, discountPercentage };
+}
+
+async function calculatePriceWithSpecialPricing(
+  boatId,
+  basePrice,
+  startDate,
+  endDate
+) {
+  const specialPricing = await SpecialPricing.getActivePricingForDateRange(
+    boatId,
+    startDate,
+    endDate
+  );
+
+  if (!specialPricing) {
+    return {
+      finalPrice: basePrice,
+      basePrice,
+      specialPricingApplied: false,
+      specialPricingDiscount: 0,
+      specialPricingId: null,
+    };
+  }
+
+  const bookingStart = new Date(startDate);
+  const bookingEnd = new Date(endDate);
+
+  // Calculate total booking duration in milliseconds
+  const totalBookingDuration = bookingEnd - bookingStart;
+
+  const pricingStart = new Date(specialPricing.startDate);
+  const pricingEnd = new Date(specialPricing.endDate);
+
+  // Calculate overlap period
+  const overlapStart = new Date(
+    Math.max(bookingStart.getTime(), pricingStart.getTime())
+  );
+  const overlapEnd = new Date(
+    Math.min(bookingEnd.getTime(), pricingEnd.getTime())
+  );
+
+  // Calculate overlap duration in milliseconds
+  const overlapDuration = overlapEnd - overlapStart;
+
+  // Calculate what percentage of booking falls under this special pricing
+  const overlapPercentage = overlapDuration / totalBookingDuration;
+
+  // Calculate base price portion that falls under this special pricing
+  const basePricePortion = basePrice * overlapPercentage;
+
+  let discountAmount = 0;
+
+  if (specialPricing.type === 'discount') {
+    if (specialPricing.percent) {
+      discountAmount = (basePricePortion * specialPricing.percent) / 100;
+    } else if (specialPricing.amount) {
+      // For fixed amount, prorate based on overlap percentage
+      discountAmount = specialPricing.amount * overlapPercentage;
+    }
+  } else if (specialPricing.type === 'raise') {
+    if (specialPricing.amount) {
+      // For fixed raise amount, prorate based on overlap percentage
+      discountAmount = -specialPricing.amount * overlapPercentage;
+    } else if (specialPricing.percent) {
+      discountAmount = -(basePricePortion * specialPricing.percent) / 100;
+    }
+  }
+
+  const finalPrice = basePrice - discountAmount;
+
+  return {
+    finalPrice: Math.max(0, finalPrice),
+    basePrice,
+    specialPricingApplied: true,
+    specialPricingDiscount: Math.abs(discountAmount),
+    specialPricingId: specialPricing._id,
+  };
 }
 
 /**
@@ -214,11 +292,32 @@ export const createBookingController = async (req, res, next) => {
     const owner = await Users.findOne({ _id: ownerId });
     if (!owner) throw new Error('Owner not found');
 
+    const { finalPrice, specialPricingId, specialPricingApplied } =
+      await calculatePriceWithSpecialPricing(
+        boatId,
+        boakingParam.renterPrice,
+        duration.start,
+        duration.end
+      );
+
     const booking = new Bookings({
       ...boakingParam,
+      renterPrice: finalPrice,
+      specialPricingApplied,
+      specialPricingId,
     });
 
     const savedReservation = await booking.createBooking();
+    if (specialPricingApplied && specialPricingId) {
+      const updated = await SpecialPricing.findByIdAndUpdate(specialPricingId, {
+        $inc: { timesUsed: 1 },
+        $push: { usedInBookings: savedReservation._id },
+      });
+    }
+
+    const populatedBooking = await Bookings.findById(savedReservation._id)
+      .populate('specialPricingId', '-usedInBookings')
+      .exec();
     const ownerPhoneNumber = owner.phoneNumber;
 
     const requesterFirstName = req?.user?.firstName ?? '';
@@ -231,7 +330,7 @@ export const createBookingController = async (req, res, next) => {
       bookingId: booking._id.toString(),
     });
 
-    res.send(savedReservation);
+    res.send(populatedBooking);
   } catch (error) {
     next(error);
   }
