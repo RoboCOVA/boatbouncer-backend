@@ -10,6 +10,7 @@ import offerRoute from '../routes/offer';
 import testRoute from '../routes/test';
 import uploadRoute from '../routes/upload';
 import userRoute from '../routes/user';
+import reviewRoute from '../routes/review';
 
 const router = express.Router();
 
@@ -23,5 +24,6 @@ router.use('/intent', authenticateJwt, intentRoute);
 router.use('/booking', authenticateJwt, bookingRoute);
 router.use('/message', authenticateJwt, messageRoute);
 router.use('/conversation', authenticateJwt, conversationRoute);
+router.use('/reviews', reviewRoute);
 
 export default router;

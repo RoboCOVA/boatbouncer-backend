@@ -96,6 +96,35 @@ export const createBookingController = async (req, res, next) => {
     if (!boat) throw new 'Boat not found'();
     const listingType = boat?.listingType;
 
+    if (boat.blockedSchedule && boat.blockedSchedule.length > 0) {
+      const bookingStart = new Date(duration.start);
+      const bookingEnd = new Date(duration.end);
+
+      const blockedPeriod = boat.blockedSchedule.find((blocked) => {
+        const blockedStart = new Date(blocked.start);
+        const blockedEnd = new Date(blocked.end);
+
+        // Check if booking overlaps with any blocked period
+        return (
+          (bookingStart >= blockedStart && bookingStart < blockedEnd) ||
+          (bookingEnd > blockedStart && bookingEnd <= blockedEnd) ||
+          (bookingStart <= blockedStart && bookingEnd >= blockedEnd)
+        );
+      });
+
+      if (blockedPeriod) {
+        const reasonMessage =
+          blockedPeriod.reason && blockedPeriod.reason.trim() !== ''
+            ? ` due to: ${blockedPeriod.reason}`
+            : ' due to owner schedule blocking';
+
+        throw new APIError(
+          `This time period is not available${reasonMessage}`,
+          httpStatus.BAD_REQUEST
+        );
+      }
+    }
+
     if (listingType === boatListTypes.RENTAL) {
       const isTypeValid = [pricingType.PER_HOUR, pricingType.PER_DAY].includes(
         type

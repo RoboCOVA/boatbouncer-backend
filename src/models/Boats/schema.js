@@ -39,6 +39,14 @@ const cancelationSchema = {
   priorHours: { type: Number },
   _id: false,
 };
+
+const blockedScheduleSchema = {
+  start: { type: Date, required: true },
+  end: { type: Date, required: true },
+  reason: { type: String }, // Optional reason for blocking
+  _id: false,
+};
+
 const baseBoatFieldsSchema = {
   boatName: { type: String, required: true },
   description: { type: String, required: true },
@@ -55,6 +63,8 @@ const baseBoatFieldsSchema = {
   securityAllowance: { type: String, required: true },
   cancelationPolicy: { type: [cancelationSchema] },
   avgResponseTime: { type: Number, default: 0 },
+  blockedSchedule: { type: [blockedScheduleSchema], default: [] },
+  rating: { type: Number, default: 0, min: 0, max: 5 },
 };
 
 const activityBoatFields = {
@@ -78,6 +88,7 @@ const activityBoatFields = {
     _id: false,
   },
 };
+
 const combinedPricingSchema = new Schema(
   {
     // Common fields
