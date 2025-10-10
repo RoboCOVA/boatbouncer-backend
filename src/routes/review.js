@@ -18,12 +18,14 @@ import {
   getUserReviewsValidator,
   updateReviewValidator,
 } from '../validators/review.validators';
+import { authenticateJwt } from '../controller/authenticate';
 
 const router = express.Router();
 
 // Create a new review
 router.post(
   '/',
+  authenticateJwt,
   createReviewValidator(),
   parseValidationResult,
   createReviewController
@@ -32,6 +34,7 @@ router.post(
 // Update a review
 router.put(
   '/:reviewId',
+  authenticateJwt,
   updateReviewValidator(),
   parseValidationResult,
   updateReviewController
@@ -40,6 +43,7 @@ router.put(
 // Delete a review
 router.delete(
   '/:reviewId',
+  authenticateJwt,
   deleteReviewValidator(),
   parseValidationResult,
   deleteReviewController
