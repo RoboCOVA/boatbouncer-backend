@@ -34,7 +34,7 @@ export async function createReview() {
   }
 
   // Check if booking is completed
-  if (booking.status !== 'completed') {
+  if (booking.status !== 'Completed') {
     throw bookingNotCompleted;
   }
 
