@@ -8,6 +8,7 @@ import {
   getCanceledBookingsValidator,
 } from '../validators/booking.validators';
 import {
+  calculateBookingPriceController,
   cancelBookingController,
   createBookingController,
   getBookingController,
@@ -23,6 +24,12 @@ router.post(
   createBookingValidator(),
   parseValidationResult,
   createBookingController
+);
+router.post(
+  '/price',
+  createBookingValidator(),
+  parseValidationResult,
+  calculateBookingPriceController
 );
 
 router.put(
