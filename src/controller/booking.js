@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import APIError from '../errors/APIError';
 import Boats from '../models/Boats';
 import Bookings from '../models/Bookings';
+import SpecialPricing from '../models/SpecialPricing';
 import Users from '../models/Users';
 import { boatListTypes, bookingStatus, pricingType } from '../utils/constants';
 import { sendMessage } from '../utils/twilio';
@@ -66,6 +67,83 @@ function calculateRentalBoatPrice(period, pricing, type) {
   }
 
   return { price, renterPrice, discountPercentage };
+}
+
+async function calculatePriceWithSpecialPricing(
+  boatId,
+  basePrice,
+  startDate,
+  endDate
+) {
+  const specialPricing = await SpecialPricing.getActivePricingForDateRange(
+    boatId,
+    startDate,
+    endDate
+  );
+
+  if (!specialPricing) {
+    return {
+      finalPrice: basePrice,
+      basePrice,
+      specialPricingApplied: false,
+      specialPricingDiscount: 0,
+      specialPricingId: null,
+    };
+  }
+
+  const bookingStart = new Date(startDate);
+  const bookingEnd = new Date(endDate);
+
+  // Calculate total booking duration in milliseconds
+  const totalBookingDuration = bookingEnd - bookingStart;
+
+  const pricingStart = new Date(specialPricing.startDate);
+  const pricingEnd = new Date(specialPricing.endDate);
+
+  // Calculate overlap period
+  const overlapStart = new Date(
+    Math.max(bookingStart.getTime(), pricingStart.getTime())
+  );
+  const overlapEnd = new Date(
+    Math.min(bookingEnd.getTime(), pricingEnd.getTime())
+  );
+
+  // Calculate overlap duration in milliseconds
+  const overlapDuration = overlapEnd - overlapStart;
+
+  // Calculate what percentage of booking falls under this special pricing
+  const overlapPercentage = overlapDuration / totalBookingDuration;
+
+  // Calculate base price portion that falls under this special pricing
+  const basePricePortion = basePrice * overlapPercentage;
+
+  let discountAmount = 0;
+
+  if (specialPricing.type === 'discount') {
+    if (specialPricing.percent) {
+      discountAmount = (basePricePortion * specialPricing.percent) / 100;
+    } else if (specialPricing.amount) {
+      // For fixed amount, prorate based on overlap percentage
+      discountAmount = specialPricing.amount * overlapPercentage;
+    }
+  } else if (specialPricing.type === 'raise') {
+    if (specialPricing.amount) {
+      // For fixed raise amount, prorate based on overlap percentage
+      discountAmount = -specialPricing.amount * overlapPercentage;
+    } else if (specialPricing.percent) {
+      discountAmount = -(basePricePortion * specialPricing.percent) / 100;
+    }
+  }
+
+  const finalPrice = basePrice - discountAmount;
+
+  return {
+    finalPrice: Math.max(0, finalPrice),
+    basePrice,
+    specialPricingApplied: true,
+    specialPricingDiscount: Math.abs(discountAmount),
+    specialPricingId: specialPricing._id,
+  };
 }
 
 /**
@@ -214,11 +292,32 @@ export const createBookingController = async (req, res, next) => {
     const owner = await Users.findOne({ _id: ownerId });
     if (!owner) throw new Error('Owner not found');
 
+    const { finalPrice, specialPricingId, specialPricingApplied } =
+      await calculatePriceWithSpecialPricing(
+        boatId,
+        boakingParam.renterPrice,
+        duration.start,
+        duration.end
+      );
+
     const booking = new Bookings({
       ...boakingParam,
+      renterPrice: finalPrice,
+      specialPricingApplied,
+      specialPricingId,
     });
 
     const savedReservation = await booking.createBooking();
+    if (specialPricingApplied && specialPricingId) {
+      const updated = await SpecialPricing.findByIdAndUpdate(specialPricingId, {
+        $inc: { timesUsed: 1 },
+        $push: { usedInBookings: savedReservation._id },
+      });
+    }
+
+    const populatedBooking = await Bookings.findById(savedReservation._id)
+      .populate('specialPricingId', '-usedInBookings')
+      .exec();
     const ownerPhoneNumber = owner.phoneNumber;
 
     const requesterFirstName = req?.user?.firstName ?? '';
@@ -231,9 +330,134 @@ export const createBookingController = async (req, res, next) => {
       bookingId: booking._id.toString(),
     });
 
-    res.send(savedReservation);
+    res.send(populatedBooking);
   } catch (error) {
     next(error);
+  }
+};
+
+export const calculateBookingPriceController = async (req, res, next) => {
+  try {
+    const { boatId, type, duration, days, noPeople, hours, activityType } =
+      req.body;
+
+    const id = req?.user?._id;
+
+    let boakingParam = {
+      boatId,
+      type,
+      duration,
+      renter: id,
+      status: bookingStatus.PENDING,
+    };
+    boakingParam.duration.start = new Date(duration.start);
+
+    const boat = await Boats.getBoat({ boatId });
+    if (!boat) return res.send(boakingParam);
+    const listingType = boat?.listingType;
+
+    if (listingType === boatListTypes.RENTAL) {
+      const isTypeValid = [pricingType.PER_HOUR, pricingType.PER_DAY].includes(
+        type
+      );
+      if (!isTypeValid)
+        throw new APIError(
+          `Invalid booking type for ${listingType} boat `,
+          httpStatus.BAD_REQUEST
+        );
+      if (type === pricingType.PER_HOUR) {
+        if (!hours)
+          throw new APIError(
+            `Hours are required for ${pricingType.PER_HOUR} pricing `,
+            httpStatus.BAD_REQUEST
+          );
+        boakingParam.hours = hours;
+        boakingParam.days = 0;
+        boakingParam.duration = {
+          ...duration,
+          end: addHoursToDate(duration.start, hours),
+        };
+      }
+
+      if (type === pricingType.PER_DAY) {
+        if (!days)
+          throw new APIError(
+            `Days are required for ${pricingType.PER_HOUR} pricing `,
+            httpStatus.BAD_REQUEST
+          );
+
+        boakingParam.days = days;
+        boakingParam.hours = 0;
+        boakingParam.duration = {
+          ...duration,
+          end: addHoursToDate(duration.start, days * 24),
+        };
+      }
+
+      boakingParam = {
+        ...boakingParam,
+        ...calculateRentalBoatPrice({ hours, days }, boat.pricing, type),
+      };
+    }
+
+    if (listingType === boatListTypes.ACTIVITY) {
+      const isTypeValid = [pricingType.PER_PERSON].includes(type);
+      if (!isTypeValid)
+        throw new APIError(
+          `Invalid booking type for ${listingType} boat `,
+          httpStatus.BAD_REQUEST
+        );
+
+      if (!activityType)
+        throw new APIError(
+          `activity Type is required for for ${listingType} boat `,
+          httpStatus.BAD_REQUEST
+        );
+
+      if (type === pricingType.PER_PERSON) {
+        if (!noPeople)
+          throw new APIError(
+            `Number of people  is required for ${pricingType.PER_PERSON} pricing `,
+            httpStatus.BAD_REQUEST
+          );
+      }
+      boakingParam.noPeople = noPeople;
+      boakingParam.activityType = activityType;
+      const selectedAactivityType = boat?.activityTypes.find(
+        ({ type: fechtecType }) => fechtecType === activityType
+      );
+      if (selectedAactivityType) {
+        boakingParam.duration = {
+          ...duration,
+          end: addHoursToDate(
+            duration.start,
+            selectedAactivityType.durationHours
+          ),
+        };
+      }
+      boakingParam = {
+        ...boakingParam,
+        ...calculateActivityBoatPrice(noPeople, boat.pricing),
+      };
+    }
+
+    const { finalPrice, specialPricingId, specialPricingApplied } =
+      await calculatePriceWithSpecialPricing(
+        boatId,
+        boakingParam.renterPrice,
+        duration.start,
+        duration.end
+      );
+
+    return res.send({
+      ...boakingParam,
+      renterPrice: finalPrice,
+      specialPricingApplied,
+      specialPricingId,
+    });
+  } catch (error) {
+    next(error);
+    return null;
   }
 };
 

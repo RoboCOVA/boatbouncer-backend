@@ -38,7 +38,7 @@ export const offerCancelFailed = new APIError(
 );
 
 export const invalidOperaton = new APIError(
-  'Boat owner can not own his/her own boat',
+  'Boat owner can not book his/her own boat',
   httpStatus.BAD_REQUEST
 );
 

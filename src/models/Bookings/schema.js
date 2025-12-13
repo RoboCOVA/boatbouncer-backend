@@ -40,6 +40,16 @@ const bookingSchema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
+    specialPricingId: {
+      type: Types.ObjectId,
+      ref: modelNames.SPECIAL_PRICING,
+      required: false,
+      default: null,
+    },
+    specialPricingApplied: {
+      type: Boolean,
+      default: false,
+    },
     activityType: {
       type: String,
       enum: boatActivityTypeEnum,

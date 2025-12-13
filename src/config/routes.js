@@ -11,6 +11,7 @@ import testRoute from '../routes/test';
 import uploadRoute from '../routes/upload';
 import userRoute from '../routes/user';
 import reviewRoute from '../routes/review';
+import spcailPricingRoute from '../routes/specialPricing';
 
 const router = express.Router();
 

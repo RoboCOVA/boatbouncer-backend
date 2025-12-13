@@ -552,6 +552,38 @@ export async function getBoats({ pageNo, size, filter }) {
     },
   });
 
+  // : Active Special Pricing lookup (ONLY ACTIVE)
+  aggregationQuery.push({
+    $lookup: {
+      from: 'specialpricings',
+      let: { boatId: '$_id' },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ['$boatId', '$$boatId'] },
+            isActive: true,
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            type: 1,
+            amount: 1,
+            percent: 1,
+            title: 1,
+            description: 1,
+            startDate: 1,
+            endDate: 1,
+          },
+        },
+        { $sort: { startDate: 1 } },
+      ],
+      as: 'activeSpecialPricing',
+    },
+  });
+
   // STAGE 5+: Rest of your existing pipeline stages
   aggregationQuery.push(
     {
@@ -580,6 +612,7 @@ export async function getBoats({ pageNo, size, filter }) {
       $project: {
         isFavorite: { $cond: [{ $ifNull: ['$favorite', false] }, true, false] },
         bookings: 1,
+        activeSpecialPricing: 1,
         boatName: 1,
         boatType: 1,
         status: 1,
@@ -707,11 +740,7 @@ export async function getBoatListings({ pageNo, size, userId, filter }) {
  * It finds a boat by its id and returns it
  * @returns The boat object
  */
-export async function getBoatd({ boatId }) {
-  const boat = await this.findOne({ _id: boatId, status: { $ne: 'deleted' } });
-  if (!boat) throw boatNotFound;
-  return boat;
-}
+
 export async function getBoat({ boatId }) {
   // Convert string ID to ObjectId if needed
 
@@ -751,9 +780,42 @@ export async function getBoat({ boatId }) {
         as: 'bookings',
       },
     },
+
     {
       $addFields: {
         hasActiveBookings: { $gt: [{ $size: '$bookings' }, 0] },
+      },
+    },
+    {
+      $lookup: {
+        from: 'specialpricings',
+        let: { boatId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$boatId', '$$boatId'] },
+              isActive: true,
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              type: 1,
+              amount: 1,
+              percent: 1,
+              title: 1,
+              description: 1,
+              startDate: 1,
+              endDate: 1,
+              isActive: 1,
+              timesUsed: 1,
+              createdAt: 1,
+              updatedAt: 1,
+            },
+          },
+          { $sort: { startDate: 1 } },
+        ],
+        as: 'specialPricing',
       },
     },
   ]);

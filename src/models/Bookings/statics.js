@@ -108,7 +108,12 @@ export async function getBookings({ userId, isRenter }) {
     {
       path: 'boatId',
     },
+    {
+      path: 'specialPricingId',
+      select: ['-usedInBookings'],
+    },
   ]);
+
   const total = await this.count(matchQuery);
   return { data: bookings, total };
 }
@@ -118,6 +123,7 @@ export async function getBookings({ userId, isRenter }) {
  * @returns The booking object
  */
 export async function getBooking({ bookId, userId, isRenter }) {
+  console.log('called');
   const matchQuery = {
     _id: bookId,
     status: { $nin: [bookingStatus.CANCELLED] },
@@ -135,6 +141,10 @@ export async function getBooking({ bookId, userId, isRenter }) {
     },
     {
       path: 'renter',
+    },
+    {
+      path: 'specialPricingId',
+      select: ['-usedInBookings'],
     },
   ]);
   return booking;
