@@ -69,6 +69,15 @@ export async function getBoatReviews({ boatId, pageNo, size }) {
     {
       $sort: { date: -1 }, // Sort by date descending to get latest first
     },
+    // {
+    //   $group: {
+    //     _id: '$userId', // Group by user
+    //     allReviews: { $push: '$$ROOT' },
+    //   },
+    // },
+    // {
+    //   $replaceRoot: { newRoot: '$allReviews' }, // Replace root with the review document
+    // },
     {
       $group: {
         _id: '$userId', // Group by user
@@ -123,12 +132,23 @@ export async function getBoatReviews({ boatId, pageNo, size }) {
   ]);
 
   const total = totalResult[0]?.total || 0;
+  const page = pageNo || 1;
+  const totalPages = Math.ceil(total / limit);
+
+  // Calculate next and previous page numbers
+  const next = page < totalPages ? page + 1 : null;
+  const prev = page > 1 ? page - 1 : null;
 
   return {
     data: reviews,
-    total,
-    page: pageNo,
-    size: limit,
+    pagination: {
+      page,
+      size: limit,
+      totalItems: total,
+      totalPages,
+      next,
+      prev,
+    },
   };
 }
 
