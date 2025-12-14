@@ -25,6 +25,7 @@ router.use('/intent', authenticateJwt, intentRoute);
 router.use('/booking', authenticateJwt, bookingRoute);
 router.use('/message', authenticateJwt, messageRoute);
 router.use('/conversation', authenticateJwt, conversationRoute);
+router.use('/special-pricing', spcailPricingRoute);
 router.use('/reviews', reviewRoute);
 
 export default router;
