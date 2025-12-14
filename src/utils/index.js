@@ -239,3 +239,15 @@ export function getRemainingTime(departureTime) {
   }
   return remainingTime;
 }
+
+export function extractErrorMessageFromStack(stack) {
+  if (typeof stack !== 'string') return null;
+
+  // Match: APIError: <message>
+  const match = stack.match(/APIError:\s*(.+)/);
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+
+  return null;
+}
