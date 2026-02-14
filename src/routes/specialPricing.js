@@ -15,6 +15,7 @@ import {
   updateSpecialPricingValidator,
 } from '../validators/specialPricing.validator';
 import { authenticateJwt } from '../controller/authenticate';
+import { authenticateJwtOptional } from '../controller/authenticateOptional';
 
 const router = express.Router();
 
@@ -30,7 +31,7 @@ router.post(
 // Get all special pricing for a boat
 router.get(
   '/boat/:boatId',
-
+  authenticateJwtOptional,
   getBoatSpecialPricingValidator(),
   parseValidationResult,
   getBoatSpecialPricingController
@@ -39,7 +40,6 @@ router.get(
 // Get specific special pricing
 router.get(
   '/:pricingId',
-
   getSpecialPricingValidator(),
   parseValidationResult,
   getSpecialPricingController

@@ -30,14 +30,18 @@ export async function getSpecialPricingById(pricingId) {
 
 export async function getSpecialPricingByBoat(
   boatId,
+  isOwner,
   { page = 1, size = 10 } = {}
 ) {
   const { skip, limit } = getPaginationValues(page, size);
-
-  const query = {
-    boatId,
-    isActive: true,
-  };
+  const query = isOwner
+    ? {
+        boatId,
+      }
+    : {
+        boatId,
+        isActive: true,
+      };
 
   const [pricing, total] = await Promise.all([
     this.find(query)
@@ -76,7 +80,6 @@ export async function getSpecialPricingByBoat(
 export async function updateSpecialPricing(pricingId, updateData, userId) {
   const existingPricing = await this.findOne({
     _id: pricingId,
-    isActive: true,
   }).populate('boatId');
 
   if (!existingPricing) {
@@ -152,7 +155,6 @@ export async function updateSpecialPricing(pricingId, updateData, userId) {
       throw specialPricingOverlap;
     }
   }
-
   const updatedPricing = await this.findByIdAndUpdate(
     pricingId,
     { ...updateData, updatedAt: new Date() },
