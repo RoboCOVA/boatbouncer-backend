@@ -8,6 +8,7 @@ import * as environments from './environments';
 import APIError from '../errors/APIError';
 import routes from './routes';
 import { stripeWebHookController } from '../controller/webhook';
+import { extractErrorMessageFromStack } from '../utils';
 // import adminRoute from './admin';
 // import { adminJs } from './admin/config';
 
@@ -60,17 +61,46 @@ app.use((req, res, next) => {
 });
 
 // Catch errors passed from controllers
-app.use((err, req, res, next) => {
-  // Change error catched to APIError if instance is not APIError
-  if (!(err instanceof APIError)) {
-    const newError = new APIError(
-      err.message || 'An unknown error occured',
-      httpStatus.INTERNAL_SERVER_ERROR
-    );
+// app.use((err, req, res, next) => {
+//   // Change error catched to APIError if instance is not APIError
+//   const errorMessage = extractErrorMessageFromStack(err.stack);
+//   console.log({ err, errorMessage }, 'eeeeeeeeeeeeeeeeee');
+//   if (!(err instanceof APIError)) {
+//     const newError = new APIError(
+//       err.message || 'An unknown error occured',
+//       httpStatus.INTERNAL_SERVER_ERROR
+//     );
 
-    return next(newError);
+//     return next(newError);
+//   }
+
+//   return next(err);
+// });
+
+app.use((err, req, res, next) => {
+  const mainError = err;
+  // Extract message from stack if needed
+  const extractedMessage =
+    mainError?.message ||
+    extractErrorMessageFromStack(mainError?.stack) ||
+    'An unknown error occurred';
+
+  // If it's NOT already an APIError, wrap it properly
+  if (!(mainError instanceof APIError)) {
+    const error = new APIError(
+      extractedMessage,
+      mainError.status || httpStatus.INTERNAL_SERVER_ERROR
+    );
+    error.stack = null;
+    error.stack = extractedMessage;
+    return next(error);
   }
 
+  // If it's already APIError, ensure message is correct
+  mainError.message = null;
+
+  mainError.stack = extractedMessage;
+  mainError.message = extractedMessage;
   return next(err);
 });
 

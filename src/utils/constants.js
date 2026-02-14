@@ -251,8 +251,6 @@ export const authProvidersEnum = generateEnumArrayFromObject(authProviders);
 export const specialPricingTypes = {
   RAISE: 'raise',
   DISCOUNT: 'discount',
-  APPLE: 'apple',
-  FACEBOOK: 'facebook',
 };
 export const specialPricingTypeEnum =
   generateEnumArrayFromObject(specialPricingTypes);

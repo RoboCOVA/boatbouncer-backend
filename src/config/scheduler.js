@@ -104,7 +104,7 @@ export const Scheduler = async () => {
       );
     }
 
-    SpecialPricing.updateAllSpecialPricingStatuses();
+    SpecialPricing.updateAllSpecialPricingStatus();
   } catch (error) {
     console.log('scheduler failed to run');
   }

@@ -28,26 +28,50 @@ export async function getSpecialPricingById(pricingId) {
   return pricing;
 }
 
-/**
- * Get all special pricing for a boat
- */
-export async function getSpecialPricingByBoat(boatId, { pageNo, size } = {}) {
-  const { skip, limit } = getPaginationValues(pageNo, size);
+export async function getSpecialPricingByBoat(
+  boatId,
+  isOwner,
+  { page = 1, size = 10 } = {}
+) {
+  const { skip, limit } = getPaginationValues(page, size);
+  const query = isOwner
+    ? {
+        boatId,
+      }
+    : {
+        boatId,
+        isActive: true,
+      };
 
-  const query = {
-    boatId,
-    isActive: true,
+  const [pricing, total] = await Promise.all([
+    this.find(query)
+      .sort({ startDate: 1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('boatId'),
+    this.countDocuments(query),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  const pagination = {
+    page: parseInt(page, 10),
+    size: parseInt(size, 10),
+    totalItems: total,
+    totalPages,
+    next: page < totalPages ? page + 1 : null,
+    prev: page > 1 ? page - 1 : null,
+    hasNext: page < totalPages,
+    hasPrev: page > 1,
+    startIndex: skip + 1,
+    endIndex: Math.min(skip + limit, total),
   };
 
-  const pricing = await this.find(query)
-    .sort({ startDate: 1 })
-    .skip(skip)
-    .limit(limit)
-    .populate('boatId');
-
-  const total = await this.countDocuments(query);
-
-  return { data: pricing, total };
+  return {
+    data: pricing,
+    total,
+    pagination,
+  };
 }
 
 /**
@@ -56,7 +80,6 @@ export async function getSpecialPricingByBoat(boatId, { pageNo, size } = {}) {
 export async function updateSpecialPricing(pricingId, updateData, userId) {
   const existingPricing = await this.findOne({
     _id: pricingId,
-    isActive: true,
   }).populate('boatId');
 
   if (!existingPricing) {
@@ -132,7 +155,6 @@ export async function updateSpecialPricing(pricingId, updateData, userId) {
       throw specialPricingOverlap;
     }
   }
-
   const updatedPricing = await this.findByIdAndUpdate(
     pricingId,
     { ...updateData, updatedAt: new Date() },
@@ -245,7 +267,7 @@ export async function getActivePricingForDateRange(boatId, startDate, endDate) {
  * Check all special pricing entries across all boats and update their isActive status
  * based on the current date (startDate <= now <= endDate).
  */
-export async function updateAllSpecialPricingStatuses() {
+export async function updateAllSpecialPricingStatus() {
   const now = new Date();
   const allPricings = await this.find({});
 

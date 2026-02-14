@@ -1,18 +1,14 @@
-import SpecialPricing from '../models/SpecialPricing';
 import Boats from '../models/Boats';
-import {
-  specialPricingNotFound,
-  specialPricingCannotUpdate,
-  specialPricingCannotDelete,
-  boatOwnershipError,
-} from '../models/SpecialPricing/errors';
 import { boatNotFound } from '../models/Boats/errors';
+import SpecialPricing from '../models/SpecialPricing';
 
 export const createSpecialPricingController = async (req, res, next) => {
   try {
     const userId = req?.user?._id;
     const specialPricingData = req.body;
+
     // Verify user owns the boat
+
     const boat = await Boats.findOne({
       _id: specialPricingData.boatId,
       owner: userId,
@@ -41,17 +37,19 @@ export const getBoatSpecialPricingController = async (req, res, next) => {
     // Verify user owns the boat
     const boat = await Boats.findOne({
       _id: boatId,
-      owner: userId,
+      // owner: userId,
     });
 
     if (!boat) {
-      res.status(404).json({ message: 'Boat not found or access denied' });
+      throw boatNotFound;
     }
+    const isOwner = boat.owner?.toString() === userId?.toString();
 
     const specialPricing = await SpecialPricing.getSpecialPricingByBoat(
       boatId,
+      isOwner,
       {
-        pageNo,
+        page: pageNo,
         size,
       }
     );

@@ -14,12 +14,15 @@ import {
   getSpecialPricingValidator,
   updateSpecialPricingValidator,
 } from '../validators/specialPricing.validator';
+import { authenticateJwt } from '../controller/authenticate';
+import { authenticateJwtOptional } from '../controller/authenticateOptional';
 
 const router = express.Router();
 
 // Create special pricing
 router.post(
   '/',
+  authenticateJwt,
   createSpecialPricingValidator(),
   parseValidationResult,
   createSpecialPricingController
@@ -28,6 +31,7 @@ router.post(
 // Get all special pricing for a boat
 router.get(
   '/boat/:boatId',
+  authenticateJwtOptional,
   getBoatSpecialPricingValidator(),
   parseValidationResult,
   getBoatSpecialPricingController
@@ -44,6 +48,7 @@ router.get(
 // Update special pricing
 router.put(
   '/:pricingId',
+  authenticateJwt,
   updateSpecialPricingValidator(),
   parseValidationResult,
   updateSpecialPricingController
@@ -52,6 +57,7 @@ router.put(
 // Delete special pricing
 router.delete(
   '/:pricingId',
+  authenticateJwt,
   deleteSpecialPricingValidator(),
   parseValidationResult,
   deleteSpecialPricingController
