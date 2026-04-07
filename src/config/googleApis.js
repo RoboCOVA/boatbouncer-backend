@@ -1,14 +1,7 @@
-import path from 'path';
-import { readFileSync } from 'fs';
 import { google } from 'googleapis';
+import { loadFirebaseServiceAccount } from './firebase/loadServiceAccount';
 
-// Load your service account
-const serviceAccountPath = path.join(
-  __dirname,
-  './firebase/firebase-adminsdk.json'
-);
-
-const serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf-8'));
+const serviceAccount = loadFirebaseServiceAccount();
 
 const jwtClient = new google.auth.JWT({
   email: serviceAccount.client_email,

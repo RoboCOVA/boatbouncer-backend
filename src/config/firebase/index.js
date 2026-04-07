@@ -1,8 +1,8 @@
 import admin from 'firebase-admin';
-import adminSDK from './firebase-adminsdk.json';
+import { loadFirebaseServiceAccount } from './loadServiceAccount';
 
 admin.initializeApp({
-  credential: admin.credential.cert(adminSDK),
+  credential: admin.credential.cert(loadFirebaseServiceAccount()),
   //   databaseURL: 'your-database-url-here',
 });
 

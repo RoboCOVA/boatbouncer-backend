@@ -1,6 +1,9 @@
 node_modules/
 .env
 
+# Firebase Admin SDK (use GOOGLE_APPLICATION_CREDENTIALS or FIREBASE_SERVICE_ACCOUNT_JSON)
+src/config/firebase/firebase-adminsdk.json
+
 # logs
 logs/
 *.log

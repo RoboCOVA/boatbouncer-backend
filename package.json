@@ -8,7 +8,7 @@
     "start": "nodemon --exec babel-node src/index.js",
     "lint": "eslint . --ext .js --color -f table",
     "seed": "babel-node src/config/adminSeeder.js",
-    "build": "babel ./src -d dist && cp src/config/firebase/firebase-adminsdk.json dist/config/firebase/firebase-adminsdk.json",
+    "build": "babel ./src -d dist",
     "start:prod": "babel-node dist/index.js"
   },
   "husky": {
