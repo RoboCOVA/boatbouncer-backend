@@ -7,9 +7,18 @@ function parseServiceAccountJsonFromEnv() {
   return JSON.parse(raw);
 }
 
+function parseServiceAccountFromBase64Env() {
+  const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_JSON_BASE64;
+  if (!b64) return null;
+  return JSON.parse(Buffer.from(b64.trim(), 'base64').toString('utf8'));
+}
+
 export function loadFirebaseServiceAccount() {
   const fromEnv = parseServiceAccountJsonFromEnv();
   if (fromEnv) return fromEnv;
+
+  const fromBase64 = parseServiceAccountFromBase64Env();
+  if (fromBase64) return fromBase64;
 
   const credPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   if (credPath && existsSync(credPath)) {
@@ -22,7 +31,7 @@ export function loadFirebaseServiceAccount() {
   }
 
   throw new Error(
-    'Firebase service account missing. Set GOOGLE_APPLICATION_CREDENTIALS (path to JSON), ' +
-      'or FIREBASE_SERVICE_ACCOUNT_JSON (full JSON string), or add firebase-adminsdk.json next to this module (local dev only).'
+    'Firebase service account missing. Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_JSON_BASE64, ' +
+      'or GOOGLE_APPLICATION_CREDENTIALS (path to JSON file), or add firebase-adminsdk.json next to this module (local dev only).'
   );
 }
