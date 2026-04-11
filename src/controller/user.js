@@ -7,6 +7,7 @@ import Boats from '../models/Boats';
 import Otp from '../models/Otp';
 import Users from '../models/Users';
 import { emailToUsername, encryptData } from '../utils';
+import { logIdentityToolkitSmsError } from '../utils/logIdentityToolkitSmsError';
 import { authProviders } from '../utils/constants';
 
 export const createUserController = async (req, res, next) => {
@@ -53,8 +54,8 @@ export const formValidatedController = async (req, res, next) => {
 };
 
 export const sendSmsController = async (req, res, next) => {
+  const { phoneNumber, recaptchaToken } = req.body;
   try {
-    const { phoneNumber, recaptchaToken } = req.body;
     const response = await identityToolkit.relyingparty.sendVerificationCode({
       phoneNumber,
       recaptchaToken,
@@ -67,6 +68,11 @@ export const sendSmsController = async (req, res, next) => {
 
     res.send(user);
   } catch (error) {
+    logIdentityToolkitSmsError(error, {
+      phoneNumber,
+      recaptchaToken,
+      reqIp: req.ip,
+    });
     next(error);
   }
 };
