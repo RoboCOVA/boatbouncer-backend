@@ -62,4 +62,8 @@ export const adminJs = new AdminJS({
   },
 });
 
-adminJs.watch();
+// NOTE: adminJs.watch() must NEVER be called in production.
+// It starts an in-memory webpack bundler (for hot-reloading components)
+// which causes the JavaScript heap OOM crash on Heroku.
+// Only call it locally during development if you are editing custom components.
+// if (process.env.NODE_ENV === 'development') adminJs.watch();

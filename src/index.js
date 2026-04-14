@@ -20,6 +20,7 @@ import { initializEmitters } from './socket/emitters';
 import { Scheduler } from './config/scheduler';
 
 const emitter = new EventEmitter();
+emitter.setMaxListeners(200); // 1 listener per connected socket; adjust if you expect > 200 concurrent users
 global._emitter = emitter;
 
 // Init passport

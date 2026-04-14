@@ -4,7 +4,7 @@ const { _emitter } = global;
 
 // eslint-disable-next-line import/prefer-default-export
 export default (socket) => {
-  _emitter.on(eventNames.NEW_NOTIFICATION, (payload) => {
+  const notificationHandler = (payload) => {
     const { notification, users } = payload;
     const { _id } = socket.request.user;
     if (users.includes(_id.toString())) {
@@ -43,5 +43,12 @@ export default (socket) => {
         title,
       });
     }
+  };
+
+  _emitter.on(eventNames.NEW_NOTIFICATION, notificationHandler);
+
+  // Clean up listener when the socket disconnects to prevent memory leaks
+  socket.on('disconnect', () => {
+    _emitter.removeListener(eventNames.NEW_NOTIFICATION, notificationHandler);
   });
 };
