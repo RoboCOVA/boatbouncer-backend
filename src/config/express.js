@@ -8,8 +8,8 @@ import * as environments from './environments';
 import APIError from '../errors/APIError';
 import routes from './routes';
 import { stripeWebHookController } from '../controller/webhook';
-// import adminRoute from './admin';
-// import { adminJs } from './admin/config';
+import adminRoute from './admin';
+import { adminJs } from './admin/config';
 
 const app = express();
 
@@ -27,7 +27,7 @@ if (environments.nodeEnv !== 'test') {
 
 // AdminBro/Js
 app.use(cors());
-// app.use(adminJs.options.rootPath, adminRoute);
+app.use(adminJs.options.rootPath, adminRoute);
 // Secure middlewares
 app.use(helmet());
 
