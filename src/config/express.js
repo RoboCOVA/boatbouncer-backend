@@ -28,6 +28,22 @@ if (environments.nodeEnv !== 'test') {
 // AdminBro/Js
 app.use(cors());
 // app.use(adminJs.options.rootPath, adminRoute);
+
+// AdminJS is only loaded when ENABLE_ADMIN=true to prevent OOM on low-RAM dynos.
+// webpack bundles all custom components at startup and needs ~300-400MB extra heap.
+// On Heroku: set ENABLE_ADMIN=true only on a Standard-2X (1GB) dyno.
+if (process.env.ENABLE_ADMIN === 'true') {
+  // eslint-disable-next-line global-require
+  const adminRouteModule = require('./admin').default;
+  // eslint-disable-next-line global-require
+  const { adminJs: adminJsInstance } = require('./admin/config');
+  app.use(adminJsInstance.options.rootPath, adminRouteModule);
+  // eslint-disable-next-line no-console
+  console.log(
+    '[AdminJS] Admin panel enabled at',
+    adminJsInstance.options.rootPath
+  );
+}
 // Secure middlewares
 app.use(helmet());
 
