@@ -1,5 +1,8 @@
 import Bookings from '../models/Bookings';
+import Notifications from '../models/Notifications';
 import Offers from '../models/Offers';
+import { modelNames } from '../models/constants';
+import { notificationActionTypes } from '../models/Notifications/constants';
 import {
   formatDuration,
   getMinutesDifference,
@@ -32,6 +35,29 @@ export const Scheduler = async () => {
       await Bookings.updateMany(
         { _id: { $in: bookIds } },
         { $set: { status: bookingStatus.COMPLETED } }
+      );
+
+      const completedBookings = await Bookings.find({
+        _id: { $in: bookIds },
+      }).populate('renter owner', '_id');
+
+      await Promise.all(
+        completedBookings.map((booking) => {
+          const completedNotif = new Notifications({
+            title: 'Booking Completed',
+            content: 'Booking Information',
+            modelType: modelNames.BOOKINGS,
+            userType: modelNames.USERS,
+            createdBy: booking.renter._id,
+            actionType: notificationActionTypes.UPDATE,
+            model: booking._id,
+          });
+          return completedNotif
+            .createNotification({
+              userIds: [booking.renter._id, booking.owner._id],
+            })
+            .catch((err) => console.error('[Notification]', err));
+        })
       );
     }
 

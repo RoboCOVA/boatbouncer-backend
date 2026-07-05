@@ -76,6 +76,7 @@ export async function cancelBooking({ bookId, userId, isRenter }) {
  * @returns An array of bookings.
  */
 export async function getBookings({ userId, isRenter }) {
+  const Messages = this.model(modelNames.MESSAGES);
   const matchQuery = {
     status: { $nin: [bookingStatus.CANCELLED, bookingStatus.COMPLETED] },
   };
@@ -110,7 +111,26 @@ export async function getBookings({ userId, isRenter }) {
     },
   ]);
   const total = await this.count(matchQuery);
-  return { data: bookings, total };
+
+  const conversationIds = bookings.map((b) => b.conversationId).filter(Boolean);
+
+  const unreadConvIds = conversationIds.length
+    ? await Messages.distinct('conversation', {
+        conversation: { $in: conversationIds },
+        isRead: false,
+        sender: { $ne: userId },
+      })
+    : [];
+
+  const unreadSet = new Set(unreadConvIds.map((id) => id.toString()));
+
+  const data = bookings.map((b) => {
+    const obj = b.toObject();
+    obj.hasUnreadMessage = unreadSet.has(b.conversationId?.toString() ?? '');
+    return obj;
+  });
+
+  return { data, total };
 }
 
 /**
@@ -118,6 +138,7 @@ export async function getBookings({ userId, isRenter }) {
  * @returns The booking object
  */
 export async function getBooking({ bookId, userId, isRenter }) {
+  const Messages = this.model(modelNames.MESSAGES);
   const matchQuery = {
     _id: bookId,
     status: { $nin: [bookingStatus.CANCELLED] },
@@ -137,7 +158,17 @@ export async function getBooking({ bookId, userId, isRenter }) {
       path: 'renter',
     },
   ]);
-  return booking;
+
+  if (!booking) return null;
+
+  const obj = booking.toObject();
+  obj.hasUnreadMessage = !!(await Messages.exists({
+    conversation: booking.conversationId,
+    isRead: false,
+    sender: { $ne: userId },
+  }));
+
+  return obj;
 }
 
 export async function checkAvailability({ boatId, start, end }) {
@@ -181,6 +212,7 @@ export async function checkAvailability({ boatId, start, end }) {
  * @returns An array of canceled bookings
  */
 export async function getCanceledBookings({ userId, as }) {
+  const Messages = this.model(modelNames.MESSAGES);
   const matchQuery = { status: bookingStatus.CANCELLED };
   if (as === 'renter') {
     matchQuery.renter = userId;
@@ -212,10 +244,30 @@ export async function getCanceledBookings({ userId, as }) {
     },
   ]);
   const total = await this.count(matchQuery);
-  return { data: bookings, total };
+
+  const conversationIds = bookings.map((b) => b.conversationId).filter(Boolean);
+
+  const unreadConvIds = conversationIds.length
+    ? await Messages.distinct('conversation', {
+        conversation: { $in: conversationIds },
+        isRead: false,
+        sender: { $ne: userId },
+      })
+    : [];
+
+  const unreadSet = new Set(unreadConvIds.map((id) => id.toString()));
+
+  const data = bookings.map((b) => {
+    const obj = b.toObject();
+    obj.hasUnreadMessage = unreadSet.has(b.conversationId?.toString() ?? '');
+    return obj;
+  });
+
+  return { data, total };
 }
 
 export async function getCompletedBookings({ userId, as }) {
+  const Messages = this.model(modelNames.MESSAGES);
   const matchQuery = { status: bookingStatus.COMPLETED };
   if (as === 'renter') {
     matchQuery.renter = userId;
@@ -247,5 +299,24 @@ export async function getCompletedBookings({ userId, as }) {
     },
   ]);
   const total = await this.count(matchQuery);
-  return { data: bookings, total };
+
+  const conversationIds = bookings.map((b) => b.conversationId).filter(Boolean);
+
+  const unreadConvIds = conversationIds.length
+    ? await Messages.distinct('conversation', {
+        conversation: { $in: conversationIds },
+        isRead: false,
+        sender: { $ne: userId },
+      })
+    : [];
+
+  const unreadSet = new Set(unreadConvIds.map((id) => id.toString()));
+
+  const data = bookings.map((b) => {
+    const obj = b.toObject();
+    obj.hasUnreadMessage = unreadSet.has(b.conversationId?.toString() ?? '');
+    return obj;
+  });
+
+  return { data, total };
 }

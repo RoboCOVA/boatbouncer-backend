@@ -6,6 +6,7 @@ import bookingRoute from '../routes/booking';
 import conversationRoute from '../routes/conversaton';
 import intentRoute from '../routes/intent';
 import messageRoute from '../routes/message';
+import notificationRoute from '../routes/notification';
 import offerRoute from '../routes/offer';
 import testRoute from '../routes/test';
 import uploadRoute from '../routes/upload';
@@ -24,6 +25,7 @@ router.use('/intent', authenticateJwt, intentRoute);
 router.use('/booking', authenticateJwt, bookingRoute);
 router.use('/message', authenticateJwt, messageRoute);
 router.use('/conversation', authenticateJwt, conversationRoute);
+router.use('/notification', authenticateJwt, notificationRoute);
 router.use('/reviews', reviewRoute);
 
 export default router;

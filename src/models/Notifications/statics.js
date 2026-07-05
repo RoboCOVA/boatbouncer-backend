@@ -1,4 +1,4 @@
-import { clickUpdateFailed } from './errors';
+import { clickUpdateFailed, deleteNotificationFailed } from './errors';
 
 // eslint-disable-next-line import/prefer-default-export
 export async function updateNotificationSeenStatus(
@@ -14,7 +14,7 @@ export async function updateNotificationSeenStatus(
         : { _id: id, createdBy: userId };
       const updatedNotification = await this.findOneAndUpdate(
         matchQuery,
-        { $push: { seenBy: userId } },
+        { $addToSet: { seenBy: userId } },
         { new: true }
       );
       if (updatedNotification)
@@ -23,6 +23,17 @@ export async function updateNotificationSeenStatus(
   );
 
   return updatedNotificationIds;
+}
+
+export async function softDeleteNotification(notificationId, userId) {
+  const updated = await this.findOneAndUpdate(
+    { _id: notificationId, deletedBy: { $ne: userId } },
+    { $push: { deletedBy: userId } },
+    { new: true }
+  );
+
+  if (!updated) throw deleteNotificationFailed;
+  return notificationId;
 }
 
 export async function updateNotificationClickedBy(

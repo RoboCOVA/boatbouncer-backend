@@ -31,6 +31,7 @@ const notificationSchema = new Schema(
     parentId: { type: Schema.Types.Mixed },
     seenBy: [{ type: Schema.Types.Mixed, refPath: 'userType' }],
     clickedBy: [{ type: Schema.Types.Mixed, refPath: 'userType' }],
+    deletedBy: [{ type: Schema.Types.Mixed, refPath: 'userType' }],
     createdBy: { type: Schema.Types.Mixed, refPath: 'userType' },
   },
 

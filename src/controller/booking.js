@@ -2,8 +2,11 @@ import httpStatus from 'http-status';
 import APIError from '../errors/APIError';
 import Boats from '../models/Boats';
 import Bookings from '../models/Bookings';
+import Notifications from '../models/Notifications';
 import Users from '../models/Users';
 import { boatListTypes, bookingStatus, pricingType } from '../utils/constants';
+import { modelNames } from '../models/constants';
+import { notificationActionTypes } from '../models/Notifications/constants';
 import { sendMessage } from '../utils/twilio';
 import { addHoursToDate, formatDuration } from '../utils';
 import Messages from '../models/Messages';
@@ -231,6 +234,19 @@ export const createBookingController = async (req, res, next) => {
       bookingId: booking._id.toString(),
     });
 
+    const bookingNotif = new Notifications({
+      title: 'New Booking Request',
+      content: 'Booking Information',
+      modelType: modelNames.BOOKINGS,
+      userType: modelNames.USERS,
+      createdBy: id,
+      actionType: notificationActionTypes.CREATE,
+      model: savedReservation._id,
+    });
+    bookingNotif
+      .createNotification({ userIds: [ownerId] })
+      .catch((err) => console.error('[Notification]', err));
+
     res.send(savedReservation);
   } catch (error) {
     next(error);
@@ -289,6 +305,20 @@ export const cancelBookingController = async (req, res, next) => {
       lastName,
       boatName: booking?.boatId?.boatName,
     });
+
+    const otherPartyId = isRenter ? booking.owner : booking.renter._id;
+    const cancelNotif = new Notifications({
+      title: 'Booking Cancelled',
+      content: 'Booking Information',
+      modelType: modelNames.BOOKINGS,
+      userType: modelNames.USERS,
+      createdBy: userId,
+      actionType: notificationActionTypes.UPDATE,
+      model: bookId,
+    });
+    cancelNotif
+      .createNotification({ userIds: [otherPartyId] })
+      .catch((err) => console.error('[Notification]', err));
 
     res.send(cancelledBooking);
   } catch (error) {
