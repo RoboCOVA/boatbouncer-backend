@@ -12,7 +12,7 @@ export async function createUsersNotification() {
       {
         $push: {
           notifications: {
-            $each: [notifications],
+            $each: notifications,
             $position: 0,
           },
         },

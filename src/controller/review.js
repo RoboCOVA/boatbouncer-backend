@@ -1,7 +1,10 @@
 import httpStatus from 'http-status';
 import APIError from '../errors/APIError';
+import Notifications from '../models/Notifications';
 import Reviews from '../models/Reviews';
 import Bookings from '../models/Bookings';
+import { modelNames } from '../models/constants';
+import { notificationActionTypes } from '../models/Notifications/constants';
 import { getPaginationValues } from '../utils';
 
 /**
@@ -21,6 +24,23 @@ export const createReviewController = async (req, res, next) => {
     });
 
     const savedReview = await review.createReview();
+
+    const booking = await Bookings.findOne({ _id: bookingId });
+    if (booking) {
+      const reviewNotif = new Notifications({
+        title: 'New Review',
+        content: 'Review Information',
+        modelType: modelNames.REVIEWS,
+        userType: modelNames.USERS,
+        createdBy: userId,
+        actionType: notificationActionTypes.CREATE,
+        model: savedReview._id,
+      });
+      reviewNotif
+        .createNotification({ userIds: [booking.owner] })
+        .catch((err) => console.error('[Notification]', err));
+    }
+
     res.status(httpStatus.CREATED).send(savedReview);
   } catch (error) {
     next(error);

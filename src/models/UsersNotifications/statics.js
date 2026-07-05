@@ -26,7 +26,10 @@ export async function getNotifications(pageNo, size, userId) {
           {
             $match: {
               $expr: {
-                $in: ['$_id', '$$notificationId'],
+                $and: [
+                  { $in: ['$_id', { $ifNull: ['$$notificationId', []] }] },
+                  { $not: { $in: [userId, { $ifNull: ['$deletedBy', []] }] } },
+                ],
               },
             },
           },
@@ -40,7 +43,7 @@ export async function getNotifications(pageNo, size, userId) {
               seen: {
                 $cond: {
                   if: {
-                    $in: [userId, '$seenBy'],
+                    $in: [userId, { $ifNull: ['$seenBy', []] }],
                   },
                   then: true,
                   else: false,
@@ -49,7 +52,7 @@ export async function getNotifications(pageNo, size, userId) {
               clicked: {
                 $cond: {
                   if: {
-                    $in: [userId, '$clickedBy'],
+                    $in: [userId, { $ifNull: ['$clickedBy', []] }],
                   },
                   then: true,
                   else: false,
@@ -119,7 +122,7 @@ export async function getNotifications(pageNo, size, userId) {
                 $sum: {
                   $cond: {
                     if: {
-                      $in: [userId, '$seenBy'],
+                      $in: [userId, { $ifNull: ['$seenBy', []] }],
                     },
                     then: 1,
                     else: 0,
@@ -131,7 +134,7 @@ export async function getNotifications(pageNo, size, userId) {
                   $cond: {
                     if: {
                       $not: {
-                        $in: [userId, '$seenBy'],
+                        $in: [userId, { $ifNull: ['$seenBy', []] }],
                       },
                     },
                     then: 1,
