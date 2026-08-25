@@ -2,69 +2,86 @@ import { startSession } from 'mongoose';
 import compareAsc from 'date-fns/compareAsc';
 import { modelNames } from '../constants';
 import {
+  boatNotBookable,
   boatNotFound,
   bookingNotAvailable,
   invalidDateRange,
   invalidOperaton,
 } from './errors';
 import { userNotFound } from '../Users/errors';
+import { boatStatus } from '../../utils/constants';
 
 export async function createBooking() {
-  // eslint-disable-next-line no-async-promise-executor
-  return new Promise(async (resolve, reject) => {
-    const session = await startSession();
-    const Boats = this.model(modelNames.BOATS);
-    const Users = this.model(modelNames.USERS);
-    const Conversations = this.model(modelNames.CONVERSATIONS);
+  const session = await startSession();
+  const Boats = this.model(modelNames.BOATS);
+  const Users = this.model(modelNames.USERS);
+  const Conversations = this.model(modelNames.CONVERSATIONS);
 
-    try {
-      await session.withTransaction(async () => {
-        const { boatId, renter, duration } = this;
+  try {
+    let reservation;
 
-        /** Check if the given range is valid */
-        const { start, end } = duration;
-        const result = compareAsc(new Date(end), new Date(start));
-        if (result === -1) throw invalidDateRange;
+    await session.withTransaction(async () => {
+      const { boatId, renter, duration } = this;
 
-        /** Check if the boat exists */
-        const boat = await Boats.findOne({ _id: boatId });
-        if (!boat) throw boatNotFound;
-        // If not captained remove captain price
-        // if (!boat?.captained && this.captainPrice) delete this.captainPrice;
+      /**
+       * `withTransaction` retries on write conflict, and Mongoose marks a
+       * document as no longer new once `save()` resolves — which would turn a
+       * retry into an update against a rolled-back row.
+       */
+      this.isNew = true;
 
-        const isAvailable = await this.constructor.checkAvailability({
-          boatId,
-          start,
-          end,
-        });
+      /** Check if the given range is valid */
+      const { start, end } = duration;
+      const result = compareAsc(new Date(end), new Date(start));
+      if (result === -1) throw invalidDateRange;
 
-        if (!isAvailable) throw bookingNotAvailable;
-        /** Check if the provided user exists */
-        const user = await Users.findOne({ _id: renter });
-        if (!user || user.isDeleted) throw userNotFound;
+      /**
+       * Claim the boat for this transaction before reading its availability.
+       * This write is what makes two concurrent bookings of the same boat
+       * conflict; without it the availability check is a range read that
+       * nothing serializes against, and both callers see a free slot.
+       */
+      const boat = await Boats.findOneAndUpdate(
+        { _id: boatId },
+        { $inc: { bookingSeq: 1 } },
+        { session, new: true }
+      );
+      if (!boat) throw boatNotFound;
+      // A paused or deleted listing is still reachable by direct link, so the
+      // booking path is where availability has to be enforced.
+      if (boat.status !== boatStatus.ACTIVE) throw boatNotBookable;
+      // If not captained remove captain price
+      // if (!boat?.captained && this.captainPrice) delete this.captainPrice;
 
-        if (!boat?.owner) throw userNotFound;
-
-        if (boat?.owner?.equals(renter)) throw invalidOperaton;
-        /** Create Conversaton */
-        const conversation = await Conversations({
-          members: [boat?.owner, renter],
-        });
-
-        const savedConversation = await conversation.save({ session });
-
-        this.owner = boat.owner;
-        this.conversationId = savedConversation._id;
-        const reservation = await this.save({ session });
-
-        await session.commitTransaction();
-        resolve(reservation);
+      const isAvailable = await this.constructor.checkAvailability({
+        boatId,
+        start,
+        end,
+        session,
       });
-    } catch (error) {
-      await session.endSession();
-      reject(error);
-    } finally {
-      await session.endSession();
-    }
-  });
+
+      if (!isAvailable) throw bookingNotAvailable;
+      /** Check if the provided user exists */
+      const user = await Users.findOne({ _id: renter }).session(session);
+      if (!user || user.isDeleted) throw userNotFound;
+
+      if (!boat?.owner) throw userNotFound;
+
+      if (boat?.owner?.equals(renter)) throw invalidOperaton;
+      /** Create Conversaton */
+      const conversation = await Conversations({
+        members: [boat?.owner, renter],
+      });
+
+      const savedConversation = await conversation.save({ session });
+
+      this.owner = boat.owner;
+      this.conversationId = savedConversation._id;
+      reservation = await this.save({ session });
+    });
+
+    return reservation;
+  } finally {
+    await session.endSession();
+  }
 }

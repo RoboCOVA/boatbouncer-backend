@@ -1,13 +1,12 @@
 import httpStatus from 'http-status';
 import passport from 'passport';
 import * as environments from '../config/environments';
-import { identityToolkit } from '../config/googleApis';
 import APIError from '../errors/APIError';
 import Boats from '../models/Boats';
 import Otp from '../models/Otp';
 import Users from '../models/Users';
 import { emailToUsername, encryptData } from '../utils';
-import { logIdentityToolkitSmsError } from '../utils/logIdentityToolkitSmsError';
+import { sendVerificationCode } from '../utils/identityToolkitSms';
 import { authProviders } from '../utils/constants';
 
 export const createUserController = async (req, res, next) => {
@@ -56,10 +55,10 @@ export const formValidatedController = async (req, res, next) => {
 export const sendSmsController = async (req, res, next) => {
   const { phoneNumber, recaptchaToken } = req.body;
   try {
-    const response = await identityToolkit.relyingparty.sendVerificationCode({
-      phoneNumber,
-      recaptchaToken,
-    });
+    const response = await sendVerificationCode(
+      { phoneNumber, recaptchaToken },
+      { reqIp: req.ip }
+    );
 
     const user = await Users.saveUserSession({
       phoneNumber,
@@ -68,11 +67,6 @@ export const sendSmsController = async (req, res, next) => {
 
     res.send(user);
   } catch (error) {
-    logIdentityToolkitSmsError(error, {
-      phoneNumber,
-      recaptchaToken,
-      reqIp: req.ip,
-    });
     next(error);
   }
 };
@@ -445,10 +439,10 @@ export const addPhoneNumberController = async (req, res, next) => {
     }
 
     await Users.addPhoneNumber({ phoneNumber, userId: userAccount._id });
-    const response = await identityToolkit.relyingparty.sendVerificationCode({
-      phoneNumber,
-      recaptchaToken,
-    });
+    const response = await sendVerificationCode(
+      { phoneNumber, recaptchaToken },
+      { reqIp: req.ip }
+    );
 
     const user = await Users.saveUserSession({
       phoneNumber,
@@ -467,6 +461,35 @@ export const deleteUserAccount = async (req, res, next) => {
     const userId = req.user._id;
     const result = await Users.deleteUserAccount({ userId });
 
+    res.send(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Web push registration. The browser produces an FCM token after the user
+ * grants notification permission; the client posts it here on every load, and
+ * `registerDeviceToken` treats a repeat as a refresh rather than a duplicate.
+ */
+export const registerDeviceTokenController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id;
+    const { token, platform } = req.body;
+
+    const result = await Users.registerDeviceToken({ userId, token, platform });
+    res.send(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeDeviceTokenController = async (req, res, next) => {
+  try {
+    const userId = req?.user?._id;
+    const { token } = req.body;
+
+    const result = await Users.removeDeviceToken({ userId, token });
     res.send(result);
   } catch (error) {
     next(error);

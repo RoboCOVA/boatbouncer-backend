@@ -6,11 +6,6 @@ export const boatNotFound = new APIError(
   'Boat Not Found',
   httpStatus.NOT_FOUND
 );
-export const boatNameUsed = new APIError(
-  'Boat name already used',
-  httpStatus.CONFLICT
-);
-
 export const boatDeleteFailed = new APIError(
   'Boat Delete Operation Failed',
   httpStatus.BAD_REQUEST

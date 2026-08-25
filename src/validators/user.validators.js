@@ -1,5 +1,9 @@
 import { body, param } from 'express-validator';
-import { authProviders, strongPasswordRegex } from '../utils/constants';
+import {
+  authProviders,
+  devicePlatformsEnum,
+  strongPasswordRegex,
+} from '../utils/constants';
 import defaultValidators from './default.validator';
 
 export const createUserValidator = () => [
@@ -16,7 +20,7 @@ export const createUserValidator = () => [
     .withMessage(
       'Password should be at least 8 characters and not greater than 60'
     )
-    .withMessage((val) => strongPasswordRegex.test(val))
+    .matches(strongPasswordRegex)
     .withMessage(
       'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
     ),
@@ -52,7 +56,7 @@ export const updateUserValidator = () => [
     .withMessage(
       'Password should be at least 8 cahracters and not greater than 60'
     )
-    .withMessage((val) => strongPasswordRegex.test(val))
+    .matches(strongPasswordRegex)
     .withMessage(
       'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
     )
@@ -123,7 +127,7 @@ export const resetPasswordValidator = () => [
     .withMessage(
       'Password should be at least 8 characters and not greater than 60'
     )
-    .withMessage((val) => strongPasswordRegex.test(val))
+    .matches(strongPasswordRegex)
     .withMessage(
       'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
     ),
@@ -137,7 +141,7 @@ export const setLocalPasswordValidator = () => [
     .withMessage(
       'Password should be at least 8 characters and not greater than 60'
     )
-    .withMessage((val) => strongPasswordRegex.test(val))
+    .matches(strongPasswordRegex)
     .withMessage(
       'Password should contain a lower case letter, an upper case letter, a number and one of these symbols (!@#$%^&*).'
     ),
@@ -164,4 +168,15 @@ export const addPhoneNumberValidator = () => [
     .isString()
     .withMessage('Valid recaptchaToken is required'),
   defaultValidators.phoneNumber,
+];
+
+export const deviceTokenValidator = () => [
+  body('token')
+    .isString()
+    .isLength({ min: 1, max: 4096 })
+    .withMessage('A valid device token is required'),
+  body('platform')
+    .isIn(devicePlatformsEnum)
+    .optional()
+    .withMessage('Platform must be one of web, ios or android'),
 ];

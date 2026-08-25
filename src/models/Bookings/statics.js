@@ -171,7 +171,12 @@ export async function getBooking({ bookId, userId, isRenter }) {
   return obj;
 }
 
-export async function checkAvailability({ boatId, start, end }) {
+export async function checkAvailability({
+  boatId,
+  start,
+  end,
+  session = null,
+}) {
   const startDate = new Date(start);
   const endDate = new Date(end);
 
@@ -181,7 +186,7 @@ export async function checkAvailability({ boatId, start, end }) {
     );
   }
 
-  const bookings = await this.find({
+  const query = {
     boatId,
     status: { $nin: [bookingStatus.CANCELLED] },
     // 'duration.start': { $gte: startDate },
@@ -201,7 +206,11 @@ export async function checkAvailability({ boatId, start, end }) {
         'duration.end': { $gte: endDate },
       },
     ],
-  });
+  };
+
+  // Read inside the caller's transaction when there is one, so the check sees
+  // the same snapshot as the insert it is guarding.
+  const bookings = await this.find(query).session(session);
 
   if (bookings?.length) return false;
   return true;

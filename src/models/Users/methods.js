@@ -99,6 +99,10 @@ export function clean() {
   // delete userObj?.facebookId;
   delete userObj?.facebookIdTemp;
 
+  // Push registration targets are for the server to hold, not for API
+  // responses to carry back out.
+  delete userObj?.deviceTokens;
+
   // delete userObj.stripeCustomerId;
   // Delete other sensetive fields like this
   return userObj;

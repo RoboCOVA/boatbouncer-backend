@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
-import { authProviders, authProvidersEnum } from '../../utils/constants';
+import {
+  authProviders,
+  authProvidersEnum,
+  devicePlatforms,
+} from '../../utils/constants';
 
 const userSchema = new mongoose.Schema(
   {
@@ -43,6 +47,27 @@ const userSchema = new mongoose.Schema(
     appleIdTemp: { type: String },
     facebookIdTemp: { type: String },
     isDeleted: { type: Boolean, default: false },
+
+    /**
+     * Web push targets registered by the client after the user grants
+     * notification permission. One user can hold several (a laptop and a phone
+     * browser), and FCM rotates them, so entries are matched on `token` and
+     * pruned when FCM reports them as unregistered.
+     */
+    deviceTokens: {
+      type: [
+        {
+          token: { type: String, required: true },
+          platform: {
+            type: String,
+            enum: Object.values(devicePlatforms),
+            default: devicePlatforms.WEB,
+          },
+          lastSeenAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );

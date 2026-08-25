@@ -76,6 +76,7 @@ router.get(
 // Get all reviews by the current user
 router.get(
   '/user/my-reviews',
+  authenticateJwt,
   getUserReviewsValidator(),
   parseValidationResult,
   getUserReviewsController

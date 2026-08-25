@@ -16,6 +16,7 @@ import {
   generateHashedPassword,
   generateJwtToken,
 } from '../../utils';
+import { sendVerificationCode } from '../../utils/identityToolkitSms';
 import { authProviders, boatStatus } from '../../utils/constants';
 import Boats from '../Boats';
 import Bookings from '../Bookings';
@@ -34,6 +35,7 @@ import {
   userHasPeningBookings,
   userNotFound,
   userNotVerified,
+  userNotVerifiedLogin,
 } from './errors';
 
 const stripe = new Stripe(stripeSecretKey);
@@ -185,6 +187,15 @@ export async function authenticateUser(email, password) {
   }
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (passwordMatch) {
+    /**
+     * Checked only once the password is known to be correct, so this cannot be
+     * used to enumerate which accounts exist but are unverified. Issuing a
+     * token here would be a lie: the JWT strategy rejects unverified users on
+     * every guarded route, so the client would be told login succeeded and then
+     * fail on its next call.
+     */
+    if (!user.verified) throw userNotVerifiedLogin;
+
     const cleanUser = user.clean();
     const token = generateJwtToken(user._id, cleanUser);
     cleanUser.token = token;
@@ -440,10 +451,7 @@ export async function forgetPassword({ phoneNumber, recaptchaToken }) {
 
   const encryption = encryptData(user?._id?.toString());
 
-  const response = await identityToolkit.relyingparty.sendVerificationCode({
-    phoneNumber,
-    recaptchaToken,
-  });
+  const response = await sendVerificationCode({ phoneNumber, recaptchaToken });
 
   await this.model(modelNames.USERS).saveUserSession({
     phoneNumber,
@@ -572,4 +580,71 @@ export async function deleteUserAccount({ userId }) {
 
   if (!userUpdated) throw deleteFailed;
   return userId;
+}
+
+/**
+ * Push registration. The client hands us the same token on every page load, and
+ * FCM hands the same token to more than one account when a browser is shared,
+ * so the token is pulled off every other user before being attached here. That
+ * keeps a stale registration from delivering one user's notifications to
+ * whoever logged in after them.
+ */
+export async function registerDeviceToken({ userId, token, platform }) {
+  const user = await this.findOne({ _id: userId });
+  if (!user || user.isDeleted) throw userNotFound;
+
+  await this.updateMany(
+    { _id: { $ne: userId }, 'deviceTokens.token': token },
+    { $pull: { deviceTokens: { token } } }
+  );
+
+  const existing = user.deviceTokens?.find((device) => device.token === token);
+
+  if (existing) {
+    await this.updateOne(
+      { _id: userId, 'deviceTokens.token': token },
+      {
+        $set: {
+          'deviceTokens.$.lastSeenAt': new Date(),
+          ...(platform ? { 'deviceTokens.$.platform': platform } : {}),
+        },
+      }
+    );
+    return { registered: true };
+  }
+
+  await this.updateOne(
+    { _id: userId },
+    {
+      $push: {
+        deviceTokens: {
+          token,
+          ...(platform ? { platform } : {}),
+          lastSeenAt: new Date(),
+        },
+      },
+    }
+  );
+
+  return { registered: true };
+}
+
+export async function removeDeviceToken({ userId, token }) {
+  await this.updateOne({ _id: userId }, { $pull: { deviceTokens: { token } } });
+  return { removed: true };
+}
+
+/**
+ * Called with whatever FCM reported as unregistered after a send, so revoked
+ * permissions and reinstalled browsers do not accumulate.
+ */
+export async function pruneDeviceTokens({ tokens }) {
+  if (!tokens || tokens.length === 0) return { pruned: 0 };
+
+  await this.updateMany(
+    { 'deviceTokens.token': { $in: tokens } },
+    { $pull: { deviceTokens: { token: { $in: tokens } } } }
+  );
+
+  return { pruned: tokens.length };
 }

@@ -1,7 +1,7 @@
 import { canResendVerificationSMS } from './utils';
 // eslint-disable-next-line import/no-cycle
 import OTP from './index';
-import { identityToolkit } from '../../config/googleApis';
+import { sendVerificationCode } from '../../utils/identityToolkitSms';
 
 export async function handleResendSMSCode({ phoneNumber, recaptchaToken }) {
   const existingEntry = await this.findOne({
@@ -16,10 +16,7 @@ export async function handleResendSMSCode({ phoneNumber, recaptchaToken }) {
     };
     const resendEntry = await OTP.create(otp);
 
-    await identityToolkit.relyingparty.sendVerificationCode({
-      phoneNumber,
-      recaptchaToken,
-    });
+    await sendVerificationCode({ phoneNumber, recaptchaToken });
 
     return resendEntry;
   }
@@ -30,10 +27,7 @@ export async function handleResendSMSCode({ phoneNumber, recaptchaToken }) {
   );
 
   if (canResendSMS) {
-    await identityToolkit.relyingparty.sendVerificationCode({
-      phoneNumber,
-      recaptchaToken,
-    });
+    await sendVerificationCode({ phoneNumber, recaptchaToken });
 
     existingEntry.lastSMSTime = new Date();
     existingEntry.numberOfTrials += 1;

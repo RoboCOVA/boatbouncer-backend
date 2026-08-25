@@ -35,6 +35,13 @@ export const createReviewController = async (req, res, next) => {
         createdBy: userId,
         actionType: notificationActionTypes.CREATE,
         model: savedReview._id,
+        /**
+         * `model` is the review's own id, which no page routes by. The boat is
+         * where the review is actually displayed, so carry its id the same way
+         * offer notifications carry their booking id — otherwise clicking the
+         * notification can only fall back to the generic listings page.
+         */
+        parentId: booking.boatId,
       });
       reviewNotif
         .createNotification({ userIds: [booking.owner] })

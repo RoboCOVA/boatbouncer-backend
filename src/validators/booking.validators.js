@@ -69,34 +69,32 @@ export const createBookingValidator = () => [
     ),
 ];
 
-export const cancelBookingValidator = () => [
-  param('bookId').isMongoId().withMessage('Valid Book id is required'),
+const isRenterQuery = () =>
   query('isRenter')
     .isBoolean()
-    .custom((value) => value === 'true')
-    .optional(),
+    .withMessage('isRenter must be either true or false')
+    .optional();
+
+export const cancelBookingValidator = () => [
+  param('bookId').isMongoId().withMessage('Valid Book id is required'),
+  isRenterQuery(),
 ];
 
 export const getBookingsValidator = () => [
-  query('isRenter')
-    .isBoolean()
-    .custom((value) => value === 'true')
-    .optional(),
+  isRenterQuery(),
   defaultValidators.pageNo,
   defaultValidators.size,
 ];
 
 export const getBookingValidator = () => [
   param('bookId').isMongoId().withMessage('Valid Book id is required'),
-  query('isRenter')
-    .isBoolean()
-    .custom((value) => value === 'true')
-    .optional(),
+  isRenterQuery(),
 ];
 
 export const getCanceledBookingsValidator = () => [
   query('as')
     .isString()
-    .custom((value) => value === 'renter' || 'owner')
+    .isIn(['renter', 'owner'])
+    .withMessage("as must be either 'renter' or 'owner'")
     .optional(),
 ];

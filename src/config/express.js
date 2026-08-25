@@ -99,6 +99,8 @@ app.use((err, req, res, next) => {
 
   res.status(err.status).send({
     message: err.isPublic ? err.message : httpStatus[err.status],
+    // Omitted from the payload entirely when the error carries no code.
+    code: err.code,
     stack: environments.nodeEnv === 'development' ? err.stack : null,
   });
 });

@@ -1,19 +1,16 @@
 import { clickUpdateFailed, deleteNotificationFailed } from './errors';
 
-// eslint-disable-next-line import/prefer-default-export
-export async function updateNotificationSeenStatus(
-  notificationIds,
-  userId,
-  adminOverride = false
-) {
+/**
+ * `notificationIds` must already be scoped to the caller — see
+ * `UsersNotifications.filterOwnedNotificationIds`. Notifications hold no
+ * recipient field, so ownership cannot be expressed in this query.
+ */
+export async function updateNotificationSeenStatus(notificationIds, userId) {
   const updatedNotificationIds = [];
   await Promise.all(
     notificationIds.map(async (id) => {
-      const matchQuery = adminOverride
-        ? { _id: id }
-        : { _id: id, createdBy: userId };
       const updatedNotification = await this.findOneAndUpdate(
-        matchQuery,
+        { _id: id },
         { $addToSet: { seenBy: userId } },
         { new: true }
       );
@@ -36,16 +33,10 @@ export async function softDeleteNotification(notificationId, userId) {
   return notificationId;
 }
 
-export async function updateNotificationClickedBy(
-  notificationId,
-  userId,
-  adminOverride = false
-) {
-  const matchQuery = adminOverride
-    ? { _id: notificationId }
-    : { _id: notificationId, createdBy: userId };
+/** `notificationId` must already be scoped to the caller — see above. */
+export async function updateNotificationClickedBy(notificationId, userId) {
   const updateClickedBy = await this.findOneAndUpdate(
-    matchQuery,
+    { _id: notificationId },
     { $push: { clickedBy: userId } },
     { new: true }
   );

@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import APIError from '../../errors/APIError';
+import { errorCodes } from '../../errors/codes';
 import { jwtKey } from '../environments';
 import Users from '../../models/Users';
 
@@ -25,8 +26,9 @@ const strategy = new Strategy(
       if (!user?.verified) {
         const NotVerified = new APIError(
           'User not verified',
-          httpStatus.NOT_FOUND,
-          true
+          httpStatus.FORBIDDEN,
+          true,
+          errorCodes.USER_NOT_VERIFIED
         );
 
         return done(NotVerified, false);

@@ -172,7 +172,27 @@ export async function getNotifications(pageNo, size, userId) {
   return userNotification[0] || { data: [], total: 0 };
 }
 
-// eslint-disable-next-line import/prefer-default-export
+/**
+ * Narrows a caller-supplied list of notification ids down to the ones actually
+ * delivered to `userId`. Notifications carry no recipient field of their own —
+ * `createdBy` is the actor that caused the notification, not its recipient — so
+ * this collection is the only authority on who a notification belongs to.
+ */
+export async function filterOwnedNotificationIds(userId, notificationIds) {
+  const usersNotification = await this.findOne(
+    { user: userId },
+    { notifications: 1 }
+  );
+
+  if (!usersNotification) return [];
+
+  const owned = new Set(
+    (usersNotification.notifications || []).map((id) => id.toString())
+  );
+
+  return notificationIds.filter((id) => owned.has(id.toString()));
+}
+
 export async function updateUsersNotifications(notificationId, userId) {
   const matchQuery = { user: userId };
   const usersNotification = await this.findOne(matchQuery);
