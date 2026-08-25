@@ -66,4 +66,10 @@ const bookingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Availability is on the critical path of every booking attempt; without this
+// the check is a full collection scan.
+bookingSchema.index({ boatId: 1, 'duration.start': 1, 'duration.end': 1 });
+bookingSchema.index({ renter: 1, status: 1 });
+bookingSchema.index({ owner: 1, status: 1 });
+
 export default bookingSchema;

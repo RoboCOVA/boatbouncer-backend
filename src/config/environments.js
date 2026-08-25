@@ -26,9 +26,29 @@ const envSchema = Joi.object({
   ADMIN_EMAIL: Joi.string().email().required(),
   STRIPE_SUCCESS_URL: Joi.string().required(),
   STRIPE_FAILED_URL: Joi.string().required(),
-  TWILIO_ACCOUNT_SID: Joi.string().required(),
-  TWILIO_AUTH_TOKEN: Joi.string().required(),
-  FROM_PHONE_NUMBER: Joi.string().required(),
+  // SMS is opt-in now that email and push carry these notifications, so the
+  // Twilio credentials are only required when SMS_ENABLED is true.
+  SMS_ENABLED: Joi.boolean().default(false),
+  TWILIO_ACCOUNT_SID: Joi.string().when('SMS_ENABLED', {
+    is: true,
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  TWILIO_AUTH_TOKEN: Joi.string().when('SMS_ENABLED', {
+    is: true,
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+  FROM_PHONE_NUMBER: Joi.string().when('SMS_ENABLED', {
+    is: true,
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
+
+  // Email (Resend). Sends are skipped with a warning when the key is absent,
+  // so a missing key degrades the channel instead of breaking the boot.
+  RESEND_API_KEY: Joi.string().optional(),
+  EMAIL_FROM: Joi.string().default('BoatBouncer <no-reply@boatbouncer.com>'),
   MAPBOX_API_TOKEN: Joi.string().required(),
 
   //  O Auth
@@ -78,10 +98,14 @@ export const adminPass = value.ADMIN_PASSWORD;
 export const adminEmail = value.ADMIN_EMAIL;
 export const stripeSuccessUrl = value.STRIPE_SUCCESS_URL;
 export const stripeFailedUrl = value.STRIPE_FAILED_URL;
+export const smsEnabled = value.SMS_ENABLED;
 export const twilioAccountSid = value.TWILIO_ACCOUNT_SID;
 export const twilioAuthToken = value.TWILIO_AUTH_TOKEN;
 export const fromPhoneNumber = value.FROM_PHONE_NUMBER;
 export const mapboxApiToken = value.MAPBOX_API_TOKEN;
+
+export const resendApiKey = value.RESEND_API_KEY;
+export const emailFrom = value.EMAIL_FROM;
 
 export const oAuthfailureRedict = value.O_AUTH_FAILURE_REDIRECT;
 export const oAuthSuccessRedict = value.O_AUTH_SUCCESS_REDIRECT;

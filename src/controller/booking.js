@@ -7,8 +7,8 @@ import Users from '../models/Users';
 import { boatListTypes, bookingStatus, pricingType } from '../utils/constants';
 import { modelNames } from '../models/constants';
 import { notificationActionTypes } from '../models/Notifications/constants';
-import { sendMessage } from '../utils/twilio';
-import { addHoursToDate, formatDuration } from '../utils';
+import { notifyUserSafely } from '../utils/notify';
+import { addHoursToDate, parseBooleanQuery } from '../utils';
 import Messages from '../models/Messages';
 
 function calculateActivityBoatPrice(peopleCount, pricing) {
@@ -222,16 +222,18 @@ export const createBookingController = async (req, res, next) => {
     });
 
     const savedReservation = await booking.createBooking();
-    const ownerPhoneNumber = owner.phoneNumber;
 
     const requesterFirstName = req?.user?.firstName ?? '';
     const requesterLastName = req?.user?.lastName ?? '';
-    sendMessage(ownerPhoneNumber, 'bookingRequest', {
-      requesterFirstName,
-      requesterLastName,
-      boatName: boat.boatName,
-      duration: formatDuration(boakingParam.duration),
-      bookingId: booking._id.toString(),
+    notifyUserSafely({
+      user: owner,
+      templateKey: 'bookingRequest',
+      values: {
+        requesterFirstName,
+        requesterLastName,
+        boatName: boat.boatName,
+        bookingId: booking._id.toString(),
+      },
     });
 
     const bookingNotif = new Notifications({
@@ -263,7 +265,7 @@ export const cancelBookingController = async (req, res, next) => {
   try {
     const userId = req?.user?._id || ' ';
     const { bookId } = req.params;
-    const { isRenter } = req.query;
+    const isRenter = parseBooleanQuery(req.query.isRenter);
 
     const booking = await Bookings.getBooking({
       bookId,
@@ -271,7 +273,7 @@ export const cancelBookingController = async (req, res, next) => {
       isRenter,
     });
 
-    let phoneNumber;
+    let recipient;
     let firstName;
     let lastName;
 
@@ -289,21 +291,25 @@ export const cancelBookingController = async (req, res, next) => {
       const owner = await Users.findOne({ _id: ownerId });
 
       if (!owner) throw new Error('Owner not found');
-      phoneNumber = owner.phoneNumber;
+      recipient = owner;
     } else {
       firstName = booking.renter.firstName;
       lastName = booking.renter.lastName;
-      phoneNumber = booking.renter.phoneNumber;
+      recipient = booking.renter;
     }
     await Messages.readMessagesByConversationId({
       conversationId: cancelledBooking.conversationId,
       userId,
       force: true,
     });
-    sendMessage(phoneNumber, 'bookingCancellation', {
-      firstName,
-      lastName,
-      boatName: booking?.boatId?.boatName,
+    notifyUserSafely({
+      user: recipient,
+      templateKey: 'bookingCancellation',
+      values: {
+        firstName,
+        lastName,
+        boatName: booking?.boatId?.boatName,
+      },
     });
 
     const otherPartyId = isRenter ? booking.owner : booking.renter._id;
@@ -335,7 +341,7 @@ export const cancelBookingController = async (req, res, next) => {
 export const getBookingsController = async (req, res, next) => {
   try {
     const userId = req?.user?._id || ' ';
-    const { isRenter } = req.query;
+    const isRenter = parseBooleanQuery(req.query.isRenter);
 
     const bookings = await Bookings.getBookings({
       userId,
@@ -357,7 +363,7 @@ export const getBookingController = async (req, res, next) => {
   try {
     const userId = req?.user?._id || ' ';
     const { bookId } = req.params;
-    const { isRenter } = req.query;
+    const isRenter = parseBooleanQuery(req.query.isRenter);
 
     const bookings = await Bookings.getBooking({
       bookId,

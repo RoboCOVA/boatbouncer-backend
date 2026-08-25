@@ -40,10 +40,18 @@ export const markNotificationsSeenController = async (req, res, next) => {
       );
     }
 
-    const updated = await Notifications.updateNotificationSeenStatus(
-      notificationIds,
+    const ownedIds = await UsersNotifications.filterOwnedNotificationIds(
       userId,
-      true
+      notificationIds
+    );
+
+    if (!ownedIds.length) {
+      throw new APIError('Notification not found', httpStatus.NOT_FOUND);
+    }
+
+    const updated = await Notifications.updateNotificationSeenStatus(
+      ownedIds,
+      userId
     );
     res.send({ updatedIds: updated });
   } catch (error) {
@@ -58,6 +66,15 @@ export const deleteNotificationController = async (req, res, next) => {
 
     if (!isValidObjectId(notificationId)) {
       throw new APIError('Invalid notification ID', httpStatus.BAD_REQUEST);
+    }
+
+    const [ownedId] = await UsersNotifications.filterOwnedNotificationIds(
+      userId,
+      [notificationId]
+    );
+
+    if (!ownedId) {
+      throw new APIError('Notification not found', httpStatus.NOT_FOUND);
     }
 
     await Notifications.softDeleteNotification(notificationId, userId);

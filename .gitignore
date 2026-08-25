@@ -14,3 +14,12 @@ logs/
 
 dist/
 build/
+
+# env backups (.env is ignored, but variants like .env.port3000.bak were not —
+# they hold the same live credentials)
+.env.*
+!.env.example
+
+# multer's upload staging; files here are transient
+src/config/temp/*
+!src/config/temp/.gitkeep

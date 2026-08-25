@@ -5,7 +5,6 @@ import { boatStatus, bookingStatus } from '../../utils/constants';
 import Bookings from '../Bookings';
 import {
   boatDeleteFailed,
-  boatNameUsed,
   boatNotFound,
   boatUpdateFailed,
   updatelistingTypeNotAllowed,
@@ -531,26 +530,32 @@ export async function getBoats({ pageNo, size, filter }) {
   aggregationQuery.push({ $match: match });
 
   // STAGE 4: Favorites lookup
-  aggregationQuery.push({
-    $lookup: {
-      from: 'favorites',
-      let: { boatId: '$_id' },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $and: [
-                { $eq: ['$boat', '$$boatId'] },
-                // ✅ FIX 5: CORRECT USER REFERENCE
-                { $eq: ['$user', new ObjectId(userId)] }, // Use current user
-              ],
+  //
+  // Guarded on `userId`: `new ObjectId(undefined)` does not throw, it generates
+  // a brand new random id, so an anonymous call used to run a lookup that could
+  // never match. Skipping it leaves `favorite` absent and `isFavorite` false,
+  // which is the correct answer for a caller with no session.
+  if (userId) {
+    aggregationQuery.push({
+      $lookup: {
+        from: 'favorites',
+        let: { boatId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$boat', '$$boatId'] },
+                  { $eq: ['$user', new ObjectId(userId)] },
+                ],
+              },
             },
           },
-        },
-      ],
-      as: 'favorite',
-    },
-  });
+        ],
+        as: 'favorite',
+      },
+    });
+  }
 
   // STAGE 5+: Rest of your existing pipeline stages
   aggregationQuery.push(
@@ -773,14 +778,6 @@ export async function updateBoat(id, userId, updateObject) {
   if (boat.listingType !== updateObject.listingType)
     throw updatelistingTypeNotAllowed;
 
-  const existingBoat = await this.findOne({
-    boatName: { $regex: new RegExp(`^${this.boatName}$`, 'i') },
-  });
-
-  if (existingBoat && existingBoat._id !== id) {
-    throw boatNameUsed;
-  }
-
   const boatUpdate = await this.findOneAndUpdate(
     { _id: id, owner: userId },
     updateObject,
@@ -808,9 +805,16 @@ export async function deleteBoat({ boatId, userId }) {
   });
   if (!boat) throw boatNotFound;
 
+  /**
+   * The name is left alone. Deleting used to rewrite it to `<name>_<id>` to
+   * keep it from colliding with a future listing, but `boatName` carries no
+   * unique index, so nothing was being avoided — and completed bookings still
+   * reference the boat, which is how `Serendipity_6a81bed1ae7d244321726402`
+   * ended up on a renter's booking card.
+   */
   const boatDeleted = await this.findOneAndUpdate(
     { _id: boatId, owner: userId },
-    { status: boatStatus.DELETED, boatName: `${boat.boatName}_${boatId}` },
+    { status: boatStatus.DELETED },
     {
       new: true,
     }

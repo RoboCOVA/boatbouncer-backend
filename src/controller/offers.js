@@ -3,10 +3,9 @@ import Notifications from '../models/Notifications';
 import { modelNames } from '../models/constants';
 import { notificationActionTypes } from '../models/Notifications/constants';
 import { bookingStatus } from '../utils/constants';
-import { sendMessage } from '../utils/twilio';
+import { notifyUserSafely } from '../utils/notify';
 import Bookings from '../models/Bookings';
 import Users from '../models/Users';
-import { formatDuration } from '../utils';
 
 export const createOfferController = async (req, res, next) => {
   try {
@@ -45,18 +44,18 @@ export const createOfferController = async (req, res, next) => {
 
     const savedOffer = await offer.createOffers();
 
-    const renterPhoneNumber = renter.phoneNumber;
-
     const ownerFirstName = req?.user?.firstName ?? '';
     const ownerLastName = req?.user?.lastName ?? '';
 
-    sendMessage(renterPhoneNumber, 'offerSent', {
-      ownerFirstName,
-      ownerLastName,
-      boatName: booking?.boatId?.boatName,
-      duration: formatDuration(booking.duration),
-      departureTime: new Date(departureDate).toLocaleTimeString(),
-      bookingId: booking._id.toString(),
+    notifyUserSafely({
+      user: renter,
+      templateKey: 'offerSent',
+      values: {
+        ownerFirstName,
+        ownerLastName,
+        boatName: booking?.boatId?.boatName,
+        bookingId: booking._id.toString(),
+      },
     });
 
     const offerCreatedNotif = new Notifications({
@@ -170,15 +169,16 @@ export const acceptOfferController = async (req, res, next) => {
     const owner = await Users.findOne({ _id: ownerId });
 
     if (!owner) throw new Error('Owner not found');
-    const { phoneNumber } = owner;
 
-    sendMessage(phoneNumber, 'offerAccepted', {
-      firstName,
-      lastName,
-      boatName: booking?.boatId?.boatName,
-      duration: formatDuration(booking.duration),
-      departureTime: new Date(offer?.departureDate).toLocaleTimeString(),
-      bookingId: booking._id.toString(),
+    notifyUserSafely({
+      user: owner,
+      templateKey: 'offerAccepted',
+      values: {
+        firstName,
+        lastName,
+        boatName: booking?.boatId?.boatName,
+        bookingId: booking._id.toString(),
+      },
     });
 
     const offerAcceptedNotif = new Notifications({

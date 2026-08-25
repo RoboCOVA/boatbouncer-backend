@@ -12,6 +12,8 @@ import {
   getCurrentUserController,
   getPaymentMethodController,
   loginController,
+  registerDeviceTokenController,
+  removeDeviceTokenController,
   resendSmsController,
   sendSmsController,
   updateMethodController,
@@ -24,6 +26,7 @@ import {
   attachPaymentMethodValidator,
   createUserValidator,
   detachMethodValidator,
+  deviceTokenValidator,
   forgotPasswordValidator,
   loginValidator,
   resetPasswordValidator,
@@ -135,6 +138,22 @@ router.post(
   updateMethodValidator(),
   parseValidationResult,
   updateMethodController
+);
+
+router.post(
+  '/deviceToken',
+  authenticateJwt,
+  deviceTokenValidator(),
+  parseValidationResult,
+  registerDeviceTokenController
+);
+
+router.delete(
+  '/deviceToken',
+  authenticateJwt,
+  deviceTokenValidator(),
+  parseValidationResult,
+  removeDeviceTokenController
 );
 
 router.get('/current', authenticateJwt, getCurrentUserController);

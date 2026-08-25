@@ -1,7 +1,15 @@
 import { generateEnumArrayFromObject } from '.';
 
+/**
+ * The special-character class is "anything that is not a letter or a digit"
+ * rather than a hand-picked set. The previous list was `[!@#$%^&*]`, which
+ * rejected passwords built from the punctuation people actually get handed by
+ * password managers — hyphens above all, but also `-_+=.,:;'"?/\|~()[]{}<>`.
+ * A generated password like `tuhzom-podpu6-kyqpyR` was refused for "should
+ * contain a special character" while holding three of them.
+ */
 export const strongPasswordRegex = new RegExp(
-  '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})'
+  '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9])(?=.{8,})'
 );
 
 export const currencyCode = {
@@ -249,3 +257,11 @@ export const authProviders = {
 export const authProvidersEnum = generateEnumArrayFromObject(authProviders);
 
 export const oAuthDefaultPassword = '123';
+
+export const devicePlatforms = {
+  WEB: 'web',
+  IOS: 'ios',
+  ANDROID: 'android',
+};
+
+export const devicePlatformsEnum = generateEnumArrayFromObject(devicePlatforms);

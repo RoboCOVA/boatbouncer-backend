@@ -51,3 +51,15 @@ export const bookingNotAvailable = new APIError(
   'Booking not available with this range!',
   httpStatus.BAD_REQUEST
 );
+
+/**
+ * A paused listing keeps its detail page — the owner still needs to reach it to
+ * unpause — but it must not accept bookings while it is paused. The public
+ * detail route is unauthenticated, so this is the only place the distinction
+ * can actually be enforced.
+ */
+export const boatNotBookable = new APIError(
+  'This boat is not currently available for booking',
+  httpStatus.BAD_REQUEST,
+  true
+);

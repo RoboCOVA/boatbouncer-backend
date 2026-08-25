@@ -90,6 +90,14 @@ export const getBoatsController = async (req, res, next) => {
     if (bbox) filter.bbox = typeof bbox === 'string' ? JSON.parse(bbox) : bbox;
 
     filter.searchable = true;
+    /**
+     * Without this the favourites lookup in `getBoats` ran
+     * `new ObjectId(undefined)`, which mints a fresh random id on every call
+     * and therefore matches no favourite document — so `isFavorite` came back
+     * false for every boat in the list even when the viewer had favourited it.
+     * Undefined for anonymous callers, which the lookup now skips outright.
+     */
+    filter.userId = req.user?._id;
     const boats = await Boats.getBoats({
       pageNo,
       size,

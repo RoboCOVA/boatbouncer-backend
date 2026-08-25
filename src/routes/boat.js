@@ -1,5 +1,8 @@
 import express from 'express';
-import { authenticateJwt } from '../controller/authenticate';
+import {
+  authenticateJwt,
+  optionalAuthenticateJwt,
+} from '../controller/authenticate';
 import {
   addOrRemoveFavoriteController,
   createBoatController,
@@ -45,7 +48,14 @@ router.get('/categories', getBoatCategories);
 
 router.get('/favorites', authenticateJwt, getFavoritesController);
 
-router.get('/', getBoatsValidator(), parseValidationResult, getBoatsController);
+// Public, but a signed-in caller gets their `isFavorite` flags resolved.
+router.get(
+  '/',
+  optionalAuthenticateJwt,
+  getBoatsValidator(),
+  parseValidationResult,
+  getBoatsController
+);
 
 router.get(
   '/listing',

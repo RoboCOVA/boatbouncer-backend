@@ -163,6 +163,16 @@ export const customDateValidator = (date) => {
   return false;
 };
 
+/**
+ * Query parameters always arrive as strings, so `?isRenter=false` reaches a
+ * controller as the truthy string "false". Everything downstream treats these
+ * flags as real booleans.
+ * @param {*} value Raw query value
+ * @returns {Boolean}
+ */
+export const parseBooleanQuery = (value) =>
+  value === true || value === 'true' || value === '1';
+
 export function checkMethodExpiration({ paymentMethod }) {
   const { exp_month, exp_year } = paymentMethod;
   const now = new Date();
@@ -199,6 +209,15 @@ export const generateRandomOAuthId = () => {
 export function formatDuration(durationObj) {
   const durationMs = durationObj.end - durationObj.start;
   const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+
+  /**
+   * Anything shorter than an hour floored to zero and read as "0 hours". Report
+   * those in minutes, which is also how the offer summary renders them.
+   */
+  if (durationHours < 1) {
+    const minutes = Math.max(1, Math.round(durationMs / (1000 * 60)));
+    return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+  }
 
   if (durationHours >= 24) {
     const days = Math.floor(durationHours / 24);

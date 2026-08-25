@@ -17,11 +17,18 @@ const createBaseBoatValidator = () => [
     .isLength({ max: 100 })
     .withMessage('boat Name must be less than 100 characters'),
 
+  /**
+   * `securityAllowance` is a String on the model, so this checks the numeric
+   * value the string carries rather than switching the field's type.
+   */
   body('securityAllowance')
     .isString()
     .withMessage('Deposite  is required')
     .isLength({ max: 100 })
-    .withMessage('Deposite must be less than 100 characters'),
+    .withMessage('Deposite must be less than 100 characters')
+    .bail()
+    .isFloat({ min: 1 })
+    .withMessage('Deposit must not be less than 1'),
 
   body('currency')
     .isString()
@@ -98,12 +105,12 @@ const createBaseBoatValidator = () => [
     .withMessage('Cancellation policy must be a non-empty array'),
 
   body('cancelationPolicy.*.refund')
-    .isNumeric()
-    .withMessage('Each cancellation policy refund must be a number'),
+    .isFloat({ min: 0, max: 100 })
+    .withMessage('Each cancellation policy refund must be between 0 and 100'),
 
   body('cancelationPolicy.*.priorHours')
-    .isNumeric()
-    .withMessage('Each cancellation policy priorHours must be a number'),
+    .isFloat({ min: 0 })
+    .withMessage('Each cancellation policy priorHours cannot be negative'),
 
   body('blockedSchedule')
     .isArray()
@@ -227,14 +234,18 @@ const createRentalBoatValidator = () => [
 
   body('pricing').isObject().withMessage('Pricing must be an object'),
 
+  /**
+   * A listing priced below a single currency unit is a data-entry slip rather
+   * than a real rate. 1 itself is allowed.
+   */
   body('pricing.perDay')
-    .isFloat({ min: 0 })
+    .isFloat({ min: 1 })
     .optional()
-    .withMessage('Per day price must be a positive number'),
+    .withMessage('Per day price must not be less than 1'),
 
   body('pricing.perHour')
-    .isFloat({ min: 0 })
-    .withMessage('Per hour price must be a positive number'),
+    .isFloat({ min: 1 })
+    .withMessage('Per hour price must not be less than 1'),
 
   body('pricing.dayDiscount')
     .optional()
@@ -271,10 +282,16 @@ const createRentalBoatValidator = () => [
     .optional()
     .withMessage('Each hour discount must have at least 1 minimum hour'),
 
+  /**
+   * Greater than zero, not "at least 1". A booking may be shorter than an hour
+   * — `formatDuration` reports those in minutes — so an owner must be able to
+   * set a 30-minute floor. `gt` is exclusive, which rejects 0 while allowing
+   * 0.5. Integer-only was the wrong shape for a duration.
+   */
   body('pricing.minHours')
-    .isInt({ min: 1 })
+    .isFloat({ gt: 0 })
     .optional()
-    .withMessage('Minimum hours must be at least 1'),
+    .withMessage('Minimum hours must be greater than 0'),
 
   body('features').isArray().withMessage('Features must be an array'),
 ];
@@ -317,7 +334,10 @@ const updateBaseBoatValidator = () => [
     .isString()
     .withMessage('Deposite  is required')
     .isLength({ max: 100 })
-    .withMessage('Deposite must be less than 100 characters'),
+    .withMessage('Deposite must be less than 100 characters')
+    .bail()
+    .isFloat({ min: 1 })
+    .withMessage('Deposit must not be less than 1'),
 
   body('description')
     .optional()
@@ -397,13 +417,13 @@ const updateBaseBoatValidator = () => [
 
   body('cancelationPolicy.*.refund')
     .optional()
-    .isNumeric()
-    .withMessage('Each cancellation policy refund must be a number'),
+    .isFloat({ min: 0, max: 100 })
+    .withMessage('Each cancellation policy refund must be between 0 and 100'),
 
   body('cancelationPolicy.*.priorHours')
     .optional()
-    .isNumeric()
-    .withMessage('Each cancellation policy priorHours must be a number'),
+    .isFloat({ min: 0 })
+    .withMessage('Each cancellation policy priorHours cannot be negative'),
 
   body('currency')
     .isString()
@@ -548,13 +568,13 @@ const updateRentalBoatValidator = () => [
 
   body('pricing.perDay')
     .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Per day price must be a positive number'),
+    .isFloat({ min: 1 })
+    .withMessage('Per day price must not be less than 1'),
 
   body('pricing.perHour')
     .optional()
-    .isFloat({ min: 0 })
-    .withMessage('Per hour price must be a positive number'),
+    .isFloat({ min: 1 })
+    .withMessage('Per hour price must not be less than 1'),
 
   body('pricing.dayDiscount')
     .optional()
@@ -589,8 +609,8 @@ const updateRentalBoatValidator = () => [
 
   body('pricing.minHours')
     .optional()
-    .isInt({ min: 1 })
-    .withMessage('Minimum hours must be at least 1'),
+    .isFloat({ gt: 0 })
+    .withMessage('Minimum hours must be greater than 0'),
 
   body('features')
     .optional()

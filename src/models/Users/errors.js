@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import APIError from '../../errors/APIError';
+import { errorCodes } from '../../errors/codes';
 
 /** @ERRORS */
 export const userNotFound = new APIError(
@@ -85,7 +86,20 @@ export const chargeEnableUpdateFailed = new APIError(
 export const userNotVerified = new APIError(
   'User not verified',
   httpStatus.BAD_REQUEST,
-  true
+  true,
+  errorCodes.USER_NOT_VERIFIED
+);
+
+/**
+ * Login-specific counterpart. Credentials were correct but the account has not
+ * completed phone verification, so no token is issued — the client should send
+ * the user into the OTP flow rather than treat this as a failed sign-in.
+ */
+export const userNotVerifiedLogin = new APIError(
+  'Please verify your phone number to continue',
+  httpStatus.FORBIDDEN,
+  true,
+  errorCodes.USER_NOT_VERIFIED
 );
 
 export const passwordResetSessionExp = new APIError(

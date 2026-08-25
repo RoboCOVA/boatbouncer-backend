@@ -158,6 +158,14 @@ const boatSchema = new mongoose.Schema(
       type: combinedPricingSchema,
       required: false,
     },
+    /**
+     * Serialization point for booking creation. Two transactions that each read
+     * the boat's bookings and then insert into that range touch no document in
+     * common, so MongoDB has nothing to detect a conflict on. Incrementing this
+     * counter inside the transaction gives it one — see
+     * `Bookings.createBooking`. The value itself carries no meaning.
+     */
+    bookingSeq: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
