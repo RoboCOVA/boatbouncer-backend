@@ -5,7 +5,11 @@ import APIError from '../errors/APIError';
 import Boats from '../models/Boats';
 import Otp from '../models/Otp';
 import Users from '../models/Users';
-import { emailToUsername, encryptData } from '../utils';
+import {
+  emailToUsername,
+  encryptData,
+  verifyPhoneVerificationToken,
+} from '../utils';
 import { sendVerificationCode } from '../utils/identityToolkitSms';
 import { authProviders } from '../utils/constants';
 
@@ -125,6 +129,26 @@ export const verifyUserController = async (req, res, next) => {
       encryption,
     });
     res.send(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Shares `verifyUser` with /otpVerify but not its outcome: proving control of
+ * the phone during a reset must not verify the account or issue a token. It
+ * returns the claim `/changePassword` consumes.
+ */
+export const validateResetOTPController = async (req, res, next) => {
+  try {
+    const { verificationCode, phoneNumber, encryption } = req.body;
+    const resetClaim = await Users.verifyUser({
+      verificationCode,
+      phoneNumber,
+      encryption,
+      isPasswordReset: true,
+    });
+    res.send(resetClaim);
   } catch (error) {
     next(error);
   }
@@ -407,34 +431,45 @@ export const setLocalPasswordController = async (req, res, next) => {
   }
 };
 
+/**
+ * Adds a phone number to an OAuth account that signed up without one, and sends
+ * the OTP that will verify it.
+ *
+ * Reachable without a session by necessity — the account is unverified, so
+ * `authenticateJwt` would refuse it. It used to take the caller's word for who
+ * they were in the form of a permanent `googleId`/`facebookId`, which is stable
+ * and leaks: anyone holding one could point a victim's account at their own
+ * phone, receive a genuine OTP and sign in as them. Identity now comes from the
+ * short-lived, purpose-scoped token minted during the OAuth handoff.
+ */
 export const addPhoneNumberController = async (req, res, next) => {
   try {
-    const { phoneNumber, recaptchaToken, id, provider } = req.body;
+    const { phoneNumber, recaptchaToken, verificationToken } = req.body;
 
-    let userAccount;
-
-    switch (provider) {
-      case authProviders.APPLE: {
-        userAccount = await Users.getUserByAppleId(id);
-        break;
-      }
-      case authProviders.FACEBOOK: {
-        userAccount = await Users.getUserByFacebookId(id);
-        break;
-      }
-      case authProviders.GOOGLE: {
-        userAccount = await Users.getUserByGoogleId(id);
-        break;
-      }
-      default: {
-        throw new APIError('Invalid o auth provider', httpStatus.BAD_REQUEST);
-      }
+    let userId;
+    try {
+      userId = verifyPhoneVerificationToken(verificationToken);
+    } catch (error) {
+      throw new APIError(
+        'This verification session is no longer valid. Please sign in again.',
+        httpStatus.UNAUTHORIZED,
+        true
+      );
     }
 
-    if (!userAccount) {
+    const userAccount = await Users.findOne({ _id: userId });
+
+    if (!userAccount || userAccount.isDeleted) {
+      throw new APIError('User not found', httpStatus.NOT_FOUND, true);
+    }
+
+    // The token is only minted for unverified accounts, but it outlives the
+    // moment it was minted in. Re-check rather than trust it to still be true.
+    if (userAccount.verified) {
       throw new APIError(
-        'Invalide auth provider and id match',
-        httpStatus.NOT_FOUND
+        'This account is already verified.',
+        httpStatus.BAD_REQUEST,
+        true
       );
     }
 

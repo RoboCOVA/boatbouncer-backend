@@ -1,6 +1,6 @@
 import { startSession } from 'mongoose';
 import { bookingStatus, offerStatus } from '../../utils/constants';
-import { modelNames } from '../constants';
+import { modelNames, populatedUserFields } from '../constants';
 import {
   authorizationError,
   offerCancelFailed,
@@ -87,21 +87,11 @@ export async function getBookings({ userId, isRenter }) {
   const bookings = await this.find(matchQuery).populate([
     {
       path: 'renter',
-      select: [
-        '-password',
-        '-stripeCustomerId',
-        '-stripeAccountId',
-        '-chargesEnabled',
-      ],
+      select: populatedUserFields,
     },
     {
       path: 'owner',
-      select: [
-        '-password',
-        '-stripeCustomerId',
-        '-stripeAccountId',
-        '-chargesEnabled',
-      ],
+      select: populatedUserFields,
     },
     {
       path: 'offerId',
@@ -156,6 +146,7 @@ export async function getBooking({ bookId, userId, isRenter }) {
     },
     {
       path: 'renter',
+      select: populatedUserFields,
     },
   ]);
 
@@ -229,21 +220,11 @@ export async function getCanceledBookings({ userId, as }) {
   const bookings = await this.find(matchQuery).populate([
     {
       path: 'renter',
-      select: [
-        '-password',
-        '-stripeCustomerId',
-        '-stripeAccountId',
-        '-chargesEnabled',
-      ],
+      select: populatedUserFields,
     },
     {
       path: 'owner',
-      select: [
-        '-password',
-        '-stripeCustomerId',
-        '-stripeAccountId',
-        '-chargesEnabled',
-      ],
+      select: populatedUserFields,
     },
     {
       path: 'offerId',
@@ -284,21 +265,11 @@ export async function getCompletedBookings({ userId, as }) {
   const bookings = await this.find(matchQuery).populate([
     {
       path: 'renter',
-      select: [
-        '-password',
-        '-stripeCustomerId',
-        '-stripeAccountId',
-        '-chargesEnabled',
-      ],
+      select: populatedUserFields,
     },
     {
       path: 'owner',
-      select: [
-        '-password',
-        '-stripeCustomerId',
-        '-stripeAccountId',
-        '-chargesEnabled',
-      ],
+      select: populatedUserFields,
     },
     {
       path: 'offerId',

@@ -1,9 +1,5 @@
 import { body, param } from 'express-validator';
-import {
-  authProviders,
-  devicePlatformsEnum,
-  strongPasswordRegex,
-} from '../utils/constants';
+import { devicePlatformsEnum, strongPasswordRegex } from '../utils/constants';
 import defaultValidators from './default.validator';
 
 export const createUserValidator = () => [
@@ -159,11 +155,13 @@ export const getFacebookAccoutnUserValidator = () => [
 ];
 
 export const addPhoneNumberValidator = () => [
-  body('id').isString().withMessage(' O auth provider is required  '),
-  body('provider')
+  // Replaces the `id` + `provider` pair this used to take. Those named an
+  // account without proving anything about the caller; the token both names the
+  // account and expires.
+  body('verificationToken')
     .isString()
-    .isIn([authProviders.FACEBOOK, authProviders.GOOGLE, authProviders.APPLE])
-    .withMessage('Invalid auth provider'),
+    .notEmpty()
+    .withMessage('A verification token is required'),
   body('recaptchaToken')
     .isString()
     .withMessage('Valid recaptchaToken is required'),

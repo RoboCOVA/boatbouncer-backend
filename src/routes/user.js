@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticateJwt } from '../controller/authenticate';
+import { authenticateJwt, authorizeSelf } from '../controller/authenticate';
 import {
   attachPaymentMethodController,
   changeForgottenPasswordController,
@@ -20,6 +20,7 @@ import {
   updateUserController,
   updateUserProfilePictureController,
   verifyUserController,
+  validateResetOTPController,
 } from '../controller/user';
 import parseValidationResult from '../validators/errors.parser';
 import {
@@ -79,7 +80,7 @@ router.post(
   '/validateResetOTP',
   validateResetOTPValidator(),
   parseValidationResult,
-  verifyUserController
+  validateResetOTPController
 );
 
 router.post(
@@ -98,6 +99,8 @@ router.post(
 
 router.put(
   '/:userId',
+  authenticateJwt,
+  authorizeSelf(),
   updateUserValidator(),
   parseValidationResult,
   updateUserController
@@ -105,6 +108,8 @@ router.put(
 
 router.put(
   '/updateProfilePicture/:userId',
+  authenticateJwt,
+  authorizeSelf(),
   updateUserProfilePictureValidator(),
   parseValidationResult,
   updateUserProfilePictureController

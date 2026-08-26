@@ -45,6 +45,28 @@ const clientErrors = {
     status: httpStatus.TOO_MANY_REQUESTS,
     message: 'Too many attempts. Please try again later.',
   },
+  INVALID_CODE: {
+    status: httpStatus.BAD_REQUEST,
+    message: 'The verification code is incorrect.',
+  },
+  MISSING_CODE: {
+    status: httpStatus.BAD_REQUEST,
+    message: 'A verification code is required.',
+  },
+  SESSION_EXPIRED: {
+    status: httpStatus.BAD_REQUEST,
+    message: 'The verification code has expired. Please request a new one.',
+  },
+  INVALID_SESSION_INFO: {
+    status: httpStatus.BAD_REQUEST,
+    message:
+      'This verification session is no longer valid. Please request a new code.',
+  },
+  MISSING_SESSION_INFO: {
+    status: httpStatus.BAD_REQUEST,
+    message:
+      'This verification session is no longer valid. Please request a new code.',
+  },
 };
 
 /**
@@ -84,6 +106,42 @@ export const sendVerificationCode = async (
     logIdentityToolkitSmsError(error, {
       phoneNumber,
       recaptchaToken,
+      ...context,
+    });
+    throw toSmsApiError(error);
+  }
+};
+
+/**
+ * Counterpart to `sendVerificationCode`: checks a code against the session
+ * Identity Toolkit issued when the SMS was sent.
+ *
+ * This MUST be awaited by callers. A wrong, expired or replayed code is
+ * reported as a rejected promise, never as a falsy return value, so dropping
+ * the await silently turns every failed check into a pass.
+ */
+export const verifyPhoneCode = async ({ code, sessionInfo }, context = {}) => {
+  try {
+    const response = await identityToolkit.relyingparty.verifyPhoneNumber({
+      code,
+      sessionInfo,
+    });
+
+    // Identity Toolkit answers a successful check with the identity it just
+    // verified. No body means we cannot attest to anything, so refuse rather
+    // than treat a 200 as proof.
+    if (!response?.data) {
+      throw new APIError(
+        'Phone verification failed. Please request a new code.',
+        httpStatus.BAD_REQUEST,
+        true
+      );
+    }
+
+    return response;
+  } catch (error) {
+    logIdentityToolkitSmsError(error, {
+      tag: 'identitytoolkit.verifyPhoneNumber',
       ...context,
     });
     throw toSmsApiError(error);

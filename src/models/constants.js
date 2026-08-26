@@ -47,3 +47,29 @@ export const subCategories = {
 };
 
 export const subCategoriesEnum = generateEnumArrayFromObject(subCategories);
+
+/**
+ * Fields safe to expose when a user is populated into someone else's document
+ * — a booking counterparty, a review author.
+ *
+ * Deliberately an allow-list. The blacklists this replaced named `-password`
+ * and the Stripe fields and so leaked everything added since: `session`, the
+ * permanent OAuth provider ids (which /auth/update accepts as proof of
+ * identity), and `deviceTokens`.
+ */
+export const populatedUserFields = [
+  '_id',
+  'firstName',
+  'lastName',
+  'userName',
+  'email',
+  'phoneNumber',
+  'profilePicture',
+  'address',
+  'city',
+  'state',
+  'zipCode',
+  'verified',
+  'authProviders',
+  'createdAt',
+].join(' ');

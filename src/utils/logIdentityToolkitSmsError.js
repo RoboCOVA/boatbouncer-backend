@@ -11,7 +11,7 @@ export function logIdentityToolkitSmsError(error, context = {}) {
   const googleErr = data?.error;
 
   const payload = {
-    tag: 'identitytoolkit.sendVerificationCode',
+    tag: context.tag || 'identitytoolkit.sendVerificationCode',
     errName: error.name,
     errMessage: error.message,
     gaxiosCode: error.code,
@@ -32,6 +32,6 @@ export function logIdentityToolkitSmsError(error, context = {}) {
   winstonLogger.error(JSON.stringify(payload));
   if (process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line no-console
-    console.error('[sendVerificationCode]', payload);
+    console.error(`[${payload.tag}]`, payload);
   }
 }

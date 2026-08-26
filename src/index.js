@@ -24,6 +24,22 @@ import { socketConstant } from './socket/constants';
 import APIError from './errors/APIError';
 import { initializEmitters } from './socket/emitters';
 import { Scheduler } from './config/scheduler';
+import winstonLogger from './config/winston';
+
+// Node 24 terminates the process on an unhandled rejection. A single stray
+// promise anywhere in a request path therefore takes the whole API down, and
+// because the response has usually already been sent it does so with no trace
+// of which call was responsible. Log it and stay up.
+process.on('unhandledRejection', (reason) => {
+  winstonLogger.error(
+    JSON.stringify({
+      tag: 'unhandledRejection',
+      message: reason?.message || String(reason),
+      stack: reason?.stack,
+    })
+  );
+  console.error('[unhandledRejection]', reason);
+});
 
 const emitter = new EventEmitter();
 emitter.setMaxListeners(200); // 1 listener per connected socket; adjust if you expect > 200 concurrent users
