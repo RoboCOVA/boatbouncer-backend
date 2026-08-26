@@ -92,12 +92,20 @@ export function clean() {
   delete userObj.password;
 
   // delete userObj?.authProviders;
-  // delete userObj?.appleId;
+
+  // The permanent provider ids identify an account for as long as it exists and
+  // can never be rotated, so they must not ride along in responses that other
+  // users can read. Nothing re-attaches them any more: the verify-account
+  // handoff carries a short-lived `phoneVerificationToken` instead.
+  delete userObj?.appleId;
   delete userObj?.appleIdTemp;
-  // delete userObj?.googleId;
+  delete userObj?.googleId;
   delete userObj?.googleIdTemp;
-  // delete userObj?.facebookId;
+  delete userObj?.facebookId;
   delete userObj?.facebookIdTemp;
+
+  // The Identity Toolkit session backs OTP verification. No client needs it.
+  delete userObj?.session;
 
   // Push registration targets are for the server to hold, not for API
   // responses to carry back out.
