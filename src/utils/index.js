@@ -202,8 +202,50 @@ export const generateUserNameFromEmail = (email) => {
   return `${emailUsername}.${randomBytes}`;
 };
 
+/**
+ * Backs the `*IdTemp` handoff value. `GET /auth/{provider}/success/:id` trades
+ * one of these for a signed session token, so it is a bearer credential and
+ * must be unguessable.
+ *
+ * It used to return `Date.now()`. A millisecond timestamp is neither random
+ * nor unique: an attacker who can bound when a victim signed in brute-forces a
+ * small integer range inside the three-minute window and is handed a session.
+ */
 export const generateRandomOAuthId = () => {
-  return Date.now();
+  return crypto.randomBytes(32).toString('hex');
+};
+
+const PHONE_VERIFICATION_PURPOSE = 'phone_verification';
+
+/**
+ * Proof that the bearer just completed an OAuth sign-in for this account and
+ * still owes us a phone number.
+ *
+ * `/auth/update` cannot sit behind `authenticateJwt`, because the whole point
+ * of the account at that moment is that it is unverified and the JWT strategy
+ * refuses it. It used to accept the permanent provider id instead, which is
+ * stable and leaks — anyone holding one could rebind the victim's phone number
+ * and take the account over. This is the narrow replacement: short-lived, and
+ * scoped so it cannot be replayed as a session token.
+ */
+export const generatePhoneVerificationToken = (userId) =>
+  jwt.sign({ _id: userId, purpose: PHONE_VERIFICATION_PURPOSE }, jwtKey, {
+    expiresIn: '15m',
+  });
+
+/**
+ * Returns the user id the token was minted for. Throws — never returns falsy —
+ * when the token is missing, expired, tampered with, or is some other kind of
+ * token that merely happens to be signed with the same key.
+ */
+export const verifyPhoneVerificationToken = (token) => {
+  const payload = jwt.verify(token, jwtKey);
+
+  if (payload?.purpose !== PHONE_VERIFICATION_PURPOSE || !payload?._id) {
+    throw new Error('Token is not valid for phone verification');
+  }
+
+  return payload._id;
 };
 
 export function formatDuration(durationObj) {

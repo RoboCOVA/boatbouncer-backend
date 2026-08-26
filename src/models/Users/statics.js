@@ -7,7 +7,6 @@ import {
   stripeSecretKey,
   stripeSuccessUrl,
 } from '../../config/environments';
-import { identityToolkit } from '../../config/googleApis';
 import APIError from '../../errors/APIError';
 import {
   comparePassword,
@@ -15,8 +14,12 @@ import {
   encryptData,
   generateHashedPassword,
   generateJwtToken,
+  generatePhoneVerificationToken,
 } from '../../utils';
-import { sendVerificationCode } from '../../utils/identityToolkitSms';
+import {
+  sendVerificationCode,
+  verifyPhoneCode,
+} from '../../utils/identityToolkitSms';
 import { authProviders, boatStatus } from '../../utils/constants';
 import Boats from '../Boats';
 import Bookings from '../Bookings';
@@ -63,20 +66,29 @@ export async function saveUserSession({
   );
 
   if (!sessionSaved) throw updateFailed;
-  sessionSaved.clean();
-  return sessionSaved;
+
+  // `clean()` returns a scrubbed copy, it does not mutate. Returning the
+  // mongoose document instead sent the whole record — password hash included —
+  // straight out of /sendSms, which is unauthenticated.
+  return sessionSaved.clean();
 }
 
 /**
- * It verifies a user's phone number by sending a verification code to the user's phone number and then
- * verifying the code with the Firebase API.
- * @returns The user object with the verified field set to true.
- * </code>
+ * Verifies a phone number against the Identity Toolkit session stored when the
+ * SMS was sent.
+ *
+ * `encryption` is an opaque user handle, minted by both /forgetPassword and
+ * /auth/update. It only says *which* user is being checked, so it cannot tell
+ * the two flows apart — the caller states its intent with `isPasswordReset`.
+ *
+ * @returns the verified user plus a JWT, or — for a password reset — the
+ * encrypted claim that /changePassword consumes.
  */
 export async function verifyUser({
   verificationCode,
   phoneNumber,
   encryption,
+  isPasswordReset = false,
 }) {
   const Otp = this.model(modelNames.OTP);
   const matchQuery = { phoneNumber };
@@ -92,18 +104,31 @@ export async function verifyUser({
   if (!user?.session)
     throw new APIError('Session not found', httpStatus.BAD_REQUEST);
 
-  identityToolkit.relyingparty.verifyPhoneNumber({
-    code: verificationCode,
-    sessionInfo: user?.session,
-  });
+  // This await is load-bearing. Identity Toolkit signals a wrong, expired or
+  // replayed code by rejecting, never by a falsy return, so an unawaited call
+  // lets every failed check fall through to `verified: true` and a signed JWT.
+  await verifyPhoneCode(
+    { code: verificationCode, sessionInfo: user.session },
+    { phoneNumber }
+  );
 
-  // if (encryption && user)
-  //   return encryptData(
-  //     JSON.stringify({
-  //       _id: user?._id,
-  //       phoneNumber,
-  //     })
-  //   );
+  // The session is spent once its code has been accepted; leaving it in place
+  // would let the same code be presented again.
+  await this.findOneAndUpdate({ _id: user?._id }, { $unset: { session: 1 } });
+  await Otp.findOneAndRemove({ phoneNumber });
+
+  // A password reset only proves control of the phone number. It hands back a
+  // claim for /changePassword to consume, and must not mark the account
+  // verified or mint a session token — otherwise a phone number alone is
+  // enough to take over an account. /otpVerify keeps the sign-in behaviour,
+  // including the OAuth add-a-phone flow, which also carries `encryption`.
+  if (isPasswordReset)
+    return encryptData(
+      JSON.stringify({
+        _id: user?._id,
+        phoneNumber,
+      })
+    );
 
   const verifiedUser = await this.findOneAndUpdate(
     { _id: user?._id },
@@ -112,8 +137,6 @@ export async function verifyUser({
     },
     { new: true }
   );
-
-  await Otp.findOneAndRemove({ phoneNumber });
 
   if (!verifiedUser) throw updateFailed;
 
@@ -226,6 +249,18 @@ async function authenticateUserByOAuth(tempFieldName, tempFieldValue) {
   clearTempOAuthId.call(this, user._id, tempFieldName);
 
   cleanUser.token = token;
+
+  // An unverified OAuth user is handed on to /user/verify-account, which has to
+  // tell /auth/update which account it is adding a phone number to. That used
+  // to be the permanent provider id, re-attached here — but a stable id that
+  // leaks is a password, and /auth/update took it as one. Mint a short-lived,
+  // purpose-scoped token instead, and only for the account that actually needs
+  // it. Attached after `generateJwtToken` so it does not ride inside the
+  // long-lived session token as well.
+  if (!user.verified) {
+    cleanUser.phoneVerificationToken = generatePhoneVerificationToken(user._id);
+  }
+
   return cleanUser;
 }
 
@@ -480,8 +515,10 @@ export async function changeForgottenPassword({ newPassword, encryption }) {
 
   if (!updatePassword) throw updateFailed;
 
-  await updatePassword.clean();
-  return updatePassword;
+  // `clean()` returns a scrubbed copy rather than mutating, so discarding it
+  // sent the raw document — password hash included — out of /changePassword,
+  // which is unauthenticated.
+  return updatePassword.clean();
 }
 
 export async function setLocalPassword({ password, userId }) {
@@ -497,8 +534,7 @@ export async function setLocalPassword({ password, userId }) {
   );
 
   if (!updatePassword) throw updateFailed;
-  await updatePassword.clean();
-  return updatePassword;
+  return updatePassword.clean();
 }
 
 export async function addPhoneNumber({ phoneNumber, userId }) {
@@ -518,8 +554,7 @@ export async function addPhoneNumber({ phoneNumber, userId }) {
   );
 
   if (!userUpdated) throw updateFailed;
-  await userUpdated.clean();
-  return userUpdated;
+  return userUpdated.clean();
 }
 
 export async function deleteUserAccount({ userId }) {

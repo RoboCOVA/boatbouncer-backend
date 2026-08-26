@@ -49,3 +49,28 @@ export const optionalAuthenticateJwt = (req, res, next) => {
     return next();
   })(req, res, next);
 };
+
+/**
+ * `authenticateJwt` proves there is *a* signed-in caller; on routes that name
+ * their target with a `:userId` in the path it does not prove it is the right
+ * one. Without this, any signed-in user could rewrite any other account by
+ * swapping the id in the URL.
+ */
+export const authorizeSelf =
+  (paramName = 'userId') =>
+  (req, res, next) => {
+    const target = req.params?.[paramName];
+    const caller = req.user?._id;
+
+    if (!caller || String(target) !== String(caller)) {
+      return next(
+        new APIError(
+          'You are not allowed to modify this account',
+          httpStatus.FORBIDDEN,
+          true
+        )
+      );
+    }
+
+    return next();
+  };
