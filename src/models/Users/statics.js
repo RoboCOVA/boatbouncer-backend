@@ -216,8 +216,17 @@ export async function authenticateUser(email, password) {
      * token here would be a lie: the JWT strategy rejects unverified users on
      * every guarded route, so the client would be told login succeeded and then
      * fail on its next call.
+     *
+     * The error carries the same short-lived, purpose-scoped token the OAuth
+     * handoff mints, so the client can send the user on to /user/verify-account
+     * and finish verification. Without it a local account that never completed
+     * OTP has no route forward at all — login just fails forever. Minting it
+     * only after the password matches keeps it from being a way to fish tokens
+     * for arbitrary accounts.
      */
-    if (!user.verified) throw userNotVerifiedLogin;
+    if (!user.verified) {
+      throw userNotVerifiedLogin(generatePhoneVerificationToken(user._id));
+    }
 
     const cleanUser = user.clean();
     const token = generateJwtToken(user._id, cleanUser);
