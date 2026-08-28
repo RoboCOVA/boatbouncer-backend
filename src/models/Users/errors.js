@@ -94,13 +94,23 @@ export const userNotVerified = new APIError(
  * Login-specific counterpart. Credentials were correct but the account has not
  * completed phone verification, so no token is issued — the client should send
  * the user into the OTP flow rather than treat this as a failed sign-in.
+ *
+ * A factory, not a shared instance: it carries a `phoneVerificationToken` minted
+ * for one specific account, and a module-level singleton would hand whichever
+ * token was written last to every concurrent request.
  */
-export const userNotVerifiedLogin = new APIError(
-  'Please verify your phone number to continue',
-  httpStatus.FORBIDDEN,
-  true,
-  errorCodes.USER_NOT_VERIFIED
-);
+export const userNotVerifiedLogin = (phoneVerificationToken) => {
+  const error = new APIError(
+    'Please verify your phone number to continue',
+    httpStatus.FORBIDDEN,
+    true,
+    errorCodes.USER_NOT_VERIFIED
+  );
+
+  error.phoneVerificationToken = phoneVerificationToken;
+
+  return error;
+};
 
 export const passwordResetSessionExp = new APIError(
   'Password reset session expired!',

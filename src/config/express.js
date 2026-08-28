@@ -101,6 +101,10 @@ app.use((err, req, res, next) => {
     message: err.isPublic ? err.message : httpStatus[err.status],
     // Omitted from the payload entirely when the error carries no code.
     code: err.code,
+    // Only ever set on the unverified-login error, where the client needs it to
+    // resume phone verification. Undefined on every other error, and dropped
+    // from the JSON when undefined.
+    phoneVerificationToken: err.phoneVerificationToken,
     stack: environments.nodeEnv === 'development' ? err.stack : null,
   });
 });
